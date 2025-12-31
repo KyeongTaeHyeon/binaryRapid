@@ -1,0 +1,337 @@
+@charset "UTF-8";
+
+#main {
+    margin-top: 40px;
+}
+
+.filterOutline {
+    box-shadow: #dedede 0px 0px 5px 0px;
+    color: #000;
+    border-radius: 10px;
+}
+
+#filterWrapper {
+    width: 1440px;
+    margin: 0 auto;
+    padding: 16px;
+    color: #222;
+    margin-top: 10px;
+    text-align: center;
+}
+
+#filterWrapper .filters {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+#filterWrapper .filters > div,
+#filterWrapper .filters .filterGroupWrap > div {
+    display: flex;
+    align-items: stretch;
+    justify-content: center;
+}
+
+#filterWrapper .filters .filterSection {
+    display: flex;
+    flex-direction: column;
+    text-align: center;
+}
+#filterWrapper .filters .filterHeaderTitle {
+    width: 100%;
+    font-size: 20px;
+    font-weight: 700;
+    padding: 5px;
+    border-bottom: 1px solid #dedede;
+    margin-bottom: 5px;
+}
+
+#filterWrapper .filters > div .filterTitle,
+#filterWrapper .filters .filterGroupWrap > div .filterTitle {
+    width: 100px;
+    font-size: 16px;
+    font-weight: 700;
+    padding-right: 20px;
+    margin-right: 20px;
+    border-right: 1px solid #dedede;
+    text-align: right;
+    align-self: stretch;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+#filterWrapper .filters > div .filterList,
+#filterWrapper .filters .filterGroupWrap > div .filterList {
+    display: flex;
+    flex: 1;
+}
+
+#filterWrapper .filters > div .filterList ul,
+#filterWrapper .filters .filterGroupWrap > div .filterList ul {
+    display: flex;
+    gap: 24px;
+    flex-wrap: wrap;
+    padding: 0;
+    margin: 0;
+    list-style: none;
+}
+
+#filterWrapper .filters > div .filterList ul li,
+#filterWrapper .filters .filterGroupWrap > div .filterList ul li {
+    cursor: pointer;
+}
+
+#filterWrapper .filters > div .filterList ul li:hover,
+#filterWrapper .filters .filterGroupWrap > div .filterList ul li:hover {
+    color: #5ac3f5;
+}
+
+.filterList .filterContents {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: block;
+}
+
+.filterList .filterContents li {
+    padding: 6px 10px;
+    border-bottom: 1px solid #eee;
+    background: #fff;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+.filterList .filterContents li:hover {
+    background: #f0f0f0;
+    border-radius: 20px;
+}
+.filterList .filterContents li.selected,
+.filterList .filterContents li.selected:hover {
+    background: #f1fcff;
+    color: #222;
+    border-radius: 20px;
+    font-weight: bold;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+#selectorWrapper {
+    width: 1440px;
+    margin: 0 auto;
+    padding-top: 40px;
+    padding-bottom: 40px;
+    color: #222;
+    display: flex;
+    flex-direction: row-reverse;
+    justify-content: space-between;
+    align-items: center;
+}
+
+#selectorWrapper .clearAllBtn {
+    color: white;
+    font-weight: 700;
+    border: 1px solid #dedede;
+    padding: 10px;
+    border-radius: 10px;
+    background-color: #5ac3f5;
+    min-width: 100px;
+}
+#selectorWrapper .selectorContents {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+#selectorWrapper .selectorContents li {
+    padding: 5px 16px;
+    border: 1px solid #5ac3f5;
+    border-radius: 10px;
+    cursor: pointer;
+}
+
+.selectorContents .removeBtn {
+    margin-left: 8px;
+    cursor: pointer;
+    font-size: 16px;
+    color: #888;
+    transition: color 0.2s;
+}
+.selectorContents .removeBtn:hover {
+    color: #e74c3c;
+}
+
+#contentWrapper {
+    width: 1440px;
+    margin: 0 auto;
+    padding-bottom: 30px;
+}
+
+#contentList {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 40px;
+}
+
+#contentList .contentItem {
+    position: relative;
+    width: 330px;
+    margin-bottom: 30px;
+}
+
+#contentList .contentItem .contentImage img {
+    width: 100%;
+    height: 280px;
+    object-fit: cover;
+}
+
+#contentList .contentItem .contentsInfo {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    color: #222;
+}
+
+#contentList .contentItem .contentsInfo .contentTitle {
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 12px;
+    margin-top: 10px;
+    padding-right: 52px;
+}
+
+#contentList .contentItem .contentsInfo .contentCategory {
+    margin-bottom: 20px;
+}
+
+#contentList .contentItem .contentsInfo .contentCategory .categoryList {
+    display: flex;
+    gap: 4px;
+    flex-wrap: wrap;
+}
+
+#contentList .contentItem .contentsInfo .contentCategory .categoryList li {
+    padding: 4px 20px;
+    background-color: #e0f0fa;
+    border-radius: 20px;
+    cursor: pointer;
+    color: #176d9f;
+}
+
+#contentList .contentItem .contentsInfo .contentDescription {
+    font-size: 14px;
+    line-height: 1.5;
+    color: #555;
+    margin-bottom: 20px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 3; /* 원하는 줄 수 */
+    line-clamp: 3;
+    -webkit-box-orient: vertical;
+    max-width: 300px; /* 원하는 최대 너비로 조정 */
+}
+
+/* 페이지 네비게이션 디자인 - 색상 구분 및 자연스러운 효과 */
+#contentNav {
+    width: 1440px;
+    display: flex;
+    justify-content: center;
+    margin: 0 auto;
+    padding-bottom: 80px;
+}
+
+.pagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+}
+
+.page-btn {
+    color: #777;
+    font-size: 1.4rem;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s, border 0.2s;
+    box-shadow: 0 2px 8px rgba(90, 195, 245, 0.08);
+}
+
+.pageBtn:hover {
+    background: #5ac3f5;
+    color: #fff;
+    border-color: #5ac3f5;
+}
+
+.pageList {
+    display: flex;
+    gap: 8px;
+    padding: 0;
+    margin: 0;
+    list-style: none;
+}
+
+.page-item button {
+    background: none;
+    border: none;
+    color: #8d9ba1;
+    font-size: 1.1rem;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s, border 0.2s;
+    box-shadow: 0 1px 4px rgba(90, 195, 245, 0.06);
+}
+
+.page-item.active button,
+.page-item button:hover {
+    background: #ebf8ff;
+    color: #5ac3f5;
+    font-weight: bold;
+}
+
+.accordionToggle {
+    background: #f5f5f5;
+    border: none;
+    cursor: pointer;
+    font-weight: bold;
+    padding: 8px 12px;
+    width: 100%;
+    text-align: left;
+}
+
+.regionMoreBtn {
+    display: block;
+    background: #f5f5f5;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+    padding: 8px;
+    width: 100%;
+    height: 100%;
+    margin: 0 0 0 auto;
+    text-align: center;
+    transition: background 0.2s;
+}
+.regionMoreBtn:hover {
+    background: #e0e0e0;
+}
+
+.contentLike {
+    position: absolute;
+    top: 280px;
+    right: 0;
+    z-index: 100;
+    cursor: pointer;
+    width: 52px;
+    height: 52px;
+    background-image: url('../img/ico-heart-gr.png');
+}
+
+.contentLike.liked {
+    background-image: url('../img/ico-heart-red.png');
+    background-repeat: no-repeat;
+    background-position: 50%;
+}

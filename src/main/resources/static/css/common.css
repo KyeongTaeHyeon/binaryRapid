@@ -1,0 +1,241 @@
+@charset "UTF-8";
+
+body {
+  font-family: 'SCoreDream', '맑은 고딕', 'Malgun Gothic', Arial, sans-serif;
+  color: #5ac3f5;
+  line-height: 1.8;
+}
+
+#wrapper {
+  width: 100%;
+  min-width: 1480px;
+  padding-top: 100px;
+}
+
+.outline {
+  box-shadow: #5ac3f5 0px 0px 5px 0px;
+  color: #000;
+}
+
+/* 헤더 css */
+#header {
+  width: 100%;
+  background-color: #f1fcff;
+  position: fixed;
+  top: 0px;
+  left: 0;
+  z-index: 99999999;
+}
+
+#header .inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 1440px;
+  height: 120px;
+  margin: 0 auto;
+}
+
+#logo {
+  width: 100px;
+  height: 100px;
+}
+
+#logo img {
+  width: 100px;
+  height: 100%;
+}
+
+#logo a {
+  width: 100px;
+  height: 100%;
+  display: inline-block;
+}
+
+.navMenu {
+  display: flex;
+  gap: 100px;
+}
+
+.navMenu li a {
+  font-size: 18px;
+  font-weight: 600;
+  color: #121212;
+}
+
+.navMenu li a:hover {
+  font-size: 18px;
+  font-weight: 600;
+  color: #5ac3f5;
+}
+
+.headerContent {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 16px;
+}
+
+.searchWrap {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+}
+
+.searchWrap input {
+  height: 36px;
+  padding: 0 12px;
+  background-color: #fff;
+  border: 1px solid #5ac3f5;
+}
+
+#search-button {
+  width: 36px;
+  background-color: #5ac3f5;
+}
+
+#search-button img {
+  width: 100%;
+  height: auto;
+}
+
+#user {
+  display: flex;
+  align-items: center;
+}
+
+#user .userLoggedOut {
+  display: flex;
+}
+#user .userLoggedIn {
+  display: flex;
+}
+
+.loginMypage {
+  display: none;
+}
+
+.hide {
+  display: none !important;
+}
+
+#user a {
+  font-size: 14px;
+  color: #6a7375;
+}
+
+#user span {
+  display: inline-block;
+  vertical-align: top;
+  color: #afbabd;
+  font-size: 10px;
+  margin: 5px 10px 0 10px;
+}
+
+#google_translate_element {
+  margin-left: 10px;
+}
+.skiptranslate > span {
+  display: none !important;
+}
+
+.goog-te-gadget {
+  font-size: 13px !important;
+  font-family: 'SCoreDream', '맑은 고딕', 'Malgun Gothic', Arial, sans-serif !important;
+}
+
+.goog-te-combo {
+  margin: 0 !important;
+}
+
+.adminLoggedIn {
+  display: flex;
+}
+
+/* header end */
+
+/* footer */
+
+#footer {
+  width: 100%;
+}
+
+#footer .inner {
+  width: 1440px;
+  margin: 0 auto;
+  border-top: 1px solid #ddd;
+}
+
+#footerInner {
+  height: 450px;
+  padding: 40px 0;
+  color: #222222;
+  display: flex;
+}
+
+#footerLogo {
+  margin-bottom: 10px;
+  width: 130px;
+  height: 130px;
+}
+
+#footerLogo img {
+  width: 130px;
+  height: 130px;
+}
+
+#footerAdress {
+  height: 130px;
+  padding: 20px 0;
+  box-sizing: border-box;
+  border-bottom: 1px solid white;
+}
+
+#footerTopFirst {
+  line-height: 1.7;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+#footerTopEnd {
+  line-height: 1.7;
+  font-size: 13px;
+  font-weight: 700;
+  margin-bottom: 20px;
+}
+
+#footerMiddle {
+  display: flex;
+  gap: 30px;
+  font-size: 18px;
+  line-height: 1.7;
+  font-weight: 700;
+}
+
+#footerCateWrapper {
+  height: 60px;
+  padding-top: 30px;
+}
+
+#footerCate {
+  display: flex;
+  gap: 20px;
+}
+
+#footerCate li {
+  padding: 5px;
+}
+
+#footerBottomEnd {
+  display: flex;
+  padding-top: 40px;
+  gap: 30px;
+  align-items: center;
+}
+
+#footerExternalLink {
+  font-size: 11px;
+  font-weight: 100;
+}
+
+/* footer end */

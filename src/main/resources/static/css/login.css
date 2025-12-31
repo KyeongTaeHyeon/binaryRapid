@@ -1,0 +1,91 @@
+@charset "UTF-8";
+
+.button {
+    flex: 1;
+    height: 50px;
+    font-size: 16px;
+    background-color: #5ac3f5;
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+}
+
+#main {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    margin-top: 0px;
+}
+
+#loginWrapper {
+    min-width: 600px;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background-color: #fff;
+    border-radius: 20px;
+    padding: 80px;
+    margin-top: 50px;
+    margin-bottom: 100px;
+}
+
+#loginWrapper h1 {
+    font-size: 40px;
+    margin-bottom: 24px;
+}
+
+#loginWrapper #loginForm {
+    display: flex;
+    width: 100%;
+    flex-direction: column;
+}
+
+.inputWrapper {
+    width: 100%;
+    margin-top: 30px;
+}
+
+#loginWrapper .inputGroup {
+    width: 100%;
+    display: flex;
+    margin-bottom: 16px;
+}
+
+#loginWrapper .inputGroup label {
+    width: 80px;
+    font-size: 16px;
+    text-align: right;
+    margin-right: 15px;
+    padding: 2px;
+    line-height: 50px;
+    color: #555;
+}
+
+#loginWrapper .inputGroup input {
+    flex: 1;
+    box-sizing: border-box;
+    border: 1px solid #ccc;
+    line-height: 30px;
+    padding: 0 12px;
+}
+
+#loginForm .buttonWrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+    margin-top: 8px;
+}
+
+.socialLogin_title{
+    width: 100%;
+    border-top: 1px solid #ddd;
+    margin-top: 40px;
+    padding-top: 20px;
+    text-align: center;
+    margin-bottom: 12px;
+}

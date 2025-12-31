@@ -1,0 +1,203 @@
+@charset "UTF-8";
+
+#main {
+  width: 100%;
+  max-width: 1440px;
+  min-width: 600px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  margin: 0 auto;
+  background-color: #fff;
+  border-radius: 20px;
+  color: black;
+  gap: 50px;
+}
+
+.wrapper {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  margin-top: 50px;
+  margin-bottom: 100px;
+}
+h1 {
+  margin-bottom: 20px;
+}
+a {
+  color: gray;
+}
+
+#searchPageWrapper {
+  max-width: 1440px;
+  width: 100%;
+}
+
+.searchPageWrap {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+  width: 70%;
+  margin: 0 auto;
+}
+
+.searchPageWrap input {
+  width: 100%;
+  max-height: 34px;
+  height: 34px;
+  padding: 0 12px;
+  background-color: #fff;
+  border: 1px solid #5ac3f5;
+}
+
+#searchPage-button {
+  width: 36px;
+  background-color: #5ac3f5;
+}
+
+#searchPage-button img {
+  width: 100%;
+  height: auto;
+}
+
+.wrapperTop {
+  display: flex;
+  width: 100%;
+  justify-content: space-between;
+  margin-bottom: 30px;
+}
+
+.wrapperContent {
+  width: 100%;
+}
+.wrapperContent table {
+  width: 100%;
+  text-align: center;
+}
+
+/* 생성되는 게시판 영역에 대한 css */
+/* 공통 리스트 초기화 */
+.news-list,
+.region-list,
+.origin-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+/* --- 뉴스 (가로 일렬) --- */
+.news-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.news-item .item-index {
+  font-weight: bold;
+}
+
+.news-item .item-title {
+  max-width: 80%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-decoration: none;
+  color: #222;
+  flex: 1;
+}
+
+.news-item .item-tag {
+  font-size: 0.9em;
+  color: #666;
+}
+
+/* --- 지역 (이미지 왼쪽 + 3줄 구성) --- */
+.region-item {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 20px;
+  align-items: flex-start;
+}
+
+.region-item .item-image {
+  width: 120px;
+  height: 120px;
+  object-fit: cover;
+  flex-shrink: 0;
+  border-radius: 6px;
+}
+
+.region-item .item-text {
+  display: flex;
+  justify-content: space-between;
+  flex: 1;
+  height: 120px;
+  flex-direction: column;
+}
+
+.region-item .item-top {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: bold;
+}
+
+.region-item .item-title {
+  max-width: 50%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.region-item .item-category {
+  font-size: 0.9em;
+  color: #666;
+}
+
+.region-item .item-content {
+  font-size: 0.95em;
+  color: #333;
+}
+
+.region-item .item-link-wrapper {
+  margin-top: 4px;
+}
+
+.region-item .item-link {
+  color: blue;
+  text-decoration: underline;
+  font-size: 0.9em;
+}
+
+/* --- 유래 (가로 일렬) --- */
+.origin-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.origin-item .item-index {
+  font-weight: bold;
+}
+
+.origin-item .item-title {
+  max-width: 70%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex: 1;
+}
+
+.origin-item .item-user,
+.origin-item .item-date {
+  font-size: 0.9em;
+  color: #666;
+}

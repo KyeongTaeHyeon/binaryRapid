@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>RaFeed</title>
+    <link rel="stylesheet" th:href="@{/css/reset.css}" />
+    <link rel="stylesheet" th:href="@{/css/common.css}" />
+    <link rel="stylesheet" th:href="@{/css/manager.css}" />
+  </head>
+
+  <body>
+    <div id="wrapper">
+      <header id="header" th:replace="~{fragments/header :: header}"></header>
+      <main id="main">
+        <h2>식당 신청 관리</h2>
+        <div id="inner">
+          <div id="managerLeft">
+            <div id="managerLeftInner">
+              <span id="userName"> *** 님</span>
+              <ul>
+                <li>
+                  <a href="./userModify">내 정보 변경</a>
+                </li>
+                <li><a href="./userBoardList">작성글 관리</a></li>
+                <li><a href="./userMywish">찜 목록</a></li>
+                <li class="on">
+                  <a href="./userRequestShop">등록 신청 관리</a>
+                </li>
+              </ul>
+            </div>
+          </div>
+          <div id="managerRight">
+            <div id="managerSearch">
+              <div class="searchWrapper">
+                <div class="searchWrap managerSearchWrap">
+                  <input
+                    id="searchInput"
+                    type="text"
+                    placeholder=" 게시글 제목: "
+                  />
+                  <button id="search-button">
+                    <img th:src="@{/img/ico-search-wh-56x56.png}" alt="Search" />
+                  </button>
+                </div>
+              </div>
+              <div class="searchWrapper">
+                <form
+                  class="searchWrap managerSearchWrap"
+                  id="managerSearchDate"
+                  action="/submit"
+                  method="post"
+                >
+                  <input type="date" id="start" name="startDate" required />
+                  <input type="date" id="end" name="endDate" required />
+                  <button type="submit">제출</button>
+                </form>
+              </div>
+            </div>
+            <table>
+              <thead>
+                <tr>
+                  <th>글 번호</th>
+                  <th>가게이름</th>
+                  <th>지역</th>
+                  <th>카테고리</th>
+                  <th>작성자</th>
+                  <th>작성일</th>
+                </tr>
+              </thead>
+              <tbody id="userRequestMain"></tbody>
+            </table>
+            <div id="contentNav">
+              <nav class="pagination">
+                <button class="page-btn prev" aria-label="이전 페이지">
+                  &lt;
+                </button>
+                <ul class="page-list">
+                  <li class="page-item active">
+                    <button>1</button>
+                  </li>
+                  <li class="page-item">
+                    <button>2</button>
+                  </li>
+                  <li class="page-item">
+                    <button>3</button>
+                  </li>
+                  <li class="page-item">
+                    <button>4</button>
+                  </li>
+                  <li class="page-item">
+                    <button>5</button>
+                  </li>
+                  <li class="page-item">
+                    <button>6</button>
+                  </li>
+                  <li class="page-item">
+                    <button>7</button>
+                  </li>
+                  <li class="page-item">
+                    <button>8</button>
+                  </li>
+                  <li class="page-item">
+                    <button>9</button>
+                  </li>
+                  <li class="page-item">
+                    <button>10</button>
+                  </li>
+                </ul>
+                <button class="page-btn next" aria-label="다음 페이지">
+                  &gt;
+                </button>
+              </nav>
+            </div>
+          </div>
+        </div>
+      </main>
+      <footer id="footer" th:replace="~{fragments/footer :: footer}"></footer>
+    </div>
+    <script th:src="@{/js/common.js}"></script>
+    <script type="text/javascript">
+      function googleTranslateElementInit() {
+        new google.translate.TranslateElement(
+          { pageLanguage: 'ko', includedLanguages: 'en,ja,zh-CN,ko' },
+          'google_translate_element'
+        );
+      }
+    </script>
+    <script src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+    <script th:src="@{/js/userRequestShop.js}"></script>
+  </body>
+</html>

@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>RaFeed</title>
+        <!-- 공통사용 -->
+        <link rel="stylesheet" th:href="@{/css/reset.css}" />
+        <link rel="stylesheet" th:href="@{/css/common.css}" />
+
+        <!-- 각화면 css 생성하여 사용 -->
+        <link rel="stylesheet" th:href="@{/css/boardList.css}" />
+    </head>
+    <body>
+        <div id="wrapper">
+            <!-- header(공통사용) -->
+            <header id="header" th:replace="~{fragments/header :: header}"></header>
+            <!-- 작업영역 -->
+            <main id="main">
+                <div id="boardcreat" class="outline">
+                    <div class="title"><h1>식당신청</h1></div>
+                    <div class="filter">
+                        <a href=""><span>전체</span></a>
+                        <a href=""><span>자유게시판</span></a>
+                        <a href=""><span>식당인증</span></a>
+                        <a href="" class="active"><span>식당신청</span></a>
+                    </div>
+                    <div class="store-form">
+                        <form action="#" method="post">
+                            <div class="form-row">
+                                <label for="name">상호명</label>
+                                <input type="text" id="name" name="name" />
+                            </div>
+                            <div class="form-row">
+                                <label for="address">주소</label>
+                                <input
+                                    type="text"
+                                    id="address"
+                                    name="address"
+                                />
+                            </div>
+                            <div class="form-row">
+                                <label for="category1">지역</label>
+                                <select id="category1" name="category1">
+                                    <option value="">선택</option>
+                                </select>
+                            </div>
+
+                            <div class="form-row">
+                                <label for="category2">카테고리</label>
+                                <select id="category2" name="category2">
+                                    <option value="">선택</option>
+                                    <option value="miso">미소</option>
+                                    <option value="shoyu">쇼유</option>
+                                    <option value="shio">시오</option>
+                                    <option value="kuoki">교카이</option>
+                                    <option value="nibosi">니보시</option>
+                                    <option value="pitan">파이탄</option>
+                                    <option value="yasae">야사이</option>
+                                </select>
+                            </div>
+                            <div class="form-row">
+                                <label for="category3">형태</label>
+                                <select id="category3" name="category3">
+                                    <option value="">선택</option>
+                                </select>
+                            </div>
+                            <div class="form-row">
+                                <label for="category4">두께</label>
+                                <select id="category4" name="category4">
+                                    <option value="">선택</option>
+                                </select>
+                            </div>
+                            <div class="form-row"> <label for="category5">계열</label>
+                                <select id="category5" name="category5">
+                                    <option value="">선택</option>
+                                </select>
+                            </div>
+                            <div class="form-row"> <label for="category6">종류</label>
+                                <select id="category6" name="category6">
+                                    <option value="">선택</option>
+                                </select>
+                            </div>
+                            <div class="form-row"> <label for="category7">기름기</label>
+                                <select id="category7" name="category7">
+                                    <option value="">선택</option>
+                                </select>
+                            </div>
+                            <div class="form-row"> <label for="category8">농도</label>
+                                <select id="category8" name="category8">
+                                    <option value="">선택</option>
+                                </select>
+                            </div>
+                            <div class="form-button">
+                                <button type="submit">신청</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </main>
+
+                        </form>
+                    </div>
+                </div>
+            </main>
+            <!-- footer영역(공통사용) -->
+            <footer id="footer" th:replace="~{fragments/footer :: footer}"></footer>
+        </div>
+        
+        <!-- 공통사용 -->
+        <script th:src="@{/js/common.js}"></script>
+        <script type="text/javascript">
+            function googleTranslateElementInit() {
+                new google.translate.TranslateElement(
+                    { pageLanguage: 'ko', includedLanguages: 'en,ja,zh-CN,ko' },
+                    'google_translate_element'
+                );
+            }
+        </script>
+        <script src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+        <!-- 각화면 js생성하여 사용 -->
+         <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+        <script th:src="@{/js/boardList.js}"></script>
+         <script>
+            // JSON 파일을 비동기적으로 불러오는 범용 함수
+            async function loadDataAndPopulateSelect(
+                filePath,
+                selectId,
+                filterType = null // 특정 type만 필터링할 경우 사용
+            ) {
+                try {
+                    const response = await fetch(filePath);
+                    if (!response.ok) {
+                        throw new Error(`HTTP 오류! 상태: ${response.status}`);
+                    }
+                    const data = await response.json();
+                    const selectElement = document.getElementById(selectId);
+
+                    data.forEach((item) => {
+                        // filterType이 설정되어 있으면 해당 type의 항목만 추가
+                        if (filterType === null || item.type === filterType) {
+                            const option = document.createElement("option");
+                            option.value = item.id;
+                            option.textContent = item.name;
+                            selectElement.appendChild(option);
+                        }
+                    });
+                } catch (error) {
+                    console.error(
+                        `${selectId} 데이터 로드 및 옵션 생성 중 오류 발생:`,
+                        error
+                    );
+                    // 사용자에게 오류 메시지 표시 등 추가 처리 가능
+                }
+            }
+
+            // 페이지 로드 시 모든 select 박스에 데이터 채우기
+            document.addEventListener("DOMContentLoaded", () => {
+                // category1: 지역 (region.json)
+                loadDataAndPopulateSelect("../data/region.json", "category1");
+
+                // category3: 형태 (noodle.json, type: "shape")
+                loadDataAndPopulateSelect(
+                    "../data/noodle.json",
+                    "category3",
+                    "shape"
+                );
+
+                // category4: 두께 (noodle.json, type: "thinkness")
+                loadDataAndPopulateSelect(
+                    "../data/noodle.json",
+                    "category4",
+                    "thinkness"
+                );
+
+                // category5: 계열 (broth.json, type: "style")
+                loadDataAndPopulateSelect(
+                    "../data/broth.json",
+                    "category5",
+                    "style"
+                );
+
+                // category6: 종류 (category.json, type: "name")
+                loadDataAndPopulateSelect(
+                    "../data/category.json",
+                    "category6",
+                    "name"
+                );
+
+                // category7: 기름기 (broth.json, type: "rich")
+                loadDataAndPopulateSelect(
+                    "../data/broth.json",
+                    "category7",
+                    "rich"
+                );
+
+                // category8: 농도 (broth.json, type: "richness")
+                loadDataAndPopulateSelect(
+                    "../data/broth.json",
+                    "category8",
+                    "richness"
+                );
+            });
+            document.addEventListener("DOMContentLoaded", () => {
+    // ... (다른 category 호출은 그대로 둡니다)
+
+    // category6: 종류 (category.json, 필터링 없이 모든 항목 추가)
+    loadDataAndPopulateSelect(
+        "../data/category.json",
+        "category6",
+        null // <-- "name" 대신 null로 변경합니다.
+    );
+
+    // ... (다른 category 호출은 그대로 둡니다)
+});
+        </script>
+        
+        
+    </body>
+</html>

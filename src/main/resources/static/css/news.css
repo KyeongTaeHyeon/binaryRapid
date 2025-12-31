@@ -1,0 +1,232 @@
+@charset "utf-8";
+/* 안전사이즈 */
+#boardcreat {
+    width: 90%;
+    max-width: 1440px;
+    margin-right: auto;
+    margin-left: auto;
+    text-align: center;
+    padding: 50px 0;
+}
+#boardcreat h1{
+    font-size: 40px;
+    margin-bottom: 24px;
+    margin-bottom: 50px;
+    color: #000;
+}
+/* 필터 */
+.filter {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    margin-bottom: 40px;
+}
+
+/* 모든 필터 span의 기본 스타일 */
+.filter span {
+    display: inline-block;
+    border: 1px solid #dedede;
+    border-radius: 8px;
+    background-color: #fff;
+    color: #555;
+    font-size: 16px;
+    cursor: pointer;
+    padding: 12px 24px;
+}
+
+/* 모든 필터 span의 hover 스타일 (개별적으로 정의되지 않은 경우 적용) */
+.filter span:hover {
+    background-color: #5ac3f5;
+    color: #fff;
+    border-color: #5ac3f5;
+    font-weight: 700;
+}
+
+/* ------------------------------------------------------------- */
+/* 각 필터별 활성 상태 (a.active)와 해당 span의 고유 클래스 조합 */
+/* ------------------------------------------------------------- */
+
+/* '전체' 필터 활성 상태 및 hover 상태 */
+.filter a.active span.filter-all,
+.filter span.filter-all:hover {
+    background-color: #5ac3f5;
+    color: #fff;
+    border-color: #5ac3f5;
+    font-weight: 700;
+}
+
+/* '라면 관련 이슈' 필터 활성 상태 및 hover 상태 */
+/* 이 셀렉터가 .filter a.active span 보다 우선순위가 높아야 합니다. */
+.filter a.active span.filter-issue,
+.filter span.filter-issue:hover {
+    background-color: #5ac3f5 !important; /* 기본 파란색 유지 */
+    color: #fff !important;
+    border-color: #5ac3f5 !important;
+}
+
+/* '올해의 라멘' 필터 활성 상태 및 hover 상태 */
+.filter a.active span.filter-years,
+.filter span.filter-years:hover {
+    background-color: #f9a03a !important; /* 주황색 */
+    border-color: #f9a03a !important;
+    color: #fff !important;
+}
+
+/* ------------------------------------------------------------- */
+/* --- 기존 코드 (큰 변경 없음) --- */
+/* ------------------------------------------------------------- */
+
+/* 게시글 행 */
+.post {
+    display: flex;
+    flex-direction: row; /* tag-box, name(ID+제목), user, userTime을 가로로 배치 */
+    align-items: center;
+    justify-content: space-between;
+    background-color: #fff;
+    border: 1px solid #dedede;
+    border-radius: 8px;
+    padding: 16px 24px;
+    margin-bottom: 12px;
+}
+
+/* 태그 박스 스타일 (title 앞에 올 파란 박스) */
+.tag-box {
+    background-color: #5ac3f5; /* 기본 파란색 */
+    color: #fff;
+    font-weight: bold;
+    padding: 6px 10px;
+    border-radius: 4px;
+    margin-right: 10px;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+/* '올해의 라멘' 태그 박스 색상 */
+.tag-box.tag-box-years {
+    background-color: #f9a03a; /* 주황색 */
+}
+
+/* ID 텍스트 스타일 */
+.news-id {
+    font-weight: bold; /* ID를 강조 */
+    color: #333; /* ID 색상 */
+    margin-right: 5px; /* ID와 제목 사이의 간격 */
+    white-space: nowrap;
+    flex-shrink: 0; /* ID도 줄어들지 않도록 함 */
+}
+
+/* 게시글 제목 텍스트를 위한 스타일 */
+.post .name .title-text {
+    flex-grow: 1; /* 남은 공간을 모두 차지하도록 설정 */
+    font-size: 16px; /* .name의 기본 폰트 사이즈를 따름 */
+    color: #222; /* 제목 색상 */
+    white-space: nowrap; /* 제목이 길어도 한 줄에 표시 */
+    overflow: hidden; /* 넘치는 내용은 숨김 */
+    text-overflow: ellipsis; /* 넘치는 내용은 ...으로 표시 */
+}
+
+/* .name 컨테이너 (tag-box, ID, title을 포함) */
+.post .name {
+    flex: 2; /* .post 내에서 .name이 차지하는 비율 조정 */
+    font-size: 16px;
+    display: flex; /* tag-box, ID, title을 가로로 배치 */
+    align-items: center; /* 세로 중앙 정렬 */
+    gap: 0; /* 각 요소의 margin-right로 간격 조절하므로 여기서는 0 */
+    color: #222;
+    text-align: left;
+}
+
+/* 불필요한 기존 코드 정리 */
+/* .post .tageone은 사용되지 않는 것으로 보여 제거했습니다. */
+/* .post .tage도 사용되지 않으므로 제거했습니다. */
+.post .tageone {
+    font-size: 10px;
+    color: #fff;
+    border-radius: 20%;
+    background-color: #5ac3f5;
+    padding: 6px 8px;
+    margin-right: 15px;
+}
+
+.post .user {
+    flex: 1;
+    font-size: 16px;
+    color: #555;
+    text-align: center;
+}
+
+.post .userTime {
+    flex: 1;
+    font-size: 16px;
+    color: #555;
+    text-align: right;
+}
+#contentNav {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    margin: 20px 0;
+}
+
+.pagination {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.page-btn {
+    color: #5ac3f5;
+    font-size: 1.4rem;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s;
+}
+.page-btn:hover {
+    background: #d6eefc;
+    color: #5ac3f5;
+    border-color: #d6eefc;
+}
+
+.page-list {
+    display: flex;
+    gap: 8px;
+    padding: 0;
+    margin: 0;
+    list-style: none;
+}
+
+.page-item button {
+    background: none;
+    border: none;
+    color: #777;
+    font-size: 1.1rem;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s;
+}
+
+.page-item.active button,
+.page-item button:hover {
+    background: #d6eefc;
+    color: #5ac3f5;
+    font-weight: bold;
+}
+
+.writing {
+    background-color: #5ac3f5;
+    color: white;
+    text-decoration: none;
+    font-size: 16px;
+    font-weight: 700;
+    padding: 12px 24px;
+    border-radius: 8px;
+    transition: background-color 0.3s;
+}
+
+.writing:hover {
+    background-color: #47aee4;
+}
