@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="WARN">
+
+    <!-- 로그 출력 방식 정의-->
+    <Appenders>
+        <Console name="Console" target="SYSTEM_OUT">
+            <!-- 로그 발생 시간 [스레드명] 로그레벨(색상변경) 로거이름 - 로그메세지-->
+            <PatternLayout
+                    pattern="%d{yyyy/MM/dd HH:mm:ss.SSS} [%t] %highlight{%-8level}{FATAL=red bright, ERROR=red bold, WARN=yellow bold, INFO=green bold, DEBUG=cyan bold, TRACE=blue} %-40logger{1.} : %msg%n"
+                    disableAnsi="false"/>
+        </Console>
+    </Appenders>
+
+    <!-- 로거별 출력 레벨 정의 -->
+    <Loggers>
+        <!-- MyBatis SQL 로그 -->
+        <Logger name="org.mybatis" level="WARN" additivity="false"/>
+        <Logger name="org.apache.ibatis.logging.log4j2.Log4j2Impl" level="DEBUG" additivity="false">
+            <AppenderRef ref="Console"/>
+        </Logger>
+
+        <!-- log4jdbc 관련 로그 -->
+        <Logger name="log4jdbc.log4j2" level="DEBUG" additivity="false">
+            <AppenderRef ref="Console"/>
+        </Logger>
+
+        <!-- SELECT문 조회 결과 표로 출력 -->
+        <Logger name="jdbc.resultsettable" level="INFO" additivity="false">
+            <AppenderRef ref="Console"/>
+        </Logger>
+
+        <!-- SQL 실행 시간 로그 -->
+        <Logger name="jdbc.sqltiming" level="INFO" additivity="false">
+            <AppenderRef ref="Console"/>
+        </Logger>
+
+        <!-- 불필요한 JDBC 세부 로그 OFF -->
+        <Logger name="jdbc.audit" level="OFF" additivity="false"/>
+        <Logger name="jdbc.resultset" level="OFF" additivity="false"/>
+        <Logger name="jdbc.connection" level="OFF" additivity="false"/>
+        <Logger name="jdbc.sqlonly" level="OFF" additivity="false"/>
+
+        <!-- 애플리케이션 로그 -->
+        <Logger name="com.macademy.shop" level="INFO" additivity="false">
+            <AppenderRef ref="Console"/>
+        </Logger>
+
+        <!-- 모든 로거의 최상위 로거 -->
+        <Root level="INFO">
+            <AppenderRef ref="Console"/>
+        </Root>
+
+    </Loggers>
+
+</Configuration>
