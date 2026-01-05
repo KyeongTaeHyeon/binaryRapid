@@ -3,20 +3,51 @@
     PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.binary.rapid.shop.mapper.ShopMapper">
-    <select id="allShopList" resultType="shopForm" parameterType="Map">
+    <resultMap id="shopResultMap" type="com.binary.rapid.shop.form.ShopForm">
+        <id property="shopId" column="shop_id"/>
+        <result property="shopName" column="shop_name"/>
+        <result property="shopAddress" column="shop_address"/>
+        <result property="shopContent" column="shop_content"/>
+        <result property="imgUrl" column="img_url"/>
+        <collection property="categories" ofType="com.binary.rapid.shop.form.ShopForm$CategoryInfo">
+            <result property="categoryId" column="category_id"/>
+            <result property="categoryName" column="category_name"/>
+        </collection>
+    </resultMap>
+    
+    <select id="allShopList" resultMap="shopResultMap" parameterType="Map">
         <![CDATA[
         SELECT s.id AS shop_id
             , s.name AS shop_name
             , s.address AS shop_address
             , s.content AS shop_content
+            , si.img_url AS img_url
             , c.id AS category_id
             , c.name AS category_name
-            , si.img_url AS img_url
         FROM tb_shop s
 	        JOIN tb_shopdetail sd ON sd.id = s.id
+	        LEFT OUTER JOIN tb_shopimg si ON si.id = s.id AND si.main_img = 'Y'
 	        JOIN tb_category c ON c.id = sd.contents
-            LEFT OUTER JOIN tb_shopimg si ON si.id = s.id AND si.main_img = 'Y'
         WHERE COALESCE(s.req_type, '') = 'Y'
+        ORDER BY s.id, c.view;
+        ]]>
+    </select>
+    
+    <select id="shopInfo" resultMap="shopResultMap" parameterType="String">
+        <![CDATA[
+        SELECT s.id AS shop_id
+            , s.name AS shop_name
+            , s.address AS shop_address
+            , s.content AS shop_content
+            , si.img_url AS img_url
+            , c.id AS category_id
+            , c.name AS category_name
+        FROM tb_shop s
+	        JOIN tb_shopdetail sd ON sd.id = s.id
+	        LEFT OUTER JOIN tb_shopimg si ON si.id = s.id AND si.main_img = 'Y'
+	        JOIN tb_category c ON c.id = sd.contents
+        WHERE COALESCE(s.req_type, '') = 'Y'
+            AND s.id = #{shopId}
         ORDER BY s.id, c.view;
         ]]>
     </select>

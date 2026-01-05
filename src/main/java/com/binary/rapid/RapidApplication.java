@@ -5,12 +5,10 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-@MapperScan("com.binary.rapid.shop.mapper")
 public class RapidApplication {
 
     public static void main(String[] args) {
         SpringApplication.run(RapidApplication.class, args);
     }
-
-
+    
 }

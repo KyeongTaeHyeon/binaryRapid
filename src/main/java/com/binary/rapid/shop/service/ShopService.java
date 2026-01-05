@@ -18,5 +18,9 @@ public class ShopService {
         return shopMapper.allShopList(map);
     }
 
-    ;
+    public ShopForm shopInfo(String shopId) {
+        return shopMapper.shopInfo(shopId);
+    }
+    
+
 }
