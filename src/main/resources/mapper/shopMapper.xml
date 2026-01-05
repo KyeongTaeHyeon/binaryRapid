@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.binary.rapid.shop.mapper.ShopMapper">
+    <select id="allShopList" resultType="shopForm" parameterType="Map">
+        <![CDATA[
+        SELECT s.id AS shop_id
+            , s.name AS shop_name
+            , s.address AS shop_address
+            , s.content AS shop_content
+            , c.id AS category_id
+            , c.name AS category_name
+            , si.img_url AS img_url
+        FROM tb_shop s
+	        JOIN tb_shopdetail sd ON sd.id = s.id
+	        JOIN tb_category c ON c.id = sd.contents
+            LEFT OUTER JOIN tb_shopimg si ON si.id = s.id AND si.main_img = 'Y'
+        WHERE COALESCE(s.req_type, '') = 'Y'
+        ORDER BY s.id, c.view;
+        ]]>
+    </select>
+</mapper>

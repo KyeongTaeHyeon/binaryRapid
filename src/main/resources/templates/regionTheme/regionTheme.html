@@ -1,14 +1,14 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
     <head>
-        <meta charset="UTF-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta charset="UTF-8"/>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
         <title>regionTheme</title>
         <!-- 공통사용 -->
-        <link rel="stylesheet" th:href="@{/css/reset.css}" />
-        <link rel="stylesheet" th:href="@{/css/common.css}" />
+        <link rel="stylesheet" th:href="@{/css/reset.css}"/>
+        <link rel="stylesheet" th:href="@{/css/common.css}"/>
         <!-- 각화면 css 생성하여 사용 -->
-        <link rel="stylesheet" th:href="@{/css/regionTheme.css}" />
+        <link rel="stylesheet" th:href="@{/css/regionTheme.css}"/>
     </head>
     <body>
         <div id="wrapper">
@@ -18,13 +18,33 @@
             <main id="main">
                 <div id="filterWrapper">
                     <h1 style="margin-bottom: 20px">지역별/테마별</h1>
-                    <div class="filters"></div>
+                    <div class="filters">
+
+                    </div>
                 </div>
                 <div id="selectorWrapper">
                     <ul class="selectorContents"></ul>
                 </div>
                 <div id="contentWrapper">
-                    <div id="contentList"></div>
+                    <div id="contentList">
+                        <div th:each="shop:${shopList}">
+                            <div class="contentItem">
+                                <a href="">
+                                    <div class="contentImage">
+                                        <img th:src="${shop.imgUrl}" th:alt="${shop.shopName}"/>
+                                    </div>
+                                    <div class="contentsInfo">
+                                        <div class="contentTitle"></div>
+                                        <div class="contentCategory">
+                                            <ul class="categoryList"></ul>
+                                        </div>
+                                        <div class="contentDescription"></div>
+                                    </div>
+                                </a>
+                                <button class="contentLike" type="button"></button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 <div id="contentNav">
                     <nav class="pagination">
@@ -43,21 +63,7 @@
         </div>
 
         <template id="contentItemTemplate">
-            <div class="contentItem">
-                <a href="">
-                    <div class="contentImage">
-                        <img src="" alt="" />
-                    </div>
-                    <div class="contentsInfo">
-                        <div class="contentTitle"></div>
-                        <div class="contentCategory">
-                            <ul class="categoryList"></ul>
-                        </div>
-                        <div class="contentDescription"></div>
-                    </div>
-                </a>
-                <button class="contentLike" type="button"></button>
-            </div>
+
         </template>
 
         <!-- 공통사용 -->
@@ -66,7 +72,7 @@
         <script type="text/javascript">
             function googleTranslateElementInit() {
                 new google.translate.TranslateElement(
-                    { pageLanguage: 'ko', includedLanguages: 'en,ja,zh-CN,ko' },
+                    {pageLanguage: 'ko', includedLanguages: 'en,ja,zh-CN,ko'},
                     'google_translate_element'
                 );
             }
