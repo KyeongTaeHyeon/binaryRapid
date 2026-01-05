@@ -9,6 +9,7 @@
     </settings>
 
     <typeAliases>
-
+        <typeAlias alias="popupDto" type="com.binary.rapid.ramen.dto.RamenPopupDto" />
+        <typeAlias alias="infoDto" type="com.binary.rapid.ramen.dto.RamenInfoDto" />
     </typeAliases>
 </configuration>

@@ -22,7 +22,7 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    LoadData('/data/mainsect1.json')
+    LoadData('/api/ramen/sect1')
         .then((data) => {
             data.forEach((ramenData, index) => {
                 if (ramenData && template1) {
@@ -79,7 +79,7 @@ document.addEventListener('DOMContentLoaded', function () {
             console.error('데이터 불러오기 실패:', error);
         });
 
-    LoadData('/data/mainsect2.json')
+    LoadData('/api/ramen/sect2')
         .then((data) => {
             // const ramenData = data.find((item) => item.id === "etc1");
             data.forEach((ramenData, index) => {
@@ -90,7 +90,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
                     // 데이터 삽입
                     clone.querySelector('.featureNum').textContent =
-                        ramenData.num;
+                        ramenData.name;
                     clone.querySelector('.subTitle').textContent =
                         ramenData.title;
                     clone.querySelector('.etcInfo').textContent =
@@ -169,84 +169,158 @@ function modalUp(id) {
 }
 
 // 모달데이터 뿌리기
-function modalData(id, cloneTemp) {
-    Promise.all([
-        LoadData('/data/mainpopup.json'),
-        LoadData('/data/broth.json'),
-        LoadData('/data/noodle.json'),
-    ])
-        .then(([popData, brothData, noodleData]) => {
-            let dataList = popData.find(
-                (item) => String(item.id) === String(id)
-            );
-            if (!dataList) {
-                return;
-            }
+// function modalData(id, cloneTemp) {
+//     Promise.all([
+//         LoadData('/data/mainpopup.json'),
+//         LoadData('/data/broth.json'),
+//         LoadData('/data/noodle.json'),
+//     ])
+//         .then(([popData, brothData, noodleData]) => {
+//             let dataList = popData.find(
+//                 (item) => String(item.id) === String(id)
+//             );
+//             if (!dataList) {
+//                 return;
+//             }
+//
+//             // 팝업 내부에 라멘 데이터를 삽입합니다.
+//             cloneTemp.querySelector('.tempRamenName').textContent =
+//                 dataList.name;
+//             cloneTemp.querySelector(
+//                 '.tempText .tempList .rightbox'
+//             ).textContent = dataList.soup;
+//             // 스프 농도
+//             const richnessList = cloneTemp.querySelector(
+//                 '.tempText .richness .tempCircle'
+//             );
+//             richnessList.innerHTML = '';
+//             let richnessData = brothData.filter(
+//                 (item) => item.type === 'richness'
+//             );
+//             richnessData.forEach((item) => {
+//                 const richnessDiv = document.createElement('div'); // 수정!
+//                 richnessDiv.dataset.id = item.id;
+//                 if (item.id === dataList.richness) {
+//                     richnessDiv.classList.add('active');
+//                 }
+//                 richnessList.appendChild(richnessDiv); // 부모에 추가
+//             });
+//             // 기름진 정도
+//             const richList = cloneTemp.querySelector(
+//                 '.tempText .rich .tempCircle'
+//             );
+//             richList.innerHTML = '';
+//             let richData = brothData.filter((item) => item.type === 'rich');
+//             richData.forEach((item) => {
+//                 const richDiv = document.createElement('div'); // 수정!
+//                 richDiv.dataset.id = item.id;
+//                 if (item.id === dataList.rich) {
+//                     richDiv.classList.add('active');
+//                 }
+//                 richList.appendChild(richDiv); // 부모에 추가
+//             });
+//             // 면의 굵기
+//             const thicknessList = cloneTemp.querySelector(
+//                 '.tempText .thickness .tempCircle'
+//             );
+//             thicknessList.innerHTML = '';
+//             let thicknessData = noodleData.filter(
+//                 (item) => item.type === 'thickness'
+//             );
+//             thicknessData.forEach((item) => {
+//                 const thicknessDiv = document.createElement('div'); // 수정!
+//                 thicknessDiv.dataset.id = item.id;
+//                 if (item.id === dataList.thickness) {
+//                     thicknessDiv.classList.add('active');
+//                 }
+//                 thicknessList.appendChild(thicknessDiv); // 부모에 추가
+//             });
+//         })
+//         .catch((error) => {
+//             console.error('데이터 불러오기 실패:', error);
+//         });
+// }
+// function modalHeroData(id, cloneTemp) {
+//     Promise.all([
+//         LoadData('/data/mainhero.json'),
+//         LoadData('/data/broth.json'),
+//         LoadData('/data/noodle.json'),
+//     ])
+//         .then(([popData, brothData, noodleData]) => {
+//             let dataList = popData.find(
+//                 (item) => String(item.id) === String(id)
+//             );
+//             if (!dataList) {
+//                 return;
+//             }
+//
+//             // 팝업 내부에 라멘 데이터를 삽입합니다.
+//             cloneTemp.querySelector('.tempRamenName').textContent =
+//                 dataList.name;
+//             cloneTemp.querySelector(
+//                 '.tempText .tempList .rightbox'
+//             ).textContent = dataList.soup;
+//             // 스프 농도
+//             const richnessList = cloneTemp.querySelector(
+//                 '.tempText .richness .tempCircle'
+//             );
+//             richnessList.innerHTML = '';
+//             let richnessData = brothData.filter(
+//                 (item) => item.type === 'richness'
+//             );
+//             richnessData.forEach((item) => {
+//                 const richnessDiv = document.createElement('div'); // 수정!
+//                 richnessDiv.dataset.id = item.id;
+//                 if (item.id === dataList.richness) {
+//                     richnessDiv.classList.add('active');
+//                 }
+//                 richnessList.appendChild(richnessDiv); // 부모에 추가
+//             });
+//             // 기름진 정도
+//             const richList = cloneTemp.querySelector(
+//                 '.tempText .rich .tempCircle'
+//             );
+//             richList.innerHTML = '';
+//             let richData = brothData.filter((item) => item.type === 'rich');
+//             richData.forEach((item) => {
+//                 const richDiv = document.createElement('div'); // 수정!
+//                 richDiv.dataset.id = item.id;
+//                 if (item.id === dataList.rich) {
+//                     richDiv.classList.add('active');
+//                 }
+//                 richList.appendChild(richDiv); // 부모에 추가
+//             });
+//             // 면의 굵기
+//             const thicknessList = cloneTemp.querySelector(
+//                 '.tempText .thickness .tempCircle'
+//             );
+//             thicknessList.innerHTML = '';
+//             let thicknessData = noodleData.filter(
+//                 (item) => item.type === 'thickness'
+//             );
+//             thicknessData.forEach((item) => {
+//                 const thicknessDiv = document.createElement('div'); // 수정!
+//                 thicknessDiv.dataset.id = item.id;
+//                 if (item.id === dataList.thickness) {
+//                     thicknessDiv.classList.add('active');
+//                 }
+//                 thicknessList.appendChild(thicknessDiv); // 부모에 추가
+//             });
+//         })
+//         .catch((error) => {
+//             console.error('데이터 불러오기 실패:', error);
+//         });
+// }
 
-            // 팝업 내부에 라멘 데이터를 삽입합니다.
-            cloneTemp.querySelector('.tempRamenName').textContent =
-                dataList.name;
-            cloneTemp.querySelector(
-                '.tempText .tempList .rightbox'
-            ).textContent = dataList.soup;
-            // 스프 농도
-            const richnessList = cloneTemp.querySelector(
-                '.tempText .richness .tempCircle'
-            );
-            richnessList.innerHTML = '';
-            let richnessData = brothData.filter(
-                (item) => item.type === 'richness'
-            );
-            richnessData.forEach((item) => {
-                const richnessDiv = document.createElement('div'); // 수정!
-                richnessDiv.dataset.id = item.id;
-                if (item.id === dataList.richness) {
-                    richnessDiv.classList.add('active');
-                }
-                richnessList.appendChild(richnessDiv); // 부모에 추가
-            });
-            // 기름진 정도
-            const richList = cloneTemp.querySelector(
-                '.tempText .rich .tempCircle'
-            );
-            richList.innerHTML = '';
-            let richData = brothData.filter((item) => item.type === 'rich');
-            richData.forEach((item) => {
-                const richDiv = document.createElement('div'); // 수정!
-                richDiv.dataset.id = item.id;
-                if (item.id === dataList.rich) {
-                    richDiv.classList.add('active');
-                }
-                richList.appendChild(richDiv); // 부모에 추가
-            });
-            // 면의 굵기
-            const thicknessList = cloneTemp.querySelector(
-                '.tempText .thickness .tempCircle'
-            );
-            thicknessList.innerHTML = '';
-            let thicknessData = noodleData.filter(
-                (item) => item.type === 'thickness'
-            );
-            thicknessData.forEach((item) => {
-                const thicknessDiv = document.createElement('div'); // 수정!
-                thicknessDiv.dataset.id = item.id;
-                if (item.id === dataList.thickness) {
-                    thicknessDiv.classList.add('active');
-                }
-                thicknessList.appendChild(thicknessDiv); // 부모에 추가
-            });
-        })
-        .catch((error) => {
-            console.error('데이터 불러오기 실패:', error);
-        });
-}
-function modalHeroData(id, cloneTemp) {
-    Promise.all([
-        LoadData('/data/mainhero.json'),
-        LoadData('/data/broth.json'),
-        LoadData('/data/noodle.json'),
-    ])
-        .then(([popData, brothData, noodleData]) => {
+function modalData(id, cloneTemp) {
+    Promise.all(
+        LoadData('/api/ramen/popup')
+    )
+        .then((totalData) => {
+            const popData = totalData.popData;
+            const brothData = totalData.brothData;
+            const noodleData = totalData.noodleData;
+
             let dataList = popData.find(
                 (item) => String(item.id) === String(id)
             );
