@@ -18,6 +18,10 @@ configurations {
     compileOnly {
         extendsFrom annotationProcessor
     }
+    all {
+        // Exclude the default Spring Boot logging starter to prevent conflicts
+        exclude group: 'org.springframework.boot', module: 'spring-boot-starter-logging'
+    }
 }
 
 repositories {
