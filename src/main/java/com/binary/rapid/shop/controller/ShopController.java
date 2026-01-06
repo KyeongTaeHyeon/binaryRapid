@@ -4,20 +4,20 @@ import com.binary.rapid.category.form.CategoryForm;
 import com.binary.rapid.category.service.CategoryService;
 import com.binary.rapid.shop.form.ShopForm;
 import com.binary.rapid.shop.service.ShopService;
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import jakarta.servlet.http.HttpServletRequest;
+
+import java.util.*;
 
 @Slf4j
 @Controller
@@ -28,33 +28,86 @@ public class ShopController {
     private final ShopService shopService;
     private final CategoryService categoryService;
 
-    @GetMapping()
-    public String shopList(Model model) {
-        Map map = new HashMap();
-        List<ShopForm> shopList = shopService.allShopList(map);
+    /**
+     * [1] 필터링 & 페이징 (AJAX 요청)
+     * - 화면의 #contentWrapper 부분만 갱신할 때 사용
+     */
+    @GetMapping("/filter")
+    public String filterShopList(Model model,
+                                 HttpServletRequest request,
+                                 @PageableDefault(size = 8) Pageable pageable) {
+
+        // 1. 파라미터 가공 (Map<String, String[]> -> Map<String, Object>)
+        // Service가 원하는 구조: Map 안에 "conditions"라는 키로 필터 맵이 들어있어야 함
+        Map<String, Object> searchMap = new HashMap<>();
+        Map<String, List<String>> conditions = new HashMap<>();
+
+        Map<String, String[]> requestMap = request.getParameterMap();
+        requestMap.forEach((key, values) -> {
+            // "page", "size" 같은 페이징 파라미터는 검색 조건(conditions)에 넣지 않음
+            if (!"page".equals(key) && !"size".equals(key) && !"sort".equals(key)) {
+                List<String> validValues = new ArrayList<>();
+                for (String val : values) {
+                    if (val != null && !val.isEmpty() && !"all".equals(val)) {
+                        validValues.add(val);
+                    }
+                }
+                if (!validValues.isEmpty()) {
+                    conditions.put(key, validValues);
+                }
+            }
+        });
+
+        searchMap.put("conditions", conditions);
+
+        log.info("필터 요청 - 페이지: {}, 조건: {}", pageable.getPageNumber(), conditions);
+
+        // 2. 서비스 호출 (변경된 Service는 Map과 Pageable을 받음)
+        // 반환 타입이 List가 아니라 Page<ShopForm> 입니다.
+        Page<ShopForm> shopList = shopService.allShopList(searchMap, pageable);
+
         model.addAttribute("shopList", shopList);
 
-        Map<String, Object> searchForm = new HashMap<>();
-        searchForm.put("conditions", new HashMap<String, Object>());
-        model.addAttribute("searchForm", searchForm);
+        // 3. Thymeleaf 조각(fragment) 반환
+        // 리스트와 페이징 버튼이 모두 포함된 #contentWrapper 영역을 교체
+        return "shop/shop :: #contentWrapper";
+    }
 
+    /**
+     * [2] 초기 전체 페이지 로드
+     * - /shop 으로 접속했을 때 (헤더, 푸터, 사이드바 포함 전체 렌더링)
+     */
+    @GetMapping()
+    public String shopList(Model model, @PageableDefault(size = 8) Pageable pageable) {
+
+        // 1. 초기 로드니까 검색 조건은 비어있음
+        Map<String, Object> searchMap = new HashMap<>();
+        // 빈 조건을 넣어야 Mapper 에러가 안 남
+        searchMap.put("conditions", new HashMap<>());
+
+        // 2. 서비스 호출
+        Page<ShopForm> shopList = shopService.allShopList(searchMap, pageable);
+        model.addAttribute("shopList", shopList);
+
+        // 3. 사이드바(필터 목록) 카테고리 데이터 구성
+        // (기존에 작성하신 로직 유지)
         Map<String, List<CategoryForm>> categoryMap = categoryService.getCategoryFilterMap();
+        Map<String, Map<String, List<CategoryForm>>> intermediate = new LinkedHashMap<>();
 
-        Map<String, Map<String, List<CategoryForm>>> intermediate = new java.util.LinkedHashMap<>();
         if (categoryMap != null) {
             categoryMap.forEach((key, list) -> {
                 if (list != null && !list.isEmpty()) {
                     String major = list.get(0).getMajor();
                     String minor = list.get(0).getMinor();
-                    intermediate.computeIfAbsent(major, k -> new java.util.LinkedHashMap<>())
+                    intermediate.computeIfAbsent(major, k -> new LinkedHashMap<>())
                             .put(minor, list);
                 }
             });
         }
 
-        List<Map<String, Object>> filterGroups = new java.util.ArrayList<>();
+        List<Map<String, Object>> filterGroups = new ArrayList<>();
         intermediate.forEach((majorName, minorMap) -> {
-            Map<String, Object> group = new java.util.HashMap<>();
+            Map<String, Object> group = new HashMap<>();
             group.put("majorName", majorName);
             group.put("minorMap", minorMap);
             String firstMinorKey = minorMap.keySet().iterator().next();
@@ -64,56 +117,20 @@ public class ShopController {
 
         model.addAttribute("categoryMap", categoryMap);
         model.addAttribute("filterGroups", filterGroups);
+
+        // 검색 폼 초기화용 빈 객체
+        model.addAttribute("searchForm", new HashMap<>());
+
         return "shop/shop";
     }
 
-    // 상세조회보다 상단에 배치하여 "filter"라는 문자열이 ID로 인식되는 것을 방지
-    @GetMapping("/filter")
-    public String filterShopList(Model model, HttpServletRequest request) {
-        // 1. request.getParameterMap()은 중복된 키(지역=R01&지역=R02)를 String[] 배열로 모두 가져옵니다.
-        Map<String, String[]> parameterMap = request.getParameterMap();
-
-        // MyBatis 매퍼에 전달할 최종 보따리
-        Map<String, Object> searchForm = new HashMap<>();
-        Map<String, List<String>> conditions = new HashMap<>();
-
-        // 2. 모든 파라미터를 순회하며 리스트로 변환
-        parameterMap.forEach((key, values) -> {
-            List<String> idList = new ArrayList<>();
-            for (String val : values) {
-                // 'all' 값은 필터링에서 제외
-                if (val != null && !val.isEmpty() && !"all".equals(val)) {
-                    idList.add(val);
-                }
-            }
-
-            // 유효한 ID가 하나라도 있는 그룹만 conditions에 추가
-            if (!idList.isEmpty()) {
-                conditions.put(key, idList);
-            }
-        });
-
-        // 3. 매퍼 XML의 <if test="conditions != null"> 로직이 작동하도록 키 삽입
-        searchForm.put("conditions", conditions);
-
-        // 로그를 통해 [지역=[R01, R02, R03...]] 처럼 데이터가 다 들어왔는지 꼭 확인하세요
-        log.info("MyBatis로 전달될 최종 데이터 구조: {}", searchForm);
-
-        List<ShopForm> shopList = shopService.allShopList(searchForm);
-        model.addAttribute("shopList", shopList);
-
-        return "shop/shop :: #contentList";
-    }
-
-    @GetMapping(value = "/{id}")
-    public String shopDetailList(@PathVariable("id") String shopId,
-                                 Model model) {
-        
+    /**
+     * [3] 상세 페이지
+     */
+    @GetMapping("/{id}")
+    public String shopDetailList(@PathVariable("id") String shopId, Model model) {
         ShopForm shopInfo = shopService.shopInfo(shopId);
         model.addAttribute("shopInfo", shopInfo);
-
         return "shop/shopDetail";
     }
-
-
 }

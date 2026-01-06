@@ -10,5 +10,7 @@ import java.util.Map;
 public interface ShopMapper {
     List<ShopForm> allShopList(Map map);
 
+    int countShopList(Map<String, Object> map);
+    
     ShopForm shopInfo(String shopId);
 }
