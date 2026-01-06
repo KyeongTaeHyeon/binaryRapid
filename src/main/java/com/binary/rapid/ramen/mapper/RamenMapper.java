@@ -12,4 +12,7 @@ public interface RamenMapper {
     List<RamenInfoDto> showSectInfo1();
     List<RamenInfoDto> showSectInfo2();
     List<RamenPopupDto> showPopup();
+    List<RamenPopupDto> showPopup2();
+    List<RamenPopupDto> showPopup3();
+
 }
