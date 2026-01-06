@@ -15,7 +15,6 @@ public class BoardDto {
     private LocalDateTime createDate;
     private LocalDateTime updateDate;
     private LocalDateTime deleteDate;
-    //화면 표시용 추가 필드 (닉넴)
     private String writerName;
 
 }
