@@ -1,0 +1,50 @@
+[
+    {
+        "id": "RM1",
+        "name": "시오라멘",
+        "soup": "닭, 야채, 해산물",
+        "richness": "H1",
+        "rich": "I1",
+        "thickness": "T2"
+    },
+    {
+        "id": "RM2",
+        "name": "쇼유라멘",
+        "soup": "닭, 해산물",
+        "richness": "H3",
+        "rich": "I1",
+        "thickness": "T3"
+    },
+    {
+        "id": "RM3",
+        "name": "미소라멘",
+        "soup": "돼지뼈, 해산물",
+        "richness": "H4",
+        "rich": "I3",
+        "thickness": "T4"
+    },
+    {
+        "id": "RM4",
+        "name": "돈코츠라멘",
+        "soup": "닭,야채,해산물",
+        "richness": "H5",
+        "rich": "I3",
+        "thickness": "T1"
+    },
+    {
+        "id": "RM5",
+        "name": "교카이라멘",
+        "soup": "해산물",
+        "richness": "H2",
+        "rich": "I1",
+        "thickness": "T2"
+    },
+    {
+        "id": "RM6",
+        "name": "니보시라멘",
+        "soup": "멸치",
+        "richness": "H4",
+        "rich": "I2",
+        "thickness": "T4"
+    }
+]

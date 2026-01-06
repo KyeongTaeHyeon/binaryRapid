@@ -1,0 +1,359 @@
+@charset "UTF-8";
+
+/* 전체 게시판 스타일 */
+#boardMain {
+  width: 90%;
+  max-width: 1440px;
+  margin-right: auto;
+  margin-left: auto;
+  text-align: center;
+  padding: 50px 0;
+}
+/* h역역 */
+#boardMain h1 {
+  font-size: 40px;
+  margin-bottom: 24px;
+  margin-bottom: 50px;
+  color: #000;
+}
+#boardcreat {
+  width: fit-content;
+  margin: 0 auto;
+  padding: 52px;
+  border: 1px solid #dedede;
+  border-radius: 45px;
+  margin-bottom: 50px;
+  margin-top: 50px;
+}
+/* 필터 */
+.filter {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  margin-bottom: 40px;
+}
+
+.filter span {
+  display: inline-block;
+  border: 1px solid #dedede;
+  border-radius: 8px;
+  background-color: #fff;
+  color: #555;
+  font-size: 16px;
+  cursor: pointer;
+  padding: 12px 24px;
+}
+
+.filter span:hover,
+.filter a.active span {
+  background-color: #5ac3f5;
+  color: #fff;
+  border-color: #5ac3f5;
+  font-weight: 700;
+}
+.title {
+  font-size: 20px;
+  margin-bottom: 24px;
+  min-width: 600px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background-color: #fff;
+  margin-bottom: 50px;
+  color: #000;
+}
+
+/* 게시글 행 */
+.post {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  background-color: #fff;
+  border: 1px solid #dedede;
+  border-radius: 8px;
+  padding: 16px 24px;
+  margin-bottom: 12px;
+}
+.post .tageone {
+  font-size: 12px;
+  color: #fff;
+}
+.post .tage {
+  font-size: 12px;
+  color: #fff;
+}
+.post .tageone {
+  background-color: #5ac3f5; /* 기본 파란색 */
+  color: #fff;
+  font-weight: bold;
+  padding: 6px 10px;
+  border-radius: 4px;
+  margin-right: 10px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.post .tage {
+  background-color: #5ac3f5; /* 기본 파란색 */
+  color: #fff;
+  font-weight: bold;
+  padding: 6px 10px;
+  border-radius: 4px;
+  margin-right: 10px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.post .name {
+  flex: 2;
+  font-size: 16px;
+  display: flex;
+  gap: 10px;
+  color: #222;
+  text-align: left;
+}
+
+.post .user {
+  flex: 1;
+  font-size: 16px;
+  color: #555;
+  text-align: center;
+}
+
+.post .userTime {
+  flex: 1;
+  font-size: 16px;
+  color: #555;
+  text-align: right;
+}
+
+#contentNav {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  margin-top: 40px;
+  gap: 10px;
+}
+
+.pgitagination {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.page-btn {
+  background: #d6eefc;
+  border: 1px solid #d6eefc;
+  color: #5ac3f5;
+  font-size: 22px;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+}
+.page-btn:hover {
+  background: #d6eefc;
+  color: #5ac3f5;
+  border-color: #d6eefc;
+}
+
+.page-list {
+  display: flex;
+  gap: 8px;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.page-item button {
+  background: none;
+  border: none;
+  color: #5ac3f5;
+  font-size: 18px;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+}
+
+.page-item.active button,
+.page-item button:hover {
+  background: #d6eefc;
+  color: #5ac3f5;
+  font-weight: bold;
+}
+
+.writing {
+  background-color: #5ac3f5;
+  color: white;
+  text-decoration: none;
+  font-size: 16px;
+  font-weight: 700;
+  padding: 12px 24px;
+  border-radius: 8px;
+  transition: background-color 0.3s;
+}
+
+.writing:hover {
+  background-color: #47aee4;
+}
+/* 버튼 그룹 */
+#bTn {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  margin: 20px 0;
+}
+
+#bTn button {
+  padding: 8px 16px;
+  font-size: 14px;
+  font-weight: bold;
+  background-color: #fff;
+  color: #5ac3f5;
+  border: 1px solid #5ac3f5;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+#bTn button:hover {
+  background-color: #5ac3f5;
+  color: #fff;
+}
+
+/* 게시글 본문 */
+.contentPost {
+  width: 100%;
+  height: 500px;
+  border: 1px solid #dedede;
+  border-radius: 8px;
+  background-color: #fff;
+  padding: 20px;
+  margin-bottom: 20px;
+  font-size: 16px;
+  color: #222;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* 댓글 작성 */
+/* 댓글 작성 섹션 (comment 클래스) */
+.comment {
+  display: flex; /* 자식 요소들을 가로로 정렬 */
+  align-items: center; /* 자식 요소들을 세로 중앙 정렬 */
+  gap: 10px; /* 입력창과 버튼 사이의 간격 */
+  background-color: #fff;
+  padding: 12px 16px;
+  border: 1px solid #dedede;
+  border-radius: 8px;
+}
+
+/* 댓글 입력 필드 (commentText input) */
+.commentText {
+  flex-grow: 1; /* 이 요소가 사용 가능한 공간을 최대한 채우도록 함 (입력창을 크게 만듦) */
+}
+
+.commentText input {
+  width: 100%; /* 부모 요소인 .commentText의 전체 너비를 사용 */
+  padding: 10px;
+  font-size: 15px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box; /* 패딩과 보더를 너비에 포함시켜 요소가 삐져나가지 않게 함 */
+}
+
+/* 댓글등록 버튼 (commentBtn button) */
+.commentBtn button {
+  /* 현재 스타일 유지 (크게 변경할 필요 없음) */
+  padding: 10px 16px;
+  font-size: 14px;
+  background-color: #5ac3f5;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  white-space: nowrap; /* 버튼 텍스트가 줄 바꿈되지 않도록 함 */
+}
+
+.commentBtn button:hover {
+  background-color: #47aee4;
+}
+
+/* 대댓글 영역 (선택적) */
+.replyItem,
+.commentTop {
+  padding-left: 24px;
+  margin-top: 8px;
+  font-size: 14px;
+  color: #444;
+}
+.store-form {
+  margin: 40px auto;
+}
+
+.store-form form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.form-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.form-row label {
+  width: 120px;
+  font-weight: bold;
+  text-align: center;
+  color: #333;
+}
+
+.form-row input,
+.form-row select {
+  box-sizing: border-box;
+  flex: 1;
+  height: 40px;
+  padding: 0 12px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background-color: #fff;
+  font-size: 14px;
+}
+
+.form-button {
+  text-align: center;
+  margin-top: 20px;
+}
+
+.form-button button {
+  width: 100%;
+  height: 50px;
+  padding: 10px 50px;
+  background-color: #5ac3f5;
+  border: 1px solid #999;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  color: white;
+}
+
+.form-button button:hover {
+  background-color: #5864b5;
+}
+/*댓글 답글 영역*/
+
+.commentList {
+  border-top: 1px solid #999;
+  margin-top: 5px;
+}
+.editBtn,
+.deleteBtn {
+  border: 1px solid #999;
+}

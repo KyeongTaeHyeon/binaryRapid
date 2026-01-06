@@ -1,0 +1,132 @@
+/* Main Wrapper for Detail Page */
+.shop-detail-main-wrapper {
+    max-width: 900px; /* 상세 페이지의 최대 너비 */
+    margin: 40px auto;
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    box-sizing: border-box; /* 패딩이 너비에 포함되도록 */
+}
+
+/* Individual Shop Detail Card (if you want an outer box around the content) */
+.shop-detail-card {
+    /* Optionally add padding/border here if you want an inner card look */
+}
+
+/* Shop Name */
+#shopName {
+    font-size: 2.5em; /* Supleks 페이지와 유사하게 크게 */
+    color: #333; /* 검은색 계열로 */
+    text-align: center;
+    margin-bottom: 25px;
+    padding-bottom: 15px;
+    border-bottom: 3px double #eee; /* 이중선으로 구분 */
+    font-weight: bold;
+}
+
+/* Tags Section */
+.detail-tags-section {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 12px; /* 태그 간 간격 */
+    margin-bottom: 30px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #ddd;
+}
+
+.detail-tags-section .tag {
+    background-color: #f0f0f0; /* 밝은 회색 배경 */
+    padding: 10px 20px; /* 충분한 패딩 */
+    border-radius: 25px; /* 더 둥근 모서리 */
+    font-size: 1.1em;
+    color: #555;
+    font-weight: 500;
+    white-space: nowrap;
+    border: 1px solid #e0e0e0;
+    transition: background-color 0.2s ease;
+}
+
+.detail-tags-section .tag:hover {
+    background-color: #e5e5e5;
+}
+
+/* Content Area (Image + Info) */
+.detail-content-area {
+    display: flex;
+    gap: 30px; /* 이미지와 정보 블록 사이의 간격 */
+    flex-wrap: wrap; /* 반응형: 작은 화면에서 세로로 쌓이도록 */
+    align-items: flex-start; /* 상단 정렬 */
+}
+
+.detail-image-box {
+    flex: 1; /* 남은 공간의 절반을 차지 */
+    min-width: 300px; /* 최소 너비 지정 (작은 화면에서 100% 되도록) */
+}
+
+#shopImage {
+    width: 100%;
+    height: auto;
+    max-height: 400px; /* 이미지 최대 높이 제한 */
+    object-fit: cover; /* 이미지가 잘리지 않고 채워지도록 */
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.detail-info-text {
+    flex: 1; /* 남은 공간의 절반을 차지 */
+    min-width: 300px; /* 최소 너비 지정 */
+    font-size: 1.1em;
+    line-height: 1.7; /* 줄 간격 */
+}
+
+.detail-info-text p {
+    margin-bottom: 15px; /* 각 문단 아래 여백 */
+}
+
+.detail-info-text strong {
+    color: #ff6600; /* 강조 색상 */
+    margin-right: 5px;
+}
+
+.detail-info-text .content-label {
+    margin-top: 25px; /* '내용' 라벨 위쪽 여백 */
+    font-weight: bold;
+    color: #333;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .shop-detail-main-wrapper {
+        margin: 20px auto;
+        padding: 15px;
+    }
+
+    #shopName {
+        font-size: 2em;
+        margin-bottom: 20px;
+    }
+
+    .detail-tags-section {
+        gap: 8px;
+        margin-bottom: 20px;
+        padding-bottom: 10px;
+    }
+
+    .detail-tags-section .tag {
+        font-size: 1em;
+        padding: 8px 15px;
+    }
+
+    .detail-content-area {
+        flex-direction: column; /* 세로로 쌓이도록 */
+        gap: 20px;
+    }
+
+    .detail-image-box,
+    .detail-info-text {
+        flex: none; /* 플렉스 확장 해제 */
+        width: 100%; /* 너비 100% */
+    }
+}

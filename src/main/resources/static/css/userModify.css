@@ -1,0 +1,78 @@
+@charset "UTF-8";
+
+body {
+  font-family: 'SCoreDream', 'Malgun Gothic', sans-serif;
+  background-color: #f4faff;
+}
+
+#main {
+  position: relative;
+  background-color: #ffffff;
+  max-width: 1440px;
+  min-width: 980px;
+  margin: 30px auto;
+  padding: 40px;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+}
+
+#userModifyWrapper {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+  height: 100%;
+}
+
+#userModifyLeft {
+  width: 200px;
+  height: 690px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  box-sizing: border-box;
+  flex-shrink: 0; /* 크기가 줄어들지 않도록 설정 */
+  border: 1px solid #dedede;
+  border-radius: 45px;
+  box-shadow: #5ac3f5 0px 0px 5px 0px;
+}
+
+#userModifyLeftInner {
+  height: 100%;
+  line-height: 100px;
+  font-size: 17px;
+}
+
+#userModifyLeftInner span {
+  display: flex;
+  height: 80px;
+  align-items: center;
+  justify-content: center;
+  border-bottom: 2px solid #a9d1e4;
+}
+
+#userModifyLeft ul {
+  height: 70%;
+  text-align: center;
+}
+
+#userModifyRight {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  text-align: center;
+  height: 690px;
+  width: 500px;
+  border: 1px solid #dedede;
+  border-radius: 45px;
+  box-shadow: #5ac3f5 0px 0px 5px 0px;
+}
+
+#userModifyRight h2 {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  height: 10%;
+  background-color: #e9e6e9;
+}

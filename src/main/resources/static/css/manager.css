@@ -1,0 +1,232 @@
+@charset "UTF-8";
+
+body {
+    font-family: 'SCoreDream', 'Malgun Gothic', sans-serif;
+    background-color: #f4faff;
+}
+
+#main {
+    position: relative;
+    background-color: #ffffff;
+    max-width: 1440px;
+    min-width: 980px;
+    margin: 30px auto;
+    padding: 40px;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+}
+
+#main h2 {
+    margin-bottom: 32px;
+    text-align: center;
+    color: #121212;
+}
+
+#inner {
+    display: flex;
+    justify-content: center;
+    gap: 40px;
+}
+
+#managerLeft {
+    width: 200px;
+    border: 1px solid #5ac3f5;
+}
+
+#managerLeftInner {
+    height: 100%;
+    line-height: 100px;
+    font-size: 17px;
+}
+
+#managerLeftInner span {
+    display: flex;
+    height: 80px;
+    align-items: center;
+    justify-content: center;
+    background-color: #5ac3f5;
+    color: #fff;
+    font-weight: 600;
+}
+
+#managerLeft ul {
+    padding: 20px 0;
+    text-align: center;
+    line-height: 48px;
+}
+
+#managerLeft ul li a {
+    color: #555;
+}
+
+#managerLeft ul .on a {
+    color: #2fb2ee;
+    font-weight: 600;
+}
+
+#managerRight {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+#managerRight table {
+    width: 100%;
+    border-spacing: 30px;
+    border-collapse: separate;
+    text-align: center;
+    color: #121212;
+}
+
+#managerSearch {
+    display: flex;
+    justify-content: space-around;
+    gap: 20px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #ddd;
+}
+
+.searchWrapper {
+    width: 320px;
+}
+
+.searchWrapper:last-child {
+    width: 440px;
+}
+
+.managerSearchWrap select {
+    width: 40%;
+}
+
+#cate,
+#search,
+#start,
+#end {
+    flex: 1;
+    box-sizing: border-box;
+    background-color: white;
+    height: 40px;
+    padding: 0 12px;
+    border: 1px solid #ccc;
+    border-radius: 4px 0 0 4px;
+    font-size: 14px;
+    color: #555;
+}
+
+.managerSearchWrap input {
+    box-sizing: border-box;
+    flex: 1;
+    height: 40px;
+    border: 1px solid #ccc;
+    color: #555;
+}
+
+#managerSearchDate input:first-child {
+    border-right: 0;
+    border-radius: 4px 0 0 4px;
+}
+
+#managerSearchDate input:nth-child(2) {
+    border-radius: 0;
+}
+
+#managerSearchDate button,
+#search-button {
+    background-color: #777;
+    color: white;
+    width: 40px;
+    height: 40px;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 0 4px 4px 0;
+}
+
+#managerSearchDate button {
+    width: 60px;
+}
+
+#search-button img {
+    height: 24px;
+    width: 24px;
+}
+
+@media screen and (max-width: 768px) {
+    .managerSearchWrap {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    #managerSearch {
+        flex-direction: column;
+        align-items: stretch;
+    }
+}
+
+/* 페이지 네비게이션 디자인 */
+#contentNav {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center; /* 세로 가운데 정렬 */
+    gap: 20px; /* 페이지네이션과 드롭다운 사이 간격 */
+    margin: 40px 0;
+}
+
+.pagination {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.page-btn {
+    color: #2fb2ee;
+    font-size: 1.4rem;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s;
+}
+
+.page-btn:hover {
+    background: #d6eefc;
+    color: #5ac3f5;
+    border-color: #d6eefc;
+}
+
+.page-list {
+    display: flex;
+    gap: 8px;
+    padding: 0;
+    margin: 0;
+    list-style: none;
+}
+
+.page-item button {
+    background: none;
+    border: none;
+    color: #777;
+    font-size: 1.1rem;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s;
+}
+
+.page-item.active button,
+.page-item button:hover {
+    background: #d6eefc;
+    color: #5ac3f5;
+    font-weight: bold;
+}
+
+.page-item.active button,
+.page-item button:hover {
+    background: #ebf8ff;
+    color: #5ac3f5;
+    font-weight: bold;
+}

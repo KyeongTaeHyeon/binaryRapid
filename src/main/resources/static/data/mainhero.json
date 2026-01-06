@@ -1,0 +1,38 @@
+[
+  {
+    "id": "HR1",
+    "name": "이에케라멘",
+    "soup": "돈코츠,쇼유",
+    "richness": "H4",
+    "rich": "I3",
+    "thickness": "T1",
+    "image": "img/heroieke1920x1080.jpg"
+  },
+  {
+    "id": "HR2",
+    "name": "창케라멘",
+    "soup": "쇼유,돼지고기",
+    "richness": "H2",
+    "rich": "I2",
+    "thickness": "T3",
+    "image": "img/herochangke.jpg"
+  },
+  {
+    "id": "HR3",
+    "name": "지로라멘",
+    "soup": "쇼유,아부라,마늘",
+    "richness": "H3",
+    "rich": "I3",
+    "thickness": "T5",
+    "image": "img/herojiro1920x1080.jpeg"
+  },
+  {
+    "id": "HR4",
+    "name": "츄카소바",
+    "soup": "쇼유",
+    "richness": "H2",
+    "rich": "I1",
+    "thickness": "T2",
+    "image": "img/herochuka.jpeg"
+  }
+]

@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+    <head>
+        <meta charset="UTF-8"/>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+        <title>regionTheme</title>
+        <!-- 공통사용 -->
+        <link rel="stylesheet" th:href="@{/css/reset.css}"/>
+        <link rel="stylesheet" th:href="@{/css/common.css}"/>
+        <!-- 각화면 css 생성하여 사용 -->
+        <link rel="stylesheet" th:href="@{/css/regionTheme.css}"/>
+    </head>
+    <body>
+        <div id="wrapper">
+            <!-- header(공통사용) -->
+            <header id="header" th:replace="~{fragments/header :: header}"></header>
+            <!-- 작업영역 -->
+            <main id="main">
+                <div id="filterWrapper">
+                    <h1 style="margin-bottom: 20px">지역별/테마별</h1>
+                    <div class="filters">
+
+                    </div>
+                </div>
+                <div id="selectorWrapper">
+                    <ul class="selectorContents"></ul>
+                </div>
+                <div id="contentWrapper">
+                    <div id="contentList">
+                        <div th:each="shop:${shopList}">
+                            <div class="contentItem">
+                                <a href="">
+                                    <div class="contentImage">
+                                        <img th:src="${shop.imgUrl}" th:alt="${shop.shopName}"/>
+                                    </div>
+                                    <div class="contentsInfo">
+                                        <div class="contentTitle"></div>
+                                        <div class="contentCategory">
+                                            <ul class="categoryList"></ul>
+                                        </div>
+                                        <div class="contentDescription"></div>
+                                    </div>
+                                </a>
+                                <button class="contentLike" type="button"></button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div id="contentNav">
+                    <nav class="pagination">
+                        <button class="pageBtn prev" aria-label="이전 페이지">
+                            &lt;
+                        </button>
+                        <ul class="pageList"></ul>
+                        <button class="pageBtn next" aria-label="다음 페이지">
+                            &gt;
+                        </button>
+                    </nav>
+                </div>
+            </main>
+            <!-- footer영역(공통사용) -->
+            <footer id="footer" th:replace="~{fragments/footer :: footer}"></footer>
+        </div>
+
+        <template id="contentItemTemplate">
+
+        </template>
+
+        <!-- 공통사용 -->
+        <script th:src="@{/js/common.js}"></script>
+        <!-- 각화면 js생성하여 사용 -->
+        <script type="text/javascript">
+            function googleTranslateElementInit() {
+                new google.translate.TranslateElement(
+                    {pageLanguage: 'ko', includedLanguages: 'en,ja,zh-CN,ko'},
+                    'google_translate_element'
+                );
+            }
+        </script>
+        <script src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+        <script type="module" th:src="@{/js/regionTheme.js}"></script>
+    </body>
+</html>

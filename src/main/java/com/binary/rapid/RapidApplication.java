@@ -12,5 +12,6 @@ public class RapidApplication {
     public static void main(String[] args) {
         SpringApplication.run(RapidApplication.class, args);
     }
-    
+
+
 }

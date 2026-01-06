@@ -1,0 +1,44 @@
+[
+    {
+        "type": "shape",
+        "id": "P1",
+        "title": "면/형태",
+        "name": "곱슬면"
+    },
+    {
+        "type": "shape",
+        "id": "P2",
+        "title": "면/형태",
+        "name": "스트레이트면"
+    },
+    {
+        "type": "thickness",
+        "id": "T1",
+        "title": "면/두께",
+        "name": "가는면"
+    },
+    {
+        "type": "thickness",
+        "id": "T2",
+        "title": "면/두께",
+        "name": "중간가는면"
+    },
+    {
+        "type": "thickness",
+        "id": "T3",
+        "title": "면/두께",
+        "name": "중간면"
+    },
+    {
+        "type": "thickness",
+        "id": "T4",
+        "title": "면/두께",
+        "name": "중간굵은면"
+    },
+    {
+        "type": "thickness",
+        "id": "T5",
+        "title": "면/두께",
+        "name": "굵은면"
+    }
+]

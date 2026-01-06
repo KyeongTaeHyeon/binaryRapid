@@ -1,0 +1,26 @@
+[
+    {
+        "type": "kind",
+        "id": "C1",
+        "title": "종류",
+        "name": "육수있음"
+    },
+    {
+        "type": "kind",
+        "id": "C2",
+        "title": "종류",
+        "name": "츠케멘"
+    },
+    {
+        "type": "kind",
+        "id": "C3",
+        "title": "종류",
+        "name": "마제소바"
+    },
+    {
+        "type": "kind",
+        "id": "C4",
+        "title": "종류",
+        "name": "아부라소바"
+    }
+]

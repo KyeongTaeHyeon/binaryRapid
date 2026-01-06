@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Login</title>
+    <link rel="stylesheet" th:href="@{/css/reset.css}" />
+    <link rel="stylesheet" th:href="@{/css/common.css}" />
+    <link rel="stylesheet" th:href="@{/css/userModify.css}" />
+    <link rel="stylesheet" th:href="@{/css/register.css}" />
+  </head>
+  <body>
+    <div id="wrapper">
+      <header id="header" th:replace="~{fragments/header :: header}"></header>
+      <main id="main">
+        <div id="userModifyWrapper">
+          <div id="userModifyLeft">
+            <div id="userModifyLeftInner">
+              <span> *** 님 ㅎㅇ</span>
+              <ul>
+                <li class="on">
+                  <a href="./userModify">내 정보 변경</a>
+                </li>
+                <li><a href="./userBoardList">작성글 관리</a></li>
+                <li><a href="./userMywish">찜 목록</a></li>
+                <li><a href="./userRequestShop">등록 신청 관리</a></li>
+              </ul>
+            </div>
+          </div>
+          <div id="userModifyRight">
+            <h1>유저 정보 변경</h1>
+            <form id="registerForm">
+              <div class="inputWrapper">
+                <div class="inputGroup">
+                  <label for="userName">아이디</label>
+                  <input
+                    type="text"
+                    id="userName"
+                    name="userName"
+                    required
+                    disabled
+                  />
+                </div>
+                <span id="userNameMsg" class="msg"></span>
+                <div class="inputGroup">
+                  <label for="userPassword">비밀번호</label>
+                  <input
+                    type="password"
+                    id="userPassword"
+                    name="userPassword"
+                    required
+                  />
+                </div>
+                <div class="inputGroup">
+                  <label for="userPasswordCheck"> 비밀번호확인 </label>
+                  <input
+                    type="password"
+                    id="userPasswordCheck"
+                    name="userPasswordCheck"
+                    required
+                  />
+                </div>
+                <span id="passwordCheckMsg" class="msg"></span>
+                <div class="inputGroup">
+                  <label for="userEmail">이메일</label>
+                  <input
+                    type="email"
+                    id="userEmail"
+                    name="userEmail"
+                    placeholder="RaFeed@gmail.com"
+                  />
+                </div>
+                <div class="inputGroup">
+                  <label for="nickName">닉네임</label>
+                  <input type="text" id="nickName" name="nickName" required />
+                </div>
+                <div class="inputGroup">
+                  <label>나이</label>
+                  <select name="selAge" id="selAge">
+                    <option value="">----선택----</option>
+                    <option value="10">10대</option>
+                    <option value="20">20대</option>
+                    <option value="30">30대</option>
+                    <option value="40">40대</option>
+                    <option value="50">50대</option>
+                    <option value="60">60대이상</option>
+                  </select>
+                </div>
+                <div class="inputGroup">
+                  <label>성별</label>
+                  <select name="selGender" id="selGender">
+                    <option value=""></option>
+                    <option value="male">남성</option>
+                    <option value="female">여성</option>
+                  </select>
+                </div>
+                <div class="inputGroup">
+                  <label>취향</label>
+                  <select name="selPreference" id="selPreference">
+                    <option value=""></option>
+                  </select>
+                </div>
+              </div>
+              <div class="buttonWrapper">
+                <button type="submit" id="btnRegister" class="button">
+                  변경하기
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </main>
+      <footer id="footer" th:replace="~{fragments/footer :: footer}"></footer>
+    </div>
+    <script th:src="@{/js/common.js}"></script>
+    <script type="text/javascript">
+      function googleTranslateElementInit() {
+        new google.translate.TranslateElement(
+          { pageLanguage: 'ko', includedLanguages: 'en,ja,zh-CN,ko' },
+          'google_translate_element'
+        );
+      }
+    </script>
+    <script src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+  </body>
+</html>

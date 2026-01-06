@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.binary.rapid.Board.mapper.BoardMapper">
+
+    <insert id="saveBoard" parameterType="com.binary.rapid.Board.dto.BoardDto" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO tb_board (category, title, content, user_id, create_date)
+        VALUES (#{category}, #{title}, #{content}, #{userId}, NOW())
+    </insert>
+
+    <select id="selectBoardList" resultType="com.binary.rapid.Board.dto.BoardDto">
+        SELECT
+            b.id,
+            b.category,
+            b.title,
+            b.content,
+            b.user_id AS userId,
+            b.create_date AS createDate,
+            b.update_date AS updateDate,
+            u.nickname AS writerName
+        FROM tb_board b
+                 LEFT JOIN tb_user u ON b.user_id = u.user_id
+        WHERE b.delete_date IS NULL
+        ORDER BY b.id DESC
+    </select>
+
+    <select id="selectBoardDetail" parameterType="int" resultType="com.binary.rapid.Board.dto.BoardDto">
+        SELECT
+            b.id,
+            b.category,
+            b.title,
+            b.content,
+            b.user_id AS userId,
+            b.create_date AS createDate,
+            u.nickname AS writerName
+        FROM tb_board b
+                 LEFT JOIN tb_user u ON b.user_id = u.user_id
+        WHERE b.id = #{id} AND b.delete_date IS NULL
+    </select>
+
+    <update id="updateBoard" parameterType="com.binary.rapid.Board.dto.BoardDto">
+        UPDATE tb_board
+        SET
+            category = #{category},
+            title = #{title},
+            content = #{content},
+            update_date = NOW()
+        WHERE id = #{id}
+    </update>
+
+    <update id="deleteBoard" parameterType="int">
+        UPDATE tb_board SET delete_date = NOW() WHERE id = #{id}
+    </update>
+
+    <select id="selectCommentList" parameterType="int" resultType="com.binary.rapid.Board.dto.BoardCommentDto">
+        SELECT id, seq as commentSeq, comment, user_id as userId, create_date as createDate,
+               parent_id AS parentId
+        FROM tb_boardComment
+        WHERE id = #{id} AND delete_date IS NULL
+        ORDER BY IFNULL(parent_id, seq), seq ASC
+    </select>
+
+    <insert id="insertComment" parameterType="com.binary.rapid.Board.dto.BoardCommentDto">
+        INSERT INTO tb_boardComment (id, comment, user_id, parent_id, create_date)
+        VALUES (#{id}, #{comment}, #{userId}, #{parentId}, NOW())
+    </insert>
+
+    <update id="updateComment" parameterType="com.binary.rapid.Board.dto.BoardCommentDto">
+        UPDATE tb_boardComment
+        SET
+            comment = #{comment},
+            update_date = NOW()
+        WHERE id = #{id} AND seq = #{commentSeq}
+    </update>
+
+    <update id="deleteCommentsByBoardId" parameterType="int">
+        UPDATE tb_boardComment SET delete_date = NOW() WHERE id = #{id}
+    </update>
+
+    <insert id="insertBoardFile" parameterType="com.binary.rapid.Board.dto.BoardFileDto">
+        INSERT INTO tb_boardFile (id, file_seq, file_addr, user_id, create_date)
+        VALUES (#{id}, #{fileSeq}, #{fileAddr}, #{userId}, NOW())
+    </insert>
+
+</mapper>

@@ -1,0 +1,125 @@
+[
+    {
+        "type": "category",
+        "id": "G1",
+        "title": "육수/카테고리",
+        "name": "시오"
+    },
+    {
+        "type": "category",
+        "id": "G2",
+        "title": "육수/카테고리",
+        "name": "쇼유"
+    },
+    {
+        "type": "category",
+        "id": "G3",
+        "title": "육수/카테고리",
+        "name": "미소"
+    },
+    {
+        "type": "category",
+        "id": "G4",
+        "title": "육수/카테고리",
+        "name": "돈코츠"
+    },
+    {
+        "type": "category",
+        "id": "G5",
+        "title": "육수/카테고리",
+        "name": "교카이"
+    },
+    {
+        "type": "category",
+        "id": "G6",
+        "title": "육수/카테고리",
+        "name": "니보시"
+    },
+    {
+        "type": "category",
+        "id": "G7",
+        "title": "육수/카테고리",
+        "name": "파이탄"
+    },
+    {
+        "type": "category",
+        "id": "G8",
+        "title": "육수/카테고리",
+        "name": "야사이"
+    },
+
+    {
+        "type": "style",
+        "id": "S1",
+        "title": "육수/계열",
+        "name": "이에케"
+    },
+    {
+        "type": "style",
+        "id": "S2",
+        "title": "육수/계열",
+        "name": "지로케"
+    },
+    {
+        "type": "style",
+        "id": "S3",
+        "title": "육수/계열",
+        "name": "창케"
+    },
+    {
+        "type": "style",
+        "id": "S4",
+        "title": "육수/계열",
+        "name": "츄카소바"
+    },
+
+    {
+        "type": "rich",
+        "id": "I1",
+        "title": "육수/기름기",
+        "name": "담백함"
+    },
+    {
+        "type": "rich",
+        "id": "I2",
+        "title": "육수/기름기",
+        "name": "보통"
+    },
+    {
+        "type": "rich",
+        "id": "I3",
+        "title": "육수/기름기",
+        "name": "진함"
+    },
+
+    {
+        "type": "richness",
+        "id": "H1",
+        "title": "육수/농도",
+        "name": "연함"
+    },
+    {
+        "type": "richness",
+        "id": "H2",
+        "title": "육수/농도",
+        "name": "약간연함"
+    },
+    {
+        "type": "richness",
+        "id": "H3",
+        "title": "육수/농도",
+        "name": "보통"
+    },
+    {
+        "type": "richness",
+        "id": "H4",
+        "title": "육수/농도",
+        "name": "약간진함"
+    },
+    {
+        "type": "richness",
+        "id": "H5",
+        "title": "육수/농도",
+        "name": "진함"
+    }
+]

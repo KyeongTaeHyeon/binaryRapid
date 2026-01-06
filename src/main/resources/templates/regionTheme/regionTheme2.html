@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+    <head>
+        <meta charset="UTF-8"/>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+        <title>regionTheme</title>
+        <link rel="stylesheet" th:href="@{/css/reset.css}"/>
+        <link rel="stylesheet" th:href="@{/css/common.css}"/>
+        <link rel="stylesheet" th:href="@{/css/regionTheme2.css}"/>
+    </head>
+
+    <th:block layout:fragment="script">
+
+    </th:block>
+    <body class="content" layout:fregment="content">
+        <main class="shop-detail-main-wrapper">
+            <div class="shop-detail-card">
+                <input type="hidden" id="shopId" th:value="${shopId}"/>
+                <h1 id="shopName" th:text="${shopName}"></h1>
+                <div class="detail-tags-section" id="detailTagsSection"></div>
+                <div class="detail-content-area">
+                    <div class="detail-image-box">
+                        <img id="shopImage" src="" alt="라멘 가게 이미지"/>
+                    </div>
+                    <div class="detail-info-text">
+                        <p><strong>지역:</strong> <span id="shopRegion" th:text="${shopRegion}"></span></p>
+                        <p><strong>상세주소:</strong> <span id="shopAddress" th:text="${}"></span></p>
+                        <p class="content-label"><strong>내용:</strong></p>
+                        <p id="shopContent"></p>
+                    </div>
+                </div>
+            </div>
+        </main>
+        <footer id="footer" th:replace="~{fragments/footer :: footer}"></footer>
+
+        <script th:src="@{/js/common.js}"></script>
+        <script type="text/javascript">
+            function googleTranslateElementInit() {
+                new google.translate.TranslateElement(
+                    {pageLanguage: 'ko', includedLanguages: 'en,ja,zh-CN,ko'},
+                    'google_translate_element'
+                );
+            }
+        </script>
+        <script src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+        <script type="module" th:src="@{/js/regionTheme2.js}"></script>
+    </body>
+</html>
