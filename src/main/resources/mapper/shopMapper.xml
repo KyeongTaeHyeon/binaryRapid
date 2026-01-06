@@ -3,6 +3,7 @@
     PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.binary.rapid.shop.mapper.ShopMapper">
+    
     <resultMap id="shopResultMap" type="com.binary.rapid.shop.form.ShopForm">
         <id property="shopId" column="shop_id"/>
         <result property="shopName" column="shop_name"/>
@@ -14,41 +15,53 @@
             <result property="categoryName" column="category_name"/>
         </collection>
     </resultMap>
-    
-    <select id="allShopList" resultMap="shopResultMap" parameterType="Map">
-        <![CDATA[
-        SELECT s.id AS shop_id
-            , s.name AS shop_name
-            , s.address AS shop_address
-            , s.content AS shop_content
-            , si.img_url AS img_url
-            , c.id AS category_id
-            , c.name AS category_name
+
+    <select id="allShopList" resultMap="shopResultMap" parameterType="com.binary.rapid.shop.form.ShopSearchForm">
+        SELECT s.id      AS shop_id
+             , s.name    AS shop_name
+             , s.address AS shop_address
+             , s.content AS shop_content
+             , si.img_url AS img_url
+             , c.id      AS category_id
+             , c.name    AS category_name
         FROM tb_shop s
-	        JOIN tb_shopdetail sd ON sd.id = s.id
-	        LEFT OUTER JOIN tb_shopimg si ON si.id = s.id AND si.main_img = 'Y'
-	        JOIN tb_category c ON c.id = sd.contents
+            JOIN tb_shopdetail sd_main ON sd_main.id = s.id
+            JOIN tb_category c ON c.id = sd_main.contents
+            LEFT OUTER JOIN tb_shopimg si ON si.id = s.id AND si.main_img = 'Y'
         WHERE COALESCE(s.req_type, '') = 'Y'
-        ORDER BY s.id, c.view;
-        ]]>
+
+        <if test="conditions != null and conditions.size > 0">
+            <foreach collection="conditions" index="groupId" item="idList">
+                <if test="idList != null and idList.size > 0">
+                    AND EXISTS (
+                        SELECT 1 FROM tb_shopdetail sd 
+                        WHERE sd.id = s.id 
+                        AND sd.contents IN 
+                        <foreach collection="idList" item="id" open="(" separator="," close=")">
+                            #{id}
+                        </foreach>
+                    )
+                </if>
+            </foreach>
+        </if>
+
+        ORDER BY s.id, c.view
     </select>
     
     <select id="shopInfo" resultMap="shopResultMap" parameterType="String">
-        <![CDATA[
-        SELECT s.id AS shop_id
-            , s.name AS shop_name
-            , s.address AS shop_address
-            , s.content AS shop_content
-            , si.img_url AS img_url
-            , c.id AS category_id
-            , c.name AS category_name
+        SELECT s.id       AS shop_id
+             , s.name     AS shop_name
+             , s.address  AS shop_address
+             , s.content  AS shop_content
+             , si.img_url AS img_url
+             , c.id       AS category_id
+             , c.name     AS category_name
         FROM tb_shop s
-	        JOIN tb_shopdetail sd ON sd.id = s.id
-	        LEFT OUTER JOIN tb_shopimg si ON si.id = s.id AND si.main_img = 'Y'
-	        JOIN tb_category c ON c.id = sd.contents
+                 JOIN tb_shopdetail sd ON sd.id = s.id
+                 LEFT OUTER JOIN tb_shopimg si ON si.id = s.id AND si.main_img = 'Y'
+                 JOIN tb_category c ON c.id = sd.contents
         WHERE COALESCE(s.req_type, '') = 'Y'
-            AND s.id = #{shopId}
+          AND s.id = #{shopId}
         ORDER BY s.id, c.view;
-        ]]>
     </select>
 </mapper>

@@ -15,6 +15,7 @@ public class ShopForm {
     private String shopAddress;
     private String shopContent;
     private String imgUrl;
+    private String siteUrl;
 
     private List<CategoryInfo> categories;
 
