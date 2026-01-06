@@ -3,6 +3,17 @@
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.binary.rapid.ramen.mapper.RamenMapper">
+    <select id="showHeroInfo" resultType="heroDto">
+        SELECT rp.id,rp.name,rp.soup,rp.density AS richness,rp.oily AS rich, rp.thickness, ri.image
+        FROM tb_ramenpopup rp JOIN tb_rameninfo ri ON rp.id = ri.id
+        WHERE rp.id LIKE 'HR%'
+        ORDER BY rp.id
+    </select>
+    <select id="matchPopupCate" resultType="cateDto">
+        SELECT id,group_id AS type
+        FROM tb_category
+        WHERE group_id != "region"
+    </select>
     <select id="showSectInfo1" resultType="infoDto">
         SELECT *
         FROM tb_rameninfo
