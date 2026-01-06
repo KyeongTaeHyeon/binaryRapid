@@ -380,6 +380,7 @@ body {
     color: #333;
     padding-right: 160px;
     font-weight: 500;
+    white-space: pre-wrap;
 }
 /* 섹션3 */
 .section3 {
