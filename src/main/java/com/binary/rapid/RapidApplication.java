@@ -6,6 +6,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
 @MapperScan("com.binary.rapid.shop.mapper")
+@MapperScan("com.binary.rapid.user.mapper")
 public class RapidApplication {
 
     public static void main(String[] args) {

@@ -10,5 +10,6 @@
 
     <typeAliases>
         <typeAlias alias="shopForm" type="com.binary.rapid.shop.form.ShopForm"/>
+        <typeAlias alias="userDto" type="com.binary.rapid.user.dto.UserDto"/>
     </typeAliases>
 </configuration>
