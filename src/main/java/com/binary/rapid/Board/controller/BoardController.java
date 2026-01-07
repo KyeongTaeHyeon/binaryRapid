@@ -1,88 +1,104 @@
-package com.binary.rapid.Board.controller; // 프로젝트 패키지 구조에 맞춰 수정하세요.
+package com.binary.rapid.Board.controller;
 
 import com.binary.rapid.Board.dto.BoardCommentDto;
 import com.binary.rapid.Board.dto.BoardDto;
 import com.binary.rapid.Board.service.BoardService;
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Controller;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.List;
 
-@RequestMapping("/api/board")
 @RestController
+@RequestMapping("/api/board")
 @RequiredArgsConstructor
 public class BoardController {
+
     private final BoardService boardService;
 
+    // --- 게시글 관련 ---
+
     @GetMapping("/list")
-    public List<BoardDto> getBoardList() {
-        return boardService.getBoardList();
+    public ResponseEntity<List<BoardDto>> getBoardList() {
+        List<BoardDto> boardList = boardService.getBoardList();
+        return ResponseEntity.ok(boardList);
     }
 
-    //상세 조회
-    @GetMapping("detail/{id}")
-    public BoardDto getBoardDetail(@PathVariable("id") int id) {
-        return boardService.getBoardDetail(id);
+    @GetMapping("/detail/{id}")
+    public ResponseEntity<BoardDto> getBoardDetail(@PathVariable("id") int id) {
+        BoardDto boardDetail = boardService.getBoardDetail(id);
+        return ResponseEntity.ok(boardDetail);
     }
 
-    //삭제
     @DeleteMapping("/delete/{id}")
-    public String deleteBoard(@PathVariable("id") int id) {
+    public ResponseEntity<String> deleteBoard(@PathVariable("id") int id) {
         boardService.deleteBoard(id);
-        return "삭제완료";
+        return ResponseEntity.ok("삭제 완료");
     }
 
     @PostMapping("/write")
-    public int saveBoard(@RequestBody BoardDto boardDto) {
-        return boardService.saveBoard(boardDto);
+    public ResponseEntity<Integer> saveBoard(@RequestBody BoardDto boardDto) {
+        int boardId = boardService.saveBoard(boardDto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(boardId);
     }
 
     @PutMapping("/update")
-    public String updateBoard(@RequestBody BoardDto boardDto) {
+    public ResponseEntity<String> updateBoard(@RequestBody BoardDto boardDto) {
         boardService.updateBoard(boardDto);
-        return "수정 완료";
+        return ResponseEntity.ok("수정 완료");
     }
+
+    // --- 파일 관련 ---
+
     @PostMapping("/file/upload")
-    public String uploadFiles(
+    public ResponseEntity<String> uploadFiles(
             @RequestParam("id") int id,
-            @RequestParam("userId") String userId, // FormData는 String으로 옴
+            @RequestParam("userId") int userId,
             @RequestParam("files") MultipartFile[] files,
-            @RequestParam("fileSeqs") int[] fileSeqs) throws IOException {
+            @RequestParam("fileSeqs") int[] fileSeqs) {
 
-        // String userId -> int 변환
-        int userIdInt = Integer.parseInt(userId);
-
-        for (int i = 0; i < files.length; i++) {
-            boardService.saveFileWithOrder(id, files[i], fileSeqs[i], userIdInt);
+        try {
+            for (int i = 0; i < files.length; i++) {
+                boardService.saveFileWithOrder(id, files[i], fileSeqs[i], userId);
+            }
+            return ResponseEntity.ok("success");
+        } catch (IOException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("파일 업로드 실패");
         }
-        return "success";
     }
 
-    // 댓글 등록
+    // --- 댓글 관련 ---
+
+    // 1. 댓글 등록
     @PostMapping("/comment/write")
-    public String commentWrite(@RequestBody BoardCommentDto commentDto) {
-        boardService.saveComment(commentDto);
-        return "success";
+    public ResponseEntity<String> saveComment(@RequestBody BoardCommentDto boardCommentDto) {
+        boardService.saveComment(boardCommentDto);
+        return ResponseEntity.ok("success");
     }
 
-    // 댓글 수정
-    @PutMapping("/comment/update")
-    public String updateComment(@RequestBody BoardCommentDto commentDto) {
-        boardService.updateComment(commentDto);
-        return "success";
+    // 2. 댓글 목록 조회 (중복되었던 /api/board 경로 제거)
+    @GetMapping("/comment/list/{id}")
+    public ResponseEntity<List<BoardCommentDto>> getCommentList(@PathVariable("id") int id) {
+        List<BoardCommentDto> list = boardService.getCommentList(id);
+        return ResponseEntity.ok(list);
     }
 
+    // 3. 댓글 수정 (JS의 fetch 방식에 맞춰 @PostMapping 사용 가능)
+    @PostMapping("/comment/update")
+    public ResponseEntity<String> updateComment(@RequestBody BoardCommentDto boardCommentDto) {
+        boardService.updateComment(boardCommentDto);
+        return ResponseEntity.ok("success");
+    }
 
-    // 댓글 삭제
-    @DeleteMapping("/comment/delete/{id}/{commentSeq}")
-    public String deleteComment(@PathVariable("id") int id, @PathVariable("commentSeq") int commentSeq) {
+    // 4. 댓글 삭제 (JS 요청 방식에 맞춤: /api/board/comment/delete?id=..&commentSeq=..)
+    @PostMapping("/comment/delete")
+    public ResponseEntity<String> deleteComment(
+            @RequestParam("id") int id,
+            @RequestParam("commentSeq") int commentSeq) {
         boardService.deleteComment(id, commentSeq);
-        return "success";
+        return ResponseEntity.ok("success");
     }
 }
-
