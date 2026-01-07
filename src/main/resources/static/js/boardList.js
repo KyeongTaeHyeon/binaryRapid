@@ -1,145 +1,236 @@
 // boardList.js
-
-const ITEMS_PER_PAGE = 5;
-// 현재 로그인한 유저 정보 (추후 세션이나 LocalStorage에서 가져오도록 설정)
-const currentUserId = 1;
+const currentUserId = 1; // 테스트용 사용자 ID
 
 document.addEventListener("DOMContentLoaded", function () {
-    const currentPageFileName = window.location.pathname.split("/").pop();
+    const path = window.location.pathname;
+    console.log("현재 경로:", path);
 
-    let detailViewTitleH1;
-    let detailContentView;
-    let detailButtons;
-
-    // --- API 데이터 로드 함수 ---
-    async function loadBoardData(url) {
-        try {
-            const response = await fetch(url);
-            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-            return await response.json();
-        } catch (error) {
-            console.error("데이터 로드 실패:", error);
-            return null;
-        }
+    // 1. 게시판 목록 페이지 로드
+    const postContainer = document.getElementById("postNumber");
+    if (postContainer) {
+        loadAndRenderList();
     }
 
-    // --- 페이지별 초기화 ---
-    if (currentPageFileName === "boardList2.html") {
+    // 2. 상세 페이지 로드
+    if (path.includes("boardList2") || path.includes("/board/boardList2") || path.includes("/board/detail")) {
         initDetailPage();
     }
 
-    // --- 상세 페이지 초기화 및 권한 제어 ---
-    async function initDetailPage() {
-        detailViewTitleH1 = document.querySelector(".creatPost .title h1");
-        detailContentView = document.querySelector(".contentPost input");
-        detailButtons = document.querySelector("#bTn");
-        const commentListContainer = document.querySelector(".commentList");
-
-        const urlParams = new URLSearchParams(window.location.search);
-        const postId = urlParams.get("post_id");
-
-        if (postId) {
-            const post = await loadBoardData(`/api/board/detail/${postId}`);
-            if (post) {
-                // 1. 게시글 내용 렌더링
-                if (detailViewTitleH1) detailViewTitleH1.textContent = post.title;
-                if (detailContentView) {
-                    detailContentView.value = post.content;
-                    detailContentView.readOnly = true; // 기본적으로 읽기 전용
-                }
-
-                // 2. 게시글 수정/삭제 버튼 권한 제어
-                const updateBtn = detailButtons?.querySelector("button:nth-child(2)");
-                const deleteBtn = detailButtons?.querySelector("button:nth-child(3)");
-
-                if (post.userId === currentUserId) {
-                    // 작성자 본인인 경우
-                    if (updateBtn) {
-                        updateBtn.style.display = "inline-block";
-                        updateBtn.onclick = () => enableEditMode(post);
-                    }
-                    if (deleteBtn) {
-                        deleteBtn.style.display = "inline-block";
-                        deleteBtn.onclick = () => deletePost(post.id);
-                    }
-                } else {
-                    // 작성자가 아닌 경우 버튼 숨김
-                    if (updateBtn) updateBtn.style.display = "none";
-                    if (deleteBtn) deleteBtn.style.display = "none";
-                }
-
-                // 3. 댓글 목록 렌더링 (댓글 데이터가 포함되어 있다고 가정)
-                // 만약 별도 API라면 loadBoardData(`/api/board/comment/list/${postId}`) 호출
-                renderCommentList(post.id, commentListContainer);
-            }
-        }
+    // 3. 댓글 등록 버튼 이벤트
+    const commentSubmitBtn = document.getElementById("commentSubmit");
+    if (commentSubmitBtn) {
+        commentSubmitBtn.onclick = saveComment;
     }
 
-    // --- 게시글 수정 모드 전환 ---
-    function enableEditMode(post) {
-        detailContentView.readOnly = false;
-        detailContentView.focus();
-
-        const updateBtn = detailButtons.querySelector("button:nth-child(2)");
-        updateBtn.textContent = "저장";
-        updateBtn.onclick = async () => {
-            const updatedData = {
-                id: post.id,
-                title: post.title,
-                content: detailContentView.value,
-                category: post.category
-            };
-            await updatePost(updatedData);
+    // 4. 목록으로 이동 버튼
+    const goListBtn = document.getElementById("goListBtn");
+    if (goListBtn) {
+        goListBtn.onclick = () => {
+            location.href = "/board/boardList";
         };
     }
+});
 
-    // --- 댓글 리스트 렌더링 (본인 확인 포함) ---
-    async function renderCommentList(postId, container) {
-        if (!container) return;
-        // 실제 운영시는 서버에서 댓글 목록을 가져오는 API 호출
-        const comments = await loadBoardData(`/api/board/comment/list/${postId}`);
+/**
+ * [목록 렌더링]
+ */
+async function loadAndRenderList() {
+    try {
+        const response = await fetch("/api/board/list");
+        const data = await response.json();
+        const container = document.getElementById("postNumber");
 
-        container.innerHTML = "";
-        if(!comments) return;
+        if (data && data.length > 0) {
+            let html = "";
+            data.forEach(post => {
+                let categoryName = post.category === "B00" ? "식당인증" : "자유게시판";
+                html += `
+                <div class="post">
+                    <div class="name">
+                        <span class="tage">${categoryName}</span>
+                        <a href="/board/boardList2?id=${post.id}">${post.title}</a>
+                    </div>
+                    <div class="user">${post.writerName || '익명'}</div>
+                    <div class="userTime">${post.createDate ? post.createDate.substring(0, 10) : ''}</div>
+                </div>`;
+            });
+            container.innerHTML = html;
+        }
+    } catch (e) {
+        console.error("목록 로드 중 에러:", e);
+    }
+}
 
-        comments.forEach(comment => {
-            const isMyComment = comment.userId === currentUserId;
-            const commentItem = document.createElement("div");
-            commentItem.className = "commentItem";
+/**
+ * [상세 페이지 초기화] 게시글 정보와 댓글 목록을 로드합니다.
+ */
+// boardList.js 내의 initDetailPage 함수 수정본
+async function initDetailPage() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const postId = urlParams.get("id");
 
-            // 작성자 본인일 때만 수정/삭제 버튼 포함
-            const actionButtons = isMyComment ? `
-                <button class="editBtn" onclick="editCommentPrompt(${postId}, ${comment.commentSeq}, '${comment.comment}')">수정</button>
-                <button class="deleteBtn" onclick="removeComment(${postId}, ${comment.commentSeq})">삭제</button>
-            ` : "";
+    if (!postId) return;
 
-            commentItem.innerHTML = `
-                <div class="commentTop">
-                    <span class="commentUser">작성자(ID:${comment.userId})</span>
-                    <span class="commentContent">${comment.comment}</span>
-                    <button class="replyBtn" onclick="showReplyInput(${comment.commentSeq})">답글</button>
-                    ${actionButtons}
-                </div>
-                <div id="replyInput-${comment.commentSeq}" class="replyInputArea" style="display:none; margin-left: 20px;">
-                    <input type="text" placeholder="답글을 입력하세요" id="replyText-${comment.commentSeq}">
-                    <button onclick="saveReply(${comment.commentSeq})">등록</button>
-                </div>
-            `;
-            container.appendChild(commentItem);
-        });
+    try {
+        // 1. 게시글 본문 로드
+        const response = await fetch(`/api/board/detail/${postId}`);
+        const post = await response.json();
+
+        if (post) {
+            // ... (기존 제목, 작성자 매핑 로직 생략) ...
+            document.getElementById("detailContent").value = post.contents;
+
+            // 2. ⭐ 댓글 목록을 "강제로" 따로 한 번 더 가져옵니다.
+            fetchCommentList(postId);
+        }
+    } catch (error) {
+        console.error("데이터 로드 실패:", error);
+    }
+}
+
+// [추가] 댓글 목록만 따로 가져오는 함수
+async function fetchCommentList(postId) {
+    try {
+        // 컨트롤러에 이 주소가 있어야 합니다!
+        const response = await fetch(`/api/board/comment/list/${postId}`);
+        if (response.ok) {
+            const comments = await response.json();
+            renderComments(comments); // 화면에 그리기
+        }
+    } catch (e) {
+        console.error("댓글 로드 실패:", e);
+    }
+}
+
+/**
+ * [댓글 목록 별도 로드] post 객체에 댓글이 없을 경우 호출
+ */
+async function fetchCommentList(postId) {
+    try {
+        const response = await fetch(`/api/board/comment/list/${postId}`);
+        if (response.ok) {
+            const comments = await response.json();
+            renderComments(comments);
+        }
+    } catch (e) {
+        console.error("댓글 목록 로드 실패:", e);
+    }
+}
+
+/**
+ * [댓글 저장]
+ */
+async function saveComment() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const postId = urlParams.get("id");
+    const commentInput = document.getElementById("commentInput");
+
+    if (!commentInput.value.trim()) {
+        alert("내용을 입력해주세요.");
+        return;
     }
 
-    // --- 전역 함수 등록 (HTML onclick 대응) ---
-    window.removeComment = async (id, seq) => {
-        if (!confirm("댓글을 삭제하시겠습니까?")) return;
-        const res = await fetch(`/api/board/comment/delete/${id}/${seq}`, { method: "DELETE" });
-        if (res.ok) location.reload();
+    const commentDto = {
+        id: parseInt(postId),
+        comment: commentInput.value,
+        userId: currentUserId
     };
 
-    window.editCommentPrompt = (id, seq, oldMsg) => {
-        const newMsg = prompt("댓글 수정 내용을 입력하세요:", oldMsg);
-        if (newMsg && newMsg !== oldMsg) {
-            editComment(id, seq, newMsg);
+    try {
+        const response = await fetch("/api/board/comment/write", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(commentDto)
+        });
+
+        if (response.ok) {
+            alert("댓글이 등록되었습니다.");
+            commentInput.value = "";
+            location.reload();
         }
+    } catch (error) {
+        console.error("댓글 저장 에러:", error);
+    }
+}
+
+/**
+ * [댓글 목록 렌더링]
+ */
+function renderComments(comments) {
+    const container = document.getElementById("detailCommentList");
+    if (!container) return;
+
+    if (!comments || comments.length === 0) {
+        container.innerHTML = `<div style="color:#999; padding:10px;">등록된 댓글이 없습니다.</div>`;
+        return;
+    }
+
+    container.innerHTML = comments.map(c => {
+        // 본인 확인 (DTO의 userId와 현재 세션의 currentUserId 비교)
+        const isOwner = String(c.userId) === String(currentUserId);
+
+        // MyBatis camelCase 설정에 의해 comment_seq -> commentSeq로 전달됨
+        const seq = c.commentSeq;
+
+        return `
+        <div class="commentItem" style="...">
+            <div><strong>${c.userId}</strong>: ${c.comment}</div>
+            <div class="commentBtns">
+                ${isOwner ? `
+                    <button onclick="updateComment(${c.id}, ${seq})">수정</button>
+                    <button onclick="deleteComment(${c.id}, ${seq})">삭제</button>
+                ` : ''}
+            </div>
+        </div>`;
+    }).join('');
+}
+/**
+ * [댓글 수정] prompt창을 이용해 내용을 입력받아 전송합니다.
+ */
+async function updateComment(id, seq) {
+    const newComment = prompt("수정할 내용을 입력하세요.");
+    if (!newComment || !newComment.trim()) return;
+
+    const updateDto = {
+        id: id,              // 게시글 번호
+        comment_seq: seq,    // 댓글 번호
+        comment: newComment,
+        userId: currentUserId
     };
-});
+
+    try {
+        const response = await fetch("/api/board/comment/update", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(updateDto)
+        });
+
+        if (response.ok) {
+            alert("수정되었습니다.");
+            location.reload();
+        }
+    } catch (e) {
+        console.error("수정 실패:", e);
+    }
+}
+
+/**
+ * [댓글 삭제]
+ */
+async function deleteComment(id, seq) {
+    if (!confirm("댓글을 삭제하시겠습니까?")) return;
+
+    try {
+        // 백엔드 deleteComment(@Param("id"), @Param("commentSeq")) 형식에 맞춰 쿼리스트링 전송
+        const response = await fetch(`/api/board/comment/delete?id=${id}&commentSeq=${seq}`, {
+            method: "POST"
+        });
+
+        if (response.ok) {
+            alert("삭제되었습니다.");
+            location.reload();
+        }
+    } catch (e) {
+        console.error("삭제 실패:", e);
+    }
+}

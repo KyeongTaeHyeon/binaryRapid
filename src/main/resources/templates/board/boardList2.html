@@ -2,11 +2,56 @@
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>RaFeed - 상세보기</title>
     <link rel="stylesheet" th:href="@{/css/reset.css}" />
     <link rel="stylesheet" th:href="@{/css/common.css}" />
     <link rel="stylesheet" th:href="@{/css/boardList.css}" />
+    <style>
+        /* 캡처 화면 스타일 재현 */
+        .postHeaderBar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #ffffff;
+            padding: 16px 24px;
+            border-radius: 8px;
+            border: 1px solid #eee;
+            margin-bottom: 10px;
+        }
+        .contentPost {
+            background: #ffffff;
+            height: 400px; /* 게시글 내용 영역 높이 조절 */
+            border: 1px solid rgb(222,222,222);
+            border-radius: 8px;
+            padding: 24px;
+            margin-bottom: 20px;
+        }
+        #detailContent {
+            width: 100%;
+            height: 100%;
+            border: none;
+            resize: none;
+            outline: none;
+            font-size: 16px;
+            background: transparent;
+        }
+        .commentArea {
+            border: 1px solid #eee;
+            border-radius: 10px;
+            padding: 15px;
+        }
+        .commentInputBox {
+            display: flex;
+            gap: 10px;
+        }
+        #commentInput {
+            flex: 1;
+            height: 40px;
+            padding: 0 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+    </style>
 </head>
 <body>
 <div id="wrapper">
@@ -15,30 +60,32 @@
     <main id="main">
         <div id="boardcreat">
             <div class="id creatPost">
-                <div class="title">
-                    <h1 id="detailTitle">게시글 제목</h1>
+                <div class="title"><h1 id="mainCategoryTitle">게시판</h1></div>
+
+                <div class="postHeaderBar">
+                    <span id="detailCategory" class="tage" style="background:#87ceeb; color:white; padding:5px 10px; border-radius:5px;">카테고리</span>
+                    <strong id="detailTitle" style="flex:2; margin-left:20px;">게시물 제목</strong>
+                    <span id="detailWriter" style="flex:1; text-align:center;">작성자</span>
+                    <span id="detailDate" style="flex:1; text-align:right; color:#999;">작성시간</span>
                 </div>
 
                 <div class="contentPost">
-                    <input type="text" id="detailContent" readonly />
+                    <textarea id="detailContent" readonly>내용을 불러오는 중입니다...</textarea>
                 </div>
 
-                <div id="bTn">
-                    <button type="button" id="listBtn">목록</button>
-                    <button type="button" id="editBtn" style="display:none;">수정</button>
-                    <button type="button" id="deleteBtn" style="display:none;">삭제</button>
+                <div id="bTn" style="display:flex; justify-content: flex-end; gap:10px; margin-bottom:20px;">
+                    <button type="button" id="goListBtn" class="btn">목록</button>
+                    <button type="button" id="editBtn" class="btn">수정</button>
+                    <button type="button" id="deleteBtn" class="btn">삭제</button>
                 </div>
 
-                <div class="comment">
-                    <div class="commentText">
+                <div class="commentArea">
+                    <div class="commentInputBox">
                         <input type="text" id="commentInput" placeholder="댓글을 입력하시오" />
+                        <button type="button" id="commentSubmit" class="btn" style="background:#87ceeb; color:white; border:none; padding:0 20px; border-radius:5px;">댓글등록</button>
                     </div>
-                    <div class="commentBtn">
-                        <button type="button" id="commentSubmit">댓글등록</button>
+                    <div id="detailCommentList" style="margin-top:20px;">
                     </div>
-                </div>
-
-                <div class="commentList" id="commentListContainer">
                 </div>
             </div>
         </div>
@@ -48,7 +95,6 @@
 </div>
 
 <script th:src="@{/js/common.js}"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
 <script th:src="@{/js/boardList.js}"></script>
 </body>
 </html>

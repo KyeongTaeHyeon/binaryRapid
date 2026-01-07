@@ -3,47 +3,28 @@
 <mapper namespace="com.binary.rapid.Board.mapper.BoardMapper">
 
     <insert id="saveBoard" parameterType="com.binary.rapid.Board.dto.BoardDto" useGeneratedKeys="true" keyProperty="id">
-        INSERT INTO tb_board (category, title, content, user_id, create_date)
-        VALUES (#{category}, #{title}, #{content}, #{userId}, NOW())
+        INSERT INTO tb_board (category, title, contents, userId, create_date)
+        VALUES (#{category}, #{title}, #{contents}, #{userId}, NOW())
     </insert>
 
     <select id="selectBoardList" resultType="com.binary.rapid.Board.dto.BoardDto">
-        SELECT
-            b.id,
-            b.category,
-            b.title,
-            b.content,
-            b.user_id AS userId,
-            b.create_date AS createDate,
-            b.update_date AS updateDate,
-            u.nickname AS writerName
+        SELECT b.id, b.category, b.title, b.contents, b.userId, b.create_date, u.nickname AS writerName
         FROM tb_board b
-                 LEFT JOIN tb_user u ON b.user_id = u.user_id
+                 LEFT JOIN tb_user u ON b.userId = u.user_id
         WHERE b.delete_date IS NULL
         ORDER BY b.id DESC
     </select>
 
     <select id="selectBoardDetail" parameterType="int" resultType="com.binary.rapid.Board.dto.BoardDto">
-        SELECT
-            b.id,
-            b.category,
-            b.title,
-            b.content,
-            b.user_id AS userId,
-            b.create_date AS createDate,
-            u.nickname AS writerName
+        SELECT b.id, b.category, b.title, b.contents, b.userId, b.create_date, u.nickname AS writerName
         FROM tb_board b
-                 LEFT JOIN tb_user u ON b.user_id = u.user_id
+                 LEFT JOIN tb_user u ON b.userId = u.user_id
         WHERE b.id = #{id} AND b.delete_date IS NULL
     </select>
 
     <update id="updateBoard" parameterType="com.binary.rapid.Board.dto.BoardDto">
         UPDATE tb_board
-        SET
-            category = #{category},
-            title = #{title},
-            content = #{content},
-            update_date = NOW()
+        SET category = #{category}, title = #{title}, contents = #{contents}, update_date = NOW()
         WHERE id = #{id}
     </update>
 
@@ -51,34 +32,48 @@
         UPDATE tb_board SET delete_date = NOW() WHERE id = #{id}
     </update>
 
-    <select id="selectCommentList" parameterType="int" resultType="com.binary.rapid.Board.dto.BoardCommentDto">
-        SELECT id, seq as commentSeq, comment, user_id as userId, create_date as createDate,
-               parent_id AS parentId
-        FROM tb_boardComment
-        WHERE id = #{id} AND delete_date IS NULL
-        ORDER BY IFNULL(parent_id, seq), seq ASC
-    </select>
-
-    <insert id="insertComment" parameterType="com.binary.rapid.Board.dto.BoardCommentDto">
-        INSERT INTO tb_boardComment (id, comment, user_id, parent_id, create_date)
-        VALUES (#{id}, #{comment}, #{userId}, #{parentId}, NOW())
-    </insert>
-
-    <update id="updateComment" parameterType="com.binary.rapid.Board.dto.BoardCommentDto">
-        UPDATE tb_boardComment
-        SET
-            comment = #{comment},
-            update_date = NOW()
-        WHERE id = #{id} AND seq = #{commentSeq}
-    </update>
-
     <update id="deleteCommentsByBoardId" parameterType="int">
         UPDATE tb_boardComment SET delete_date = NOW() WHERE id = #{id}
     </update>
 
+    <select id="selectCommentList" parameterType="int" resultType="com.binary.rapid.Board.dto.BoardCommentDto">
+        SELECT
+            id,
+            comment_seq,
+            comment,
+            userId,
+            create_date
+        FROM tb_boardComment
+        WHERE id = #{id} AND delete_date IS NULL
+        ORDER BY comment_seq ASC
+    </select>
+
+    <insert id="insertComment" parameterType="com.binary.rapid.Board.dto.BoardCommentDto">
+        INSERT INTO tb_boardComment (id, comment_seq, comment, userId, create_date)
+        VALUES (
+                   #{id},
+                   (SELECT IFNULL(MAX(c.comment_seq), 0) + 1 FROM tb_boardComment c WHERE c.id = #{id}),
+                   #{comment},
+                   #{userId},
+                   NOW()
+               )
+    </insert>
+
+    <update id="updateComment" parameterType="com.binary.rapid.Board.dto.BoardCommentDto">
+        UPDATE tb_boardComment
+        SET comment = #{comment}, update_date = NOW()
+        WHERE id = #{id} AND comment_seq = #{comment_seq}
+    </update>
+
+    <update id="deleteComment">
+        UPDATE tb_boardComment
+        SET delete_date = NOW()
+        WHERE id = #{id} AND comment_seq = #{commentSeq}
+    </update>
+
     <insert id="insertBoardFile" parameterType="com.binary.rapid.Board.dto.BoardFileDto">
         INSERT INTO tb_boardFile (id, file_seq, file_addr, user_id, create_date)
-        VALUES (#{id}, #{fileSeq}, #{fileAddr}, #{userId}, NOW())
+        VALUES (#{id}, #{file_seq}, #{file_addr}, #{userId}, NOW())
     </insert>
 
 </mapper>

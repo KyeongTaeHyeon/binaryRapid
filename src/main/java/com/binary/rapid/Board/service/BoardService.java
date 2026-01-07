@@ -29,36 +29,34 @@ public class BoardService {
         return boardMapper.selectBoardDetail(id);
     }
 
-    // 3. 게시글 저장 (추가: 트랜잭션 보장)
+    // 3. 게시글 저장
     @Transactional(rollbackFor = Exception.class)
     public int saveBoard(BoardDto boardDto) {
         boardMapper.saveBoard(boardDto);
-        // XML에서 useGeneratedKeys="true" 설정을 했으므로 boardDto.getId()에 값이 채워집니다.
         return boardDto.getId();
     }
 
-    // 4. 게시글 삭제 (수정: 댓글도 함께 삭제 처리)
+    // 4. 게시글 삭제
     @Transactional(rollbackFor = Exception.class)
     public void deleteBoard(int id) {
-        // XML에 정의한 deleteCommentsByBoardId를 호출하여 관련 댓글을 먼저 논리 삭제(delete_date 업데이트)합니다.
-        // 외래키 제약조건이나 데이터 무결성을 위해 필수입니다.
-        boardMapper.deleteCommentsByBoardId(id);
-
-        // 게시글 본문 삭제 (논리 삭제)
-        boardMapper.deleteBoard(id);
+        boardMapper.deleteCommentsByBoardId(id); // 댓글 먼저 삭제 처리
+        boardMapper.deleteBoard(id); // 게시글 삭제 처리
     }
 
-    // 5. 게시글 수정 (추가: 트랜잭션 보장)
+    // 5. 게시글 수정
     @Transactional(rollbackFor = Exception.class)
     public void updateBoard(BoardDto boardDto) {
         boardMapper.updateBoard(boardDto);
     }
 
-    // --- 댓글 관련 로직 ---
-
+    // --- 댓글 관련 ---
     @Transactional(rollbackFor = Exception.class)
     public void saveComment(BoardCommentDto commentDto) {
         boardMapper.insertComment(commentDto);
+    }
+
+    public List<BoardCommentDto> getCommentList(int id) {
+        return boardMapper.selectCommentList(id);
     }
 
     @Transactional(rollbackFor = Exception.class)
@@ -71,8 +69,7 @@ public class BoardService {
         boardMapper.deleteComment(id, commentSeq);
     }
 
-    // --- 파일 관련 로직 ---
-
+    // --- 파일 관련 ---
     @Transactional(rollbackFor = Exception.class)
     public void saveFileWithOrder(int id, MultipartFile file, int fileSeq, int userId) throws IOException {
         if (file != null && !file.isEmpty()) {
@@ -89,11 +86,12 @@ public class BoardService {
 
             BoardFileDto fileDto = new BoardFileDto();
             fileDto.setId(id);
-            fileDto.setFileSeq(fileSeq);
-            fileDto.setFileAddr("/files/" + fileName);
+            fileDto.setFile_seq(fileSeq);
+            fileDto.setFile_addr("/files/" + fileName);
             fileDto.setUserId(userId);
 
             boardMapper.insertBoardFile(fileDto);
         }
     }
+
 }

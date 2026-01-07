@@ -3,18 +3,14 @@ package com.binary.rapid;
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
+import org.springframework.boot.autoconfigure.jdbc.DataSourceTransactionManagerAutoConfiguration;
+import org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration;
 
-<<<<<<< HEAD
-@SpringBootApplication(exclude = {
-        DataSourceAutoConfiguration.class,
-        DataSourceTransactionManagerAutoConfiguration.class,
-        HibernateJpaAutoConfiguration.class
-})
 
-=======
-@SpringBootApplication
-@MapperScan("com.binary.rapid.shop.mapper")
->>>>>>> c4f815a4303b77dab27892e0793a037cbba6de73
+
+
+@SpringBootApplication()
 public class RapidApplication {
 
     public static void main(String[] args) {
