@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.*;
 
@@ -78,19 +79,19 @@ public class ShopController {
      * - /shop 으로 접속했을 때 (헤더, 푸터, 사이드바 포함 전체 렌더링)
      */
     @GetMapping()
-    public String shopList(Model model, @PageableDefault(size = 8) Pageable pageable) {
+    public String shopList(@RequestParam(value = "ramenId", required = false) String ramenId,
+                           Model model, @PageableDefault(size = 8) Pageable pageable) {
 
-        // 1. 초기 로드니까 검색 조건은 비어있음
         Map<String, Object> searchMap = new HashMap<>();
-        // 빈 조건을 넣어야 Mapper 에러가 안 남
         searchMap.put("conditions", new HashMap<>());
 
-        // 2. 서비스 호출
+        if (ramenId != null) {
+            searchMap.put("category", ramenId.replace("RM", "G"));
+        }
+
         Page<ShopForm> shopList = shopService.allShopList(searchMap, pageable);
         model.addAttribute("shopList", shopList);
 
-        // 3. 사이드바(필터 목록) 카테고리 데이터 구성
-        // (기존에 작성하신 로직 유지)
         Map<String, List<CategoryForm>> categoryMap = categoryService.getCategoryFilterMap();
         Map<String, Map<String, List<CategoryForm>>> intermediate = new LinkedHashMap<>();
 

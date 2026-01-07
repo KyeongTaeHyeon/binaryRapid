@@ -18,7 +18,7 @@ window.toggleFilter = function (btn) {
 
 // [2] 전역 등록: 하단 태그 삭제 핸들러
 window.removeSpecificTag = function (val) {
-    console.log("태그 삭제 실행: ", val);
+    // console.log("태그 삭제 실행: ", val);
 
     const targetFilter = document.querySelector(`.filterContents li[data-value="${val}"]`);
     if (targetFilter) {
@@ -40,7 +40,7 @@ window.removeSpecificTag = function (val) {
 
 // [3] 전역 등록: 페이지 변경 핸들러 (HTML th:onclick에서 호출)
 window.changePage = function (page) {
-    console.log("페이지 이동 요청:", page);
+    // console.log("페이지 이동 요청:", page);
     currentPage = page;
     fetchFilteredData(); // 기존 필터 조건 + 바뀐 페이지로 요청
 
@@ -130,6 +130,18 @@ document.addEventListener('DOMContentLoaded', () => {
             fetchFilteredData();
         });
     }
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const ramenId = urlParams.get('ramenId')?.trim().replace(/ /g, '');
+
+    if (ramenId) {
+        // data-value가 ramenId와 일치하는 요소를 찾음
+        const targetItem = document.querySelector(`.filterContents li[data-value="${category}"]`);
+
+        if (targetItem) {
+            targetItem.click();
+        }
+    }
 });
 
 function updateSelectorTags() {
@@ -159,12 +171,10 @@ function updateSelectorTags() {
 async function fetchFilteredData() {
     const params = new URLSearchParams();
 
-    // 1. 활성화된 필터 파라미터 수집
     document.querySelectorAll('.filterContents li.active:not(.filterAll)').forEach(li => {
         params.append(li.getAttribute('data-title'), li.getAttribute('data-value'));
     });
 
-    // 2. 현재 페이지 번호 추가 (Spring Data JPA는 page가 0부터 시작)
     params.append('page', currentPage);
 
     try {
@@ -172,14 +182,9 @@ async function fetchFilteredData() {
         if (response.ok) {
             const html = await response.text();
 
-            // [중요] 리스트와 페이징 버튼이 모두 포함된 래퍼를 교체
             const contentWrapper = document.getElementById('contentWrapper');
             if (contentWrapper) {
-                contentWrapper.outerHTML = html; // outerHTML로 교체하여 fragment ID 유지
-
-                // [추가] 교체된 새로운 DOM 요소들에 대해 이벤트 리스너 재등록이 필요할 수 있음
-                // 하지만 현재 script가 전역 함수(changePage 등)를 사용하고 있으므로 
-                // HTML의 th:onclick 속성은 그대로 작동함.
+                contentWrapper.outerHTML = html;
             }
         }
     } catch (error) {
