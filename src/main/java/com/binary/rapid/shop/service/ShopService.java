@@ -3,20 +3,49 @@ package com.binary.rapid.shop.service;
 import com.binary.rapid.shop.form.ShopForm;
 import com.binary.rapid.shop.mapper.ShopMapper;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ShopService {
+
     private final ShopMapper shopMapper;
 
-    public List<ShopForm> allShopList(Map map) {
-        return shopMapper.allShopList(map);
+    // 컨트롤러에서 이 메서드를 호출함
+    public Page<ShopForm> allShopList(Map<String, Object> map, Pageable pageable) {
+
+        // 1. 페이징 계산 (변수명 매칭 준비)
+        int page = pageable.getPageNumber();
+        int size = pageable.getPageSize();
+        int offset = page * size;
+
+        // 2. 맵에 XML이 기다리는 변수명("limit", "offset")을 넣어줌
+        map.put("limit", size);
+        map.put("offset", offset);
+
+        // 3. 카운트 조회 (Map 그대로 전달)
+        int totalCount = shopMapper.countShopList(map);
+
+        // 4. 리스트 조회 (Map 그대로 전달)
+        List<ShopForm> content = Collections.emptyList();
+        if (totalCount > 0) {
+            content = shopMapper.allShopList(map);
+        }
+
+        // 5. 결과 반환
+        return new PageImpl<>(content, pageable, totalCount);
     }
 
-    ;
+    public ShopForm shopInfo(String shopId) {
+        return shopMapper.shopInfo(shopId);
+    }
 }
