@@ -2,6 +2,7 @@ package com.binary.rapid.user;
 
 import com.binary.rapid.user.constant.SocialType;
 import com.binary.rapid.user.constant.UserRole;
+import com.binary.rapid.user.dto.UserResponseDto;
 import com.binary.rapid.user.form.UserSignUpForm;
 import com.binary.rapid.user.service.UserService;
 import org.junit.jupiter.api.Test;
@@ -15,12 +16,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 @AutoConfigureMockMvc
 // user insert Test
 public class UserInsertTest {
-    
+
     @Autowired
     private UserService service;
 
 
-    
     @Test
     public void insertMemberTest() {
 
@@ -29,16 +29,19 @@ public class UserInsertTest {
         member.setPassword("123444dd!");
         member.setNickName("테스트2");
         member.setName("김자바");
-        member.setTaste("");
+        member.setTaste("돈코츠");
         member.setBirth("2026.01.06");
         member.setEmail("test2@naver.com");
         member.setSocial(SocialType.LOCAL);
         member.setGender("M");
         member.setRole(UserRole.USER);
 
-        int result = service.localSignup(member);
-        System.out.println(member);
-        assertThat(result).isEqualTo(1);
+        UserResponseDto result = service.localSignup(member);
+
+        // ✅ 핵심 검증
+        assertThat(result).isNotNull();
+        assertThat(result.getEmail()).isEqualTo("test2@naver.com");
     }
+
 
 }

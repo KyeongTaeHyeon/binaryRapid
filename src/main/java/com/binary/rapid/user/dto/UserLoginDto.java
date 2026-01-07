@@ -17,9 +17,6 @@ public class UserLoginDto {
     UserRole role;
     
     
-    public boolean isAdmin() {
-        return role == UserRole.ADMIN;
-    }
 
 
 }

@@ -4,25 +4,43 @@
 <mapper namespace="com.binary.rapid.user.mapper.UserMapper">
 
     <!-- 회원가입 -->
-    <insert id="insertUser" useGeneratedKeys="true" keyProperty="userId" keyColumn="user_id">
-        INSERT INTO tb_user(id, password, nickname, name, taste, birth, email, social, gender, role)
+    <insert id="insertUser"
+            parameterType="com.binary.rapid.user.dto.UserDto"
+            useGeneratedKeys="true"
+            keyProperty="userId"
+            keyColumn="user_id">
+        INSERT INTO tb_user (
+        id, password, nickname, name, taste,
+        birth, email, social, gender, role
+        )
         VALUES (
         #{id},
         #{password},
         #{nickName},
         #{name},
-        #{taste, jdbcType=VARCHAR},
-        #{birth, jdbcType=VARCHAR},
+        #{taste},
+        #{birth},
         #{email},
         #{social},
-        #{gender, jdbcType=VARCHAR},
+        #{gender},
         #{role}
-        );
+        )
     </insert>
 
-    <select id="duplicateUserId" parameterType="userDto" resultType="int">
-        SELECT * FROM tb_user WHERE id = #{id};
+    <!-- 아이디 중복 체크 -->
+    <select id="duplicateUserId"
+            parameterType="string"
+            resultType="int">
+        SELECT COUNT(*) FROM tb_user WHERE id = #{id}
     </select>
 
+    <!-- 아이디로 유저 조회 -->
+    <select id="selectUserId"
+            parameterType="string"
+            resultType="com.binary.rapid.user.dto.UserResponseDto">
+        SELECT *
+        FROM tb_user
+        WHERE id = #{id}
+    </select>
 
 </mapper>
