@@ -135,11 +135,18 @@ document.addEventListener('DOMContentLoaded', () => {
     const ramenId = urlParams.get('ramenId')?.trim().replace(/ /g, '');
 
     if (ramenId) {
+        console.log('ramenId: ' + ramenId);
         // data-value가 ramenId와 일치하는 요소를 찾음
-        const targetItem = document.querySelector(`.filterContents li[data-value="${category}"]`);
+        const targetItem = document.querySelector(`.filterContents li[data-value="${ramenId.replace('RM', 'G')}"]`);
 
         if (targetItem) {
             targetItem.click();
+
+            const url = new URL(window.location.href);
+            url.searchParams.delete('ramenId'); // ramenId 파라미터만 삭제
+
+            // 변경된 URL로 주소창 업데이트 (페이지 새로고침 없음)
+            window.history.replaceState({}, document.title, url.pathname);
         }
     }
 });

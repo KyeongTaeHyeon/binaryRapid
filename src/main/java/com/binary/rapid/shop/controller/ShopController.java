@@ -37,7 +37,7 @@ public class ShopController {
     public String filterShopList(Model model,
                                  HttpServletRequest request,
                                  @PageableDefault(size = 8) Pageable pageable) {
-
+        System.out.println("filterShopList");
         // 1. 파라미터 가공 (Map<String, String[]> -> Map<String, Object>)
         // Service가 원하는 구조: Map 안에 "conditions"라는 키로 필터 맵이 들어있어야 함
         Map<String, Object> searchMap = new HashMap<>();
