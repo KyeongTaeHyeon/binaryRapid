@@ -14,9 +14,9 @@ public class BoardDto {
     private String title;
     private String contents;
     private int userId;
-    private LocalDateTime create_date;
-    private LocalDateTime update_date;
-    private LocalDateTime delete_date;
+    private LocalDateTime createDate;
+    private LocalDateTime updateDate;
+    private LocalDateTime deleteDate;
     private String writerName;
 
 

@@ -3,22 +3,34 @@
 <mapper namespace="com.binary.rapid.Board.mapper.BoardMapper">
 
     <insert id="saveBoard" parameterType="com.binary.rapid.Board.dto.BoardDto" useGeneratedKeys="true" keyProperty="id">
-        INSERT INTO tb_board (category, title, contents, userId, create_date)
+        INSERT INTO tb_board (category, title, contents, user_id, create_date)
         VALUES (#{category}, #{title}, #{contents}, #{userId}, NOW())
     </insert>
 
     <select id="selectBoardList" resultType="com.binary.rapid.Board.dto.BoardDto">
-        SELECT b.id, b.category, b.title, b.contents, b.userId, b.create_date, u.nickname AS writerName
+        SELECT b.id,
+               b.category,
+               b.title,
+               b.contents,
+               b.user_id,
+               b.create_date AS createDate,
+               u.nickname    AS writerName
         FROM tb_board b
-                 LEFT JOIN tb_user u ON b.userId = u.user_id
+                 LEFT JOIN tb_user u ON b.user_id = u.user_id
         WHERE b.delete_date IS NULL
         ORDER BY b.id DESC
     </select>
 
     <select id="selectBoardDetail" parameterType="int" resultType="com.binary.rapid.Board.dto.BoardDto">
-        SELECT b.id, b.category, b.title, b.contents, b.userId, b.create_date, u.nickname AS writerName
+        SELECT b.id,
+               b.category,
+               b.title,
+               b.contents,
+               b.user_id,
+               b.create_date AS createDate,
+               u.nickname    AS writerName
         FROM tb_board b
-                 LEFT JOIN tb_user u ON b.userId = u.user_id
+                 LEFT JOIN tb_user u ON b.user_id = u.user_id
         WHERE b.id = #{id}
           AND b.delete_date IS NULL
     </select>
@@ -46,10 +58,10 @@
 
     <select id="selectCommentList" parameterType="int" resultType="com.binary.rapid.Board.dto.BoardCommentDto">
         SELECT id,
-               comment_seq,
+               comment_seq AS commentSeq,
                comment,
-               userId,
-               create_date
+               user_id,
+               create_date AS createDate
         FROM tb_boardComment
         WHERE id = #{id}
           AND delete_date IS NULL
@@ -57,7 +69,7 @@
     </select>
 
     <insert id="insertComment" parameterType="com.binary.rapid.Board.dto.BoardCommentDto">
-        INSERT INTO tb_boardComment (id, comment_seq, comment, userId, create_date)
+        INSERT INTO tb_boardComment (id, comment_seq, comment, user_id, create_date)
         VALUES (#{id},
                 (SELECT IFNULL(MAX(c.comment_seq), 0) + 1 FROM tb_boardComment c WHERE c.id = #{id}),
                 #{comment},
@@ -70,7 +82,7 @@
         SET comment     = #{comment},
             update_date = NOW()
         WHERE id = #{id}
-          AND comment_seq = #{comment_seq}
+          AND comment_seq = #{commentSeq}
     </update>
 
     <update id="deleteComment">
@@ -82,7 +94,7 @@
 
     <insert id="insertBoardFile" parameterType="com.binary.rapid.Board.dto.BoardFileDto">
         INSERT INTO tb_boardFile (id, file_seq, file_addr, user_id, create_date)
-        VALUES (#{id}, #{file_seq}, #{file_addr}, #{userId}, NOW())
+        VALUES (#{id}, #{fileSeq}, #{fileAddr}, #{userId}, NOW())
     </insert>
 
 </mapper>

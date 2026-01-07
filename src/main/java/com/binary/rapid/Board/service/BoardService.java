@@ -86,8 +86,8 @@ public class BoardService {
 
             BoardFileDto fileDto = new BoardFileDto();
             fileDto.setId(id);
-            fileDto.setFile_seq(fileSeq);
-            fileDto.setFile_addr("/files/" + fileName);
+            fileDto.setFileSeq(fileSeq);
+            fileDto.setFileAddr("/files/" + fileName);
             fileDto.setUserId(userId);
 
             boardMapper.insertBoardFile(fileDto);

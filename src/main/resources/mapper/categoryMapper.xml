@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.binary.rapid.category.mapper.CategoryMapper">
+    <select id="allCategory" resultType="categoryForm">
+        <![CDATA[
+        SELECT id
+             , group_id AS groupId
+             , major
+             , minor
+             , name
+        FROM tb_category
+        WHERE delete_date IS NULL
+        ORDER BY view, id
+        ]]>
+    </select>
+    
+    <select id="findCategory" resultType="categoryForm">
+        <![CDATA[
+        SELECT id
+             , group_id AS groupId
+             , major
+             , minor
+             , name
+        FROM tb_category
+        WHERE delete_date IS NULL
+          AND group_id = #{groupId}
+        ORDER BY view, id
+        ]]>
+    </select>
+</mapper>
