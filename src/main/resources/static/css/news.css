@@ -78,15 +78,15 @@
 
 /* 게시글 행 */
 .post {
-    display: flex;
-    flex-direction: row; /* tag-box, name(ID+제목), user, userTime을 가로로 배치 */
-    align-items: center;
-    justify-content: space-between;
-    background-color: #fff;
-    border: 1px solid #dedede;
-    border-radius: 8px;
-    padding: 16px 24px;
-    margin-bottom: 12px;
+    /*display: flex;*/
+    /*flex-direction: row; !* tag-box, name(ID+제목), user, userTime을 가로로 배치 *!*/
+    /*align-items: center;*/
+    /*justify-content: space-between;*/
+    /*background-color: #fff;*/
+    /*border: 1px solid #dedede;*/
+    /*border-radius: 8px;*/
+    /*padding: 16px 24px;*/
+    /*margin-bottom: 12px;*/
 }
 
 /* 태그 박스 스타일 (title 앞에 올 파란 박스) */
@@ -114,6 +114,13 @@
     white-space: nowrap;
     flex-shrink: 0; /* ID도 줄어들지 않도록 함 */
 }
+.newsLink {
+    display: block;
+    width: 100%; /* 부모 너비에 맞춤 */
+    text-decoration: none;
+    color: inherit;
+    margin-bottom: 15px; /* 항목 간 간격 */
+}
 
 /* 게시글 제목 텍스트를 위한 스타일 */
 .post .name .title-text {
@@ -123,17 +130,26 @@
     white-space: nowrap; /* 제목이 길어도 한 줄에 표시 */
     overflow: hidden; /* 넘치는 내용은 숨김 */
     text-overflow: ellipsis; /* 넘치는 내용은 ...으로 표시 */
+    min-width: 0;
 }
 
 /* .name 컨테이너 (tag-box, ID, title을 포함) */
 .post .name {
-    flex: 2; /* .post 내에서 .name이 차지하는 비율 조정 */
-    font-size: 16px;
-    display: flex; /* tag-box, ID, title을 가로로 배치 */
-    align-items: center; /* 세로 중앙 정렬 */
-    gap: 0; /* 각 요소의 margin-right로 간격 조절하므로 여기서는 0 */
-    color: #222;
+    /*flex: 2; !* .post 내에서 .name이 차지하는 비율 조정 *!*/
+    /*font-size: 16px;*/
+    /*display: flex; !* tag-box, ID, title을 가로로 배치 *!*/
+    /*align-items: center; !* 세로 중앙 정렬 *!*/
+    /*gap: 0; !* 각 요소의 margin-right로 간격 조절하므로 여기서는 0 *!*/
+    /*color: #222;*/
     text-align: left;
+    display: flex;         /* 요소들을 가로로 한 줄 배치 */
+    align-items: center;   /* 세로 중앙 정렬 */
+    width: 100%;           /* 부모 박스 너비 100% 사용 */
+    overflow: hidden;      /* 자식이 밖으로 나가는 것 차단 */
+    padding: 15px;         /* 안쪽 여백 (이미지 디자인에 맞춰 조절) */
+    background: #fff;      /* 배경색 */
+    border: 1px solid #eee;/* 테두리 */
+    border-radius: 8px;
 }
 
 /* 불필요한 기존 코드 정리 */

@@ -11,5 +11,6 @@
     <typeAliases>
         <typeAlias alias="boardCommentDto" type="com.binary.rapid.Board.dto.BoardCommentDto"/>
         <typeAlias alias="shopForm" type="com.binary.rapid.shop.form.ShopForm"/>
+        <typeAlias alias="newsDto" type="com.binary.rapid.news.dto.NewsDto"/>
     </typeAliases>
 </configuration>

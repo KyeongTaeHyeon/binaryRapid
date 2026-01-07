@@ -9,7 +9,7 @@ const itemsPerPage = 5; // 한 페이지에 표시할 뉴스 항목 수
 // ----------------- 데이터 로드 및 초기화 -----------------
 // DOMContentLoaded 이벤트는 HTML 문서가 완전히 로드되고 파싱되었을 때 발생하지만,
 // 여기서는 `LoadData`가 비동기적으로 데이터를 가져온 후 UI를 렌더링하도록 설정되어 있습니다.
-LoadData('/data/news.json').then((data) => {
+LoadData('/api/news').then((data) => {
     newsList = data; // JSON 데이터 로드 후 newsList에 할당
     showNewList(); // 초기 뉴스 목록 렌더링
     setupFilterEvents(); // 필터 버튼 이벤트 설정
