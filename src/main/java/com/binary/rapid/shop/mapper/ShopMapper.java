@@ -9,4 +9,8 @@ import java.util.Map;
 @Mapper
 public interface ShopMapper {
     List<ShopForm> allShopList(Map map);
+
+    int countShopList(Map<String, Object> map);
+    
+    ShopForm shopInfo(String shopId);
 }

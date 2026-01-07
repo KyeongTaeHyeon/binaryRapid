@@ -1,31 +1,31 @@
 <footer id="footer" th:fragment="footer" xmlns:th="http://www.thymeleaf.org">
-  <div class="inner">
-    <div id="footerInner">
-    <div id="footerLogo">
-      <img th:src="@{/img/raFeed_Logo-Photoroom.png}" alt="RaFeed_Logo" />
+    <div class="inner">
+        <div id="footerInner">
+            <div id="footerLogo">
+                <img th:src="@{/img/raFeed_Logo-Photoroom.png}" alt="RaFeed_Logo"/>
+            </div>
+            <div id="footerAdress">
+                <p id="footerTopFirst">げんきの家在宅クリニック</p>
+                <p id="footerTopEnd">〒501-2566 岐阜県岐阜市福富天神前78-1</p>
+                <div id="footerMiddle">
+                    <p>電話番号 058-216-2626</p>
+                    <p>FAX番号 058-216-2627</p>
+                </div>
+            </div>
+            <div id="footerCateWrapper">
+                <ul id="footerCate">
+                    <li><a th:href="@{/origin/origin}">유래</a></li>
+                    <li>
+                        <a th:href="@{/templates/shop/regionTheme}">지역/테마별</a>
+                    </li>
+                    <li><a th:href="@{/board/news}">뉴스</a></li>
+                    <li><a th:href="@{/board/boardList}">게시판</a></li>
+                </ul>
+            </div>
+            <div id="footerBottomEnd">
+                <small>Copyright © 2025 RaFeed</small>
+                <p id="footerExternalLink">https://leapy.jp/works/</p>
+            </div>
+        </div>
     </div>
-    <div id="footerAdress">
-      <p id="footerTopFirst">げんきの家在宅クリニック</p>
-      <p id="footerTopEnd">〒501-2566 岐阜県岐阜市福富天神前78-1</p>
-      <div id="footerMiddle">
-        <p>電話番号 058-216-2626</p>
-        <p>FAX番号 058-216-2627</p>
-      </div>
-    </div>
-    <div id="footerCateWrapper">
-      <ul id="footerCate">
-        <li><a th:href="@{/origin/origin}">유래</a></li>
-        <li>
-          <a th:href="@{/regionTheme/regionTheme}">지역/테마별</a>
-        </li>
-        <li><a th:href="@{/board/news}">뉴스</a></li>
-        <li><a th:href="@{/board/boardList}">게시판</a></li>
-      </ul>
-    </div>
-    <div id="footerBottomEnd">
-      <small>Copyright © 2025 RaFeed</small>
-      <p id="footerExternalLink">https://leapy.jp/works/</p>
-    </div>
-    </div>
-  </div>
 </footer>

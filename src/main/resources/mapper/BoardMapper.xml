@@ -8,7 +8,13 @@
     </insert>
 
     <select id="selectBoardList" resultType="com.binary.rapid.Board.dto.BoardDto">
-        SELECT b.id, b.category, b.title, b.contents, b.userId, b.create_date, u.nickname AS writerName
+        SELECT
+            b.id,
+            b.category,
+            b.title,
+            b.contents,
+            b.userId,
+            b.create_date AS createDate, u.nickname AS writerName
         FROM tb_board b
                  LEFT JOIN tb_user u ON b.userId = u.user_id
         WHERE b.delete_date IS NULL
@@ -16,7 +22,14 @@
     </select>
 
     <select id="selectBoardDetail" parameterType="int" resultType="com.binary.rapid.Board.dto.BoardDto">
-        SELECT b.id, b.category, b.title, b.contents, b.userId, b.create_date, u.nickname AS writerName
+        SELECT
+            b.id,
+            b.category,
+            b.title,
+            b.contents,
+            b.userId,
+            b.create_date AS createDate,
+            u.nickname AS writerName
         FROM tb_board b
                  LEFT JOIN tb_user u ON b.userId = u.user_id
         WHERE b.id = #{id} AND b.delete_date IS NULL
@@ -39,10 +52,10 @@
     <select id="selectCommentList" parameterType="int" resultType="com.binary.rapid.Board.dto.BoardCommentDto">
         SELECT
             id,
-            comment_seq,
+            comment_seq AS commentSeq,
             comment,
             userId,
-            create_date
+            create_date AS createDate
         FROM tb_boardComment
         WHERE id = #{id} AND delete_date IS NULL
         ORDER BY comment_seq ASC
@@ -62,7 +75,7 @@
     <update id="updateComment" parameterType="com.binary.rapid.Board.dto.BoardCommentDto">
         UPDATE tb_boardComment
         SET comment = #{comment}, update_date = NOW()
-        WHERE id = #{id} AND comment_seq = #{comment_seq}
+        WHERE id = #{id} AND comment_seq = #{commentSeq}
     </update>
 
     <update id="deleteComment">
@@ -73,7 +86,7 @@
 
     <insert id="insertBoardFile" parameterType="com.binary.rapid.Board.dto.BoardFileDto">
         INSERT INTO tb_boardFile (id, file_seq, file_addr, user_id, create_date)
-        VALUES (#{id}, #{file_seq}, #{file_addr}, #{userId}, NOW())
+        VALUES (#{id}, #{fileSeq}, #{fileAddr}, #{userId}, NOW())
     </insert>
 
 </mapper>

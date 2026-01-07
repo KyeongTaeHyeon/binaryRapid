@@ -11,5 +11,7 @@
     <typeAliases>
         <typeAlias alias="boardCommentDto" type="com.binary.rapid.Board.dto.BoardCommentDto"/>
         <typeAlias alias="shopForm" type="com.binary.rapid.shop.form.ShopForm"/>
+        <typeAlias alias="shopSearchForm" type="com.binary.rapid.shop.form.ShopSearchForm"/>
+        <typeAlias alias="categoryForm" type="com.binary.rapid.category.form.CategoryForm"/>
     </typeAliases>
 </configuration>
