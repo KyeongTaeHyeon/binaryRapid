@@ -11,17 +11,23 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     // 2. 상세 페이지 로드
-    if (path.includes("boardList2") || path.includes("/board/boardList2") || path.includes("/board/detail")) {
+    if (path.includes("boardList2") || path.includes("/board/detail")) {
         initDetailPage();
     }
 
-    // 3. 댓글 등록 버튼 이벤트
+    // 3. 게시글 등록 버튼 (boardList4)
+    const submitPostBtn = document.getElementById("submitPostBtn");
+    if (submitPostBtn) {
+        submitPostBtn.onclick = saveBoard;
+    }
+
+    // 4. 댓글 등록 버튼 (boardList2)
     const commentSubmitBtn = document.getElementById("commentSubmit");
     if (commentSubmitBtn) {
         commentSubmitBtn.onclick = saveComment;
     }
 
-    // 4. 목록으로 이동 버튼
+    // 5. 목록으로 이동 버튼
     const goListBtn = document.getElementById("goListBtn");
     if (goListBtn) {
         goListBtn.onclick = () => {
@@ -31,6 +37,42 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 /**
+ * [게시글 저장]
+ */
+async function saveBoard() {
+    const category = document.getElementById("boardCategory")?.value || "B01";
+    const title = document.getElementById("postTitle")?.value;
+    const contents = document.getElementById("postContent")?.value;
+
+    if (!title || !title.trim() || !contents || !contents.trim()) {
+        alert("제목과 내용을 입력해주세요.");
+        return;
+    }
+
+    const boardDto = {
+        category: category,
+        title: title,
+        contents: contents,
+        userId: currentUserId
+    };
+
+    try {
+        const response = await fetch("/api/board/write", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(boardDto)
+        });
+
+        if (response.ok) {
+            alert("게시글이 등록되었습니다.");
+            location.href = "/board/boardList";
+        }
+    } catch (e) {
+        console.error("글 저장 에러:", e);
+    }
+}
+
+/**
  * [목록 렌더링]
  */
 async function loadAndRenderList() {
@@ -38,6 +80,8 @@ async function loadAndRenderList() {
         const response = await fetch("/api/board/list");
         const data = await response.json();
         const container = document.getElementById("postNumber");
+
+        if (!container) return;
 
         if (data && data.length > 0) {
             let html = "";
@@ -54,6 +98,8 @@ async function loadAndRenderList() {
                 </div>`;
             });
             container.innerHTML = html;
+        } else {
+            container.innerHTML = "<p>게시글이 없습니다.</p>";
         }
     } catch (e) {
         console.error("목록 로드 중 에러:", e);
@@ -61,25 +107,25 @@ async function loadAndRenderList() {
 }
 
 /**
- * [상세 페이지 초기화] 게시글 정보와 댓글 목록을 로드합니다.
+ * [상세 페이지 초기화]
  */
-// boardList.js 내의 initDetailPage 함수 수정본
 async function initDetailPage() {
     const urlParams = new URLSearchParams(window.location.search);
     const postId = urlParams.get("id");
-
     if (!postId) return;
 
     try {
-        // 1. 게시글 본문 로드
         const response = await fetch(`/api/board/detail/${postId}`);
         const post = await response.json();
 
         if (post) {
-            // ... (기존 제목, 작성자 매핑 로직 생략) ...
-            document.getElementById("detailContent").value = post.contents;
+            // 상세 페이지 필드가 있다면 매핑 (ID 확인 필요)
+            const detailTitle = document.getElementById("detailTitle");
+            if (detailTitle) detailTitle.innerText = post.title;
 
-            // 2. ⭐ 댓글 목록을 "강제로" 따로 한 번 더 가져옵니다.
+            const detailContent = document.getElementById("detailContent");
+            if (detailContent) detailContent.value = post.contents;
+
             fetchCommentList(postId);
         }
     } catch (error) {
@@ -87,22 +133,8 @@ async function initDetailPage() {
     }
 }
 
-// [추가] 댓글 목록만 따로 가져오는 함수
-async function fetchCommentList(postId) {
-    try {
-        // 컨트롤러에 이 주소가 있어야 합니다!
-        const response = await fetch(`/api/board/comment/list/${postId}`);
-        if (response.ok) {
-            const comments = await response.json();
-            renderComments(comments); // 화면에 그리기
-        }
-    } catch (e) {
-        console.error("댓글 로드 실패:", e);
-    }
-}
-
 /**
- * [댓글 목록 별도 로드] post 객체에 댓글이 없을 경우 호출
+ * [댓글 목록 가져오기]
  */
 async function fetchCommentList(postId) {
     try {
@@ -112,7 +144,7 @@ async function fetchCommentList(postId) {
             renderComments(comments);
         }
     } catch (e) {
-        console.error("댓글 목록 로드 실패:", e);
+        console.error("댓글 로드 실패:", e);
     }
 }
 
@@ -124,7 +156,7 @@ async function saveComment() {
     const postId = urlParams.get("id");
     const commentInput = document.getElementById("commentInput");
 
-    if (!commentInput.value.trim()) {
+    if (!commentInput || !commentInput.value.trim()) {
         alert("내용을 입력해주세요.");
         return;
     }
@@ -145,7 +177,7 @@ async function saveComment() {
         if (response.ok) {
             alert("댓글이 등록되었습니다.");
             commentInput.value = "";
-            location.reload();
+            fetchCommentList(postId); // 페이지 새로고침 대신 목록만 새로고침
         }
     } catch (error) {
         console.error("댓글 저장 에러:", error);
@@ -153,7 +185,7 @@ async function saveComment() {
 }
 
 /**
- * [댓글 목록 렌더링]
+ * [댓글 렌더링]
  */
 function renderComments(comments) {
     const container = document.getElementById("detailCommentList");
@@ -165,15 +197,12 @@ function renderComments(comments) {
     }
 
     container.innerHTML = comments.map(c => {
-        // 본인 확인 (DTO의 userId와 현재 세션의 currentUserId 비교)
         const isOwner = String(c.userId) === String(currentUserId);
-
-        // MyBatis camelCase 설정에 의해 comment_seq -> commentSeq로 전달됨
         const seq = c.commentSeq;
 
         return `
-        <div class="commentItem" style="...">
-            <div><strong>${c.userId}</strong>: ${c.comment}</div>
+        <div class="commentItem" style="border-bottom:1px solid #eee; padding:10px;">
+            <div><strong>익명(${c.userId})</strong>: ${c.comment}</div>
             <div class="commentBtns">
                 ${isOwner ? `
                     <button onclick="updateComment(${c.id}, ${seq})">수정</button>
