@@ -27,6 +27,6 @@ public interface BoardMapper {
     void updateComment(BoardCommentDto commentDto);
     void deleteComment(@Param("id") int id, @Param("commentSeq") int commentSeq);
 
-    // ⭐ 이 줄을 추가해야 에러가 사라집니다!
+
     void deleteCommentsByBoardId(int id);
 }
