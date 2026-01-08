@@ -1,118 +1,100 @@
 <!DOCTYPE html>
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
-    <head>
-        <meta charset="UTF-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>RaFeed</title>
-        <!-- 공통사용 -->
-        <link rel="stylesheet" th:href="@{/css/reset.css}" />
-        <link rel="stylesheet" th:href="@{/css/common.css}" />
+<head>
+    <meta charset="UTF-8" />
+    <title>RaFeed - 상세보기</title>
+    <link rel="stylesheet" th:href="@{/css/reset.css}" />
+    <link rel="stylesheet" th:href="@{/css/common.css}" />
+    <link rel="stylesheet" th:href="@{/css/boardList.css}" />
+    <style>
+        /* 캡처 화면 스타일 재현 */
+        .postHeaderBar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #ffffff;
+            padding: 16px 24px;
+            border-radius: 8px;
+            border: 1px solid #eee;
+            margin-bottom: 10px;
+        }
+        .contentPost {
+            background: #ffffff;
+            height: 400px; /* 게시글 내용 영역 높이 조절 */
+            border: 1px solid rgb(222,222,222);
+            border-radius: 8px;
+            padding: 24px;
+            margin-bottom: 20px;
+        }
+        #detailContent {
+            width: 100%;
+            height: 100%;
+            border: none;
+            resize: none;
+            outline: none;
+            font-size: 16px;
+            background: transparent;
+        }
+        .commentArea {
+            border: 1px solid #eee;
+            border-radius: 10px;
+            padding: 15px;
+        }
+        .commentInputBox {
+            display: flex;
+            gap: 10px;
+        }
+        #commentInput {
+            flex: 1;
+            height: 40px;
+            padding: 0 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+<div id="wrapper">
+    <header id="header" th:replace="~{fragments/header :: header}"></header>
 
-        <!-- 각화면 css 생성하여 사용 -->
-        <link rel="stylesheet" th:href="@{/css/boardList.css}" />
-    </head>
-    <body>
-        <div id="wrapper">
-            <!-- header(공통사용) -->
-            <header id="header" th:replace="~{fragments/header :: header}"></header>
-            <!-- 작업영역 -->
-            <main id="main">
-                <div id="boardcreat">
-                    <!-- <div class="filter">
-                        <a href="" class="active"><span>전체</span></a>
-                        <a href=""><span>자유게시판</span></a>
-                        <a href=""><span>식당인증</span></a>
-                        <a href=""><span>식당신청</span></a>
-                    </div> -->
+    <main id="main">
+        <div id="boardcreat">
+            <div class="id creatPost">
+                <div class="title"><h1 id="mainCategoryTitle">게시판</h1></div>
 
-                    <!-- 게시글 리스트 -->
-                    <div class="id creatPost">
-                        <div class="title"><h1>식당인증</h1></div>
-                        <div id="postNumber">
-                            <article class="post">
-                                <div class="name">
-                                    <a href="">
-                                        <span class="tage">식당인증</span>
-                                        게시물 제목
-                                    </a>
-                                </div>
-                                <div class="user">작성자</div>
-                                <div class="userTime">작성시간</div>
-                            </article>
-                        </div>
-                        <!--게시글작성-->
-                        <div class="contentPost">
-                            <input
-                                type="text"
-                                placeholder="내용을 입력해주세요....."
-                            />
-                        </div>
-                        <!--버튼-->
-                        <div id="bTn">
-                            <button>목록</button>
-                            <button>수정</button>
-                            <button>삭제</button>
-                        </div>
-                        <!--댓글작성-->
-                        <div class="comment">
-                            <div class="commentText">
-                                <input
-                                    type="text"
-                                    placeholder="댓글을 입력하시오"
-                                />
-                            </div>
-                            <div class="commentBtn">
-                                <button>댓글등록</button>
-                            </div>
-                        </div>
-                        <!--답글입력,수정-->
-                        <div class="commentList">
-                            <!-- 댓글 1 -->
-                            <div class="commentItem">
-                                <div class="commentTop">
-                                    <span class="commentUser">작성자1</span> :
-                                    <span class="commentContent">
-                                        댓글 내용입니다.
-                                    </span>
-                                    <span class="commentDate">작성일자</span>
-                                    <button class="editBtn">수정</button>
-                                    <button class="deleteBtn">삭제</button>
-                                </div>
+                <div class="postHeaderBar">
+                    <span id="detailCategory" class="tage" style="background:#87ceeb; color:white; padding:5px 10px; border-radius:5px;">카테고리</span>
+                    <strong id="detailTitle" style="flex:2; margin-left:20px;">게시물 제목</strong>
+                    <span id="detailWriter" style="flex:1; text-align:center;">작성자</span>
+                    <span id="detailDate" style="flex:1; text-align:right; color:#999;">작성시간</span>
+                </div>
 
-                                <!-- 대댓글 -->
-                                <div class="replyItem">
-                                    <span class="arrow">ㄴ</span>
-                                    <span class="commentUser">작성자2</span> :
-                                    <span class="commentContent">
-                                        대댓글 내용입니다.
-                                    </span>
-                                    <span class="commentDate">작성일자</span>
-                                    <button class="editBtn">수정</button>
-                                    <button class="deleteBtn">삭제</button>
-                                </div>
-                            </div>
-                        </div>
+                <div class="contentPost">
+                    <textarea id="detailContent" readonly>내용을 불러오는 중입니다...</textarea>
+                </div>
+
+                <div id="bTn" style="display:flex; justify-content: flex-end; gap:10px; margin-bottom:20px;">
+                    <button type="button" id="goListBtn" class="btn">목록</button>
+                    <button type="button" id="editBtn" class="btn">수정</button>
+                    <button type="button" id="deleteBtn" class="btn">삭제</button>
+                </div>
+
+                <div class="commentArea">
+                    <div class="commentInputBox">
+                        <input type="text" id="commentInput" placeholder="댓글을 입력하시오" />
+                        <button type="button" id="commentSubmit" class="btn" style="background:#87ceeb; color:white; border:none; padding:0 20px; border-radius:5px;">댓글등록</button>
+                    </div>
+                    <div id="detailCommentList" style="margin-top:20px;">
                     </div>
                 </div>
-            </main>
-
-            <!-- footer영역(공통사용) -->
-            <footer id="footer" th:replace="~{fragments/footer :: footer}"></footer>
+            </div>
         </div>
+    </main>
 
-        <!-- 공통사용 -->
-        <script th:src="@{/js/common.js}"></script>
-        <script type="text/javascript">
-            function googleTranslateElementInit() {
-                new google.translate.TranslateElement(
-                    { pageLanguage: 'ko', includedLanguages: 'en,ja,zh-CN,ko' },
-                    'google_translate_element'
-                );
-            }
-        </script>
-        <script src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
-        <!-- 각화면 js생성하여 사용 -->
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
-        <script th:src="@{/js/boardList.js}"></script>
-    </body>
+    <footer id="footer" th:replace="~{fragments/footer :: footer}"></footer>
+</div>
+
+<script th:src="@{/js/common.js}"></script>
+<script th:src="@{/js/boardList.js}"></script>
+</body>
 </html>

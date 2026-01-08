@@ -11,7 +11,6 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 @MapperScan("com.binary.rapid.category.mapper")
 @MapperScan("com.binary.rapid.ramen.mapper")
 public class RapidApplication {
-
     public static void main(String[] args) {
         SpringApplication.run(RapidApplication.class, args);
     }
