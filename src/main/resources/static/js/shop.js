@@ -1,69 +1,30 @@
-// shop.js
+// ============================================================
+// [설정] 덩어리 로딩 (Chunk Loading)
+// ============================================================
+let fetchSize = 120; // 서버에서 120개씩 가져옴
+let viewSize = 8;    // 화면에는 8개씩 보여줌
 
-// 현재 페이지 상태 관리 변수
-let currentPage = 0;
+let totalElements = 0;      // 전체 데이터 개수
+let currentDisplayPage = 0; // 현재 보고 있는 페이지
+let currentBufferPage = -1; // 메모리에 저장된 덩어리 번호
 
-// [1] 전역 등록: 접기/펴기 핸들러
-window.toggleFilter = function (btn) {
-    const container = btn.closest('.filterList');
-    const list = container.querySelector('.filterContents');
+let shopDataBuffer = [];    // 데이터 저장소
 
-    // 클래스 토글
-    list.classList.toggle('collapsed');
-
-    // 텍스트 변경
-    if (!list.classList.contains('collapsed')) {
-        btn.innerHTML = '접기 <br> ▲';
-    } else {
-        btn.innerHTML = '...';
-    }
-};
-
-// [2] 전역 등록: 하단 태그 삭제 핸들러
-window.removeSpecificTag = function (val) {
-    // 해당 필터 찾아서 active 해제
-    const targetFilter = document.querySelector(`.filterContents li[data-value="${val}"]`);
-    if (targetFilter) {
-        targetFilter.classList.remove('active');
-
-        // 해당 그룹 전체 해제 시 '전체' 버튼 불 끄기
-        const parentList = targetFilter.closest('.filterContents');
-        const allBtn = parentList.querySelector('.filterAll');
-        if (allBtn) {
-            allBtn.classList.remove('active');
-        }
-    }
-
-    // 태그 삭제 시 페이지 초기화 및 재조회
-    currentPage = 0;
-    updateSelectorTags();
-    fetchFilteredData();
-};
-
-// [3] 전역 등록: 페이지 변경 핸들러 (HTML onclick에서 호출됨)
-window.changePage = function (page) {
-    currentPage = page;
-    fetchFilteredData(); // 데이터 재요청
-
-    // 화면 상단으로 스크롤 이동 (부드럽게)
-    const contentWrapper = document.getElementById('contentWrapper');
-    if (contentWrapper) {
-        contentWrapper.scrollIntoView({behavior: 'smooth'});
-    }
-};
-
+// ============================================================
+// [1] 초기화
+// ============================================================
 document.addEventListener('DOMContentLoaded', () => {
-    console.log("스크립트 실행: CSR 방식 필터 및 페이징 연동 완료");
+    // 셀렉트 박스 초기값 동기화
+    const sizeSelect = document.getElementById('pageSizeSelect');
+    if (sizeSelect) viewSize = parseInt(sizeSelect.value);
 
-    // 1. 헤더 접기/펴기 애니메이션 (GSAP 사용)
+    // 필터 헤더 애니메이션 (GSAP)
     document.querySelectorAll('.filterHeaderTitle').forEach(header => {
         header.addEventListener('click', function () {
             const groupWrap = this.nextElementSibling;
             if (!groupWrap) return;
             const isActive = groupWrap.classList.contains('active');
-
             if (isActive) {
-                // 접기
                 gsap.to(groupWrap, {
                     height: 0, duration: 0.3, onComplete: () => {
                         groupWrap.style.display = 'none';
@@ -72,13 +33,12 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                 });
             } else {
-                // 펴기
                 groupWrap.style.display = 'block';
                 groupWrap.style.height = 'auto';
-                const targetHeight = groupWrap.offsetHeight;
+                const h = groupWrap.offsetHeight;
                 groupWrap.style.height = '0px';
                 gsap.to(groupWrap, {
-                    height: targetHeight, duration: 0.3, onComplete: () => {
+                    height: h, duration: 0.3, onComplete: () => {
                         groupWrap.style.height = 'auto';
                         groupWrap.classList.add('active');
                         this.innerHTML = this.innerHTML.replace('▲', '▼');
@@ -88,226 +48,254 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // 2. 상단 필터 항목 클릭 이벤트
+    // 필터 항목 클릭
     document.querySelectorAll('.filterContents li').forEach(item => {
         item.addEventListener('click', function () {
-            const value = this.getAttribute('data-value');
-            const parent = this.closest('.filterContents');
-            const allBtn = parent.querySelector('.filterAll');
-            const eachItems = parent.querySelectorAll('li:not(.filterAll)');
-
-            // 필터 변경 시 페이지 초기화
-            currentPage = 0;
-
-            if (value === 'all') {
-                // 전체 버튼 클릭 시
-                const isAlreadyAllActive = this.classList.contains('active');
-                if (!isAlreadyAllActive) {
-                    this.classList.add('active');
-                    eachItems.forEach(li => li.classList.add('active'));
-                } else {
-                    this.classList.remove('active');
-                    eachItems.forEach(li => li.classList.remove('active'));
-                }
-            } else {
-                // 개별 버튼 클릭 시
-                this.classList.toggle('active');
-                const activeCount = parent.querySelectorAll('li.active:not(.filterAll)').length;
-
-                // 전부 선택되면 '전체' 버튼도 활성화
-                if (activeCount === eachItems.length) {
-                    if (allBtn) allBtn.classList.add('active');
-                } else {
-                    if (allBtn) allBtn.classList.remove('active');
-                }
-            }
-            updateSelectorTags();
-            fetchFilteredData();
+            handleFilterClick(this);
         });
     });
 
-    // 3. 전체 삭제 버튼
-    const clearAllBtn = document.querySelector('.btn-clear-all');
-    if (clearAllBtn) {
-        clearAllBtn.addEventListener('click', function () {
-            document.querySelectorAll('.filterContents li').forEach(li => {
-                li.classList.remove('active');
-            });
-            currentPage = 0;
-            updateSelectorTags();
-            fetchFilteredData();
+    // 초기화 버튼
+    const clearBtn = document.querySelector('.btn-clear-all');
+    if (clearBtn) {
+        clearBtn.addEventListener('click', () => {
+            document.querySelectorAll('.filterContents li').forEach(li => li.classList.remove('active'));
+            resetAndFetch();
         });
     }
 
-    // 4. URL 파라미터 처리 (메인에서 ramenId 타고 들어왔을 때)
-    const urlParams = new URLSearchParams(window.location.search);
-    const ramenId = urlParams.get('ramenId')?.trim().replace(/ /g, '');
-
-    if (ramenId) {
-        // 해당 필터 찾아서 강제 클릭 트리거
-        const targetItem = document.querySelector(`.filterContents li[data-value="${ramenId.replace('RM', 'G')}"]`);
-
-        if (targetItem) {
-            targetItem.click();
-
-            // 주소창 깔끔하게 정리 (새로고침 없이 파라미터 삭제)
-            const url = new URL(window.location.href);
-            url.searchParams.delete('ramenId');
-            window.history.replaceState({}, document.title, url.pathname);
-        }
-    }
+    // ★ 실행: 페이지 로드 즉시 데이터 요청
+    resetAndFetch();
 });
 
-// 선택된 태그 하단에 표시하는 함수
-function updateSelectorTags() {
-    const selectorList = document.querySelector('.selectorContents');
-    const clearAllBtn = document.querySelector('.btn-clear-all');
-    if (!selectorList) return;
+// ============================================================
+// [2] 필터 동작
+// ============================================================
+function handleFilterClick(element) {
+    const value = element.getAttribute('data-value');
+    const parent = element.closest('.filterContents');
+    const allBtn = parent.querySelector('.filterAll');
+    const items = parent.querySelectorAll('li:not(.filterAll)');
 
-    selectorList.innerHTML = '';
-    const activeFilters = document.querySelectorAll('.filterContents li.active:not(.filterAll)');
-
-    if (clearAllBtn) {
-        clearAllBtn.style.display = (activeFilters.length > 0) ? 'block' : 'none';
+    if (value === 'all') {
+        const isActive = element.classList.contains('active');
+        if (!isActive) {
+            element.classList.add('active');
+            items.forEach(li => li.classList.add('active'));
+        } else {
+            element.classList.remove('active');
+            items.forEach(li => li.classList.remove('active'));
+        }
+    } else {
+        element.classList.toggle('active');
+        const activeCount = parent.querySelectorAll('li.active:not(.filterAll)').length;
+        if (activeCount === items.length && allBtn) allBtn.classList.add('active');
+        else if (allBtn) allBtn.classList.remove('active');
     }
+    updateSelectorTags();
+    resetAndFetch();
+}
 
-    activeFilters.forEach(activeItem => {
-        const tagLi = document.createElement('li');
-        tagLi.className = 'selectedTag';
-        tagLi.innerHTML = `
-            ${activeItem.innerText} 
-            <span class="removeTag" style="cursor:pointer; margin-left:8px; color:#ff4d4f; font-weight:bold;" 
-                  onclick="removeSpecificTag('${activeItem.getAttribute('data-value')}')">×</span>
-        `;
-        selectorList.appendChild(tagLi);
+// 전역 함수 연결
+window.toggleFilter = function (btn) {
+    const list = btn.closest('.filterList').querySelector('.filterContents');
+    list.classList.toggle('collapsed');
+    btn.innerHTML = list.classList.contains('collapsed') ? '...' : '접기 <br> ▲';
+};
+
+window.removeSpecificTag = function (val) {
+    const target = document.querySelector(`.filterContents li[data-value="${val}"]`);
+    if (target) {
+        target.classList.remove('active');
+        // 전체버튼 처리
+        const parent = target.closest('.filterContents');
+        const allBtn = parent.querySelector('.filterAll');
+        if (allBtn) allBtn.classList.remove('active');
+    }
+    updateSelectorTags();
+    resetAndFetch();
+};
+
+function updateSelectorTags() {
+    const list = document.querySelector('.selectorContents');
+    const clearBtn = document.querySelector('.btn-clear-all');
+    if (!list) return;
+    list.innerHTML = '';
+    const actives = document.querySelectorAll('.filterContents li.active:not(.filterAll)');
+    if (clearBtn) clearBtn.style.display = actives.length > 0 ? 'block' : 'none';
+
+    actives.forEach(li => {
+        const tag = document.createElement('li');
+        tag.className = 'selectedTag';
+        tag.innerHTML = `${li.innerText} <span class="removeTag" style="cursor:pointer; margin-left:8px; color:#ff4d4f;" onclick="removeSpecificTag('${li.getAttribute('data-value')}')">×</span>`;
+        list.appendChild(tag);
     });
 }
 
-// ★★★ [핵심] 데이터를 가져와서 화면을 그리는 함수 ★★★
-async function fetchFilteredData() {
-    const params = new URLSearchParams();
+// ============================================================
+// [3] 데이터 로딩 (핵심 로직)
+// ============================================================
+function resetAndFetch() {
+    currentDisplayPage = 0;
+    currentBufferPage = -1;
+    shopDataBuffer = [];
+    loadDataForCurrentPage();
+}
 
-    // 활성화된 필터 수집
+async function loadDataForCurrentPage() {
+    const startIndex = currentDisplayPage * viewSize;
+    const neededBufferPage = Math.floor(startIndex / fetchSize);
+
+    // 버퍼에 없으면 서버 요청
+    if (neededBufferPage !== currentBufferPage) {
+        await fetchChunkFromServer(neededBufferPage);
+    }
+    renderView();
+}
+
+async function fetchChunkFromServer(pageToFetch) {
+    const params = new URLSearchParams();
     document.querySelectorAll('.filterContents li.active:not(.filterAll)').forEach(li => {
         params.append(li.getAttribute('data-title'), li.getAttribute('data-value'));
     });
-
-    // 현재 페이지 추가
-    params.append('page', currentPage);
+    // 120개 요청
+    params.append('page', pageToFetch);
+    params.append('size', fetchSize);
 
     try {
-        // 1. 서버에 데이터(JSON) 요청
-        const response = await fetch(`/shop/filter?${params.toString()}`);
+        const res = await fetch(`/shop/filter?${params.toString()}`);
+        if (res.ok) {
+            const data = await res.json();
 
-        if (response.ok) {
-            // 2. JSON 데이터 파싱
-            const data = await response.json();
+            // 데이터 확보
+            shopDataBuffer = data.content || [];
 
-            // 3. 리스트 그리기
-            renderContentList(data.content);
+            // ★ 전체 개수 안전하게 확보 (숫자 안 나오는 버그 수정)
+            if (data.totalElements !== undefined) {
+                totalElements = Number(data.totalElements);
+            } else {
+                // 서버가 totalElements를 안 주면 그냥 가져온 개수로 설정
+                totalElements = shopDataBuffer.length;
+            }
 
-            // 4. 페이징 그리기 (10개 단위)
-            renderPagination(data);
+            currentBufferPage = pageToFetch;
         }
-    } catch (error) {
-        console.error("데이터 조회 실패:", error);
+    } catch (e) {
+        console.error("Error:", e);
     }
 }
 
-// [리스트 렌더링 함수] JSON 데이터를 받아서 HTML로 만듦
-function renderContentList(shopList) {
+function renderView() {
     const contentList = document.getElementById('contentList');
-    contentList.innerHTML = ''; // 기존 내용 삭제
+    contentList.innerHTML = '';
 
-    // 데이터가 없을 때 처리
-    if (!shopList || shopList.length === 0) {
+    if (!shopDataBuffer || shopDataBuffer.length === 0) {
         contentList.innerHTML = '<div style="text-align: center; padding: 50px;">검색 결과가 없습니다.</div>';
+        document.getElementById('contentNav').innerHTML = '';
         return;
     }
 
-    // 데이터 반복문
-    shopList.forEach(shop => {
-        // 카테고리 뱃지 HTML 생성
-        let categoriesHtml = '';
-        if (shop.categories) {
-            shop.categories.forEach(cat => {
-                categoriesHtml += `<li><span class="badge">${cat.categoryName}</span></li>`;
-            });
-        }
+    const absoluteIndex = currentDisplayPage * viewSize;
+    const bufferStartIndex = absoluteIndex % fetchSize;
+    const bufferEndIndex = bufferStartIndex + viewSize;
 
-        // 아이템 HTML 생성
-        const itemHtml = `
+    // 배열 범위 초과 방지
+    const safeEnd = Math.min(bufferEndIndex, shopDataBuffer.length);
+    const itemsToShow = shopDataBuffer.slice(bufferStartIndex, safeEnd);
+
+    itemsToShow.forEach(shop => {
+        let catHtml = '';
+        if (shop.categories) {
+            shop.categories.forEach(c => catHtml += `<li><span class="badge">${c.categoryName}</span></li>`);
+        }
+        const html = `
             <div class="contentItem">
                 <a href="/shop/${shop.shopId}">
-                    <div class="contentImage">
-                        <img src="${shop.imgUrl}" alt="${shop.shopName}"/>
-                    </div>
+                    <div class="contentImage"><img src="${shop.imgUrl}" alt="${shop.shopName}"/></div>
                     <div class="contentsInfo">
                         <div class="contentTitle">${shop.shopName}</div>
-                        <div class="contentCategory">
-                            <ul class="categoryList">${categoriesHtml}</ul>
-                        </div>
+                        <div class="contentCategory"><ul class="categoryList">${catHtml}</ul></div>
                         <div class="contentDescription">${shop.shopContent || ''}</div>
                     </div>
                 </a>
                 <button class="contentLike" type="button"></button>
-            </div>
-        `;
-        // 화면에 추가
-        contentList.insertAdjacentHTML('beforeend', itemHtml);
+            </div>`;
+        contentList.insertAdjacentHTML('beforeend', html);
     });
+
+    renderPagination();
+
+    // 페이지 이동 시에만 스크롤 (첫 로딩 제외)
+    if (currentBufferPage !== -1) {
+        const wrapper = document.getElementById('contentWrapper');
+        if (wrapper) wrapper.scrollIntoView({behavior: 'smooth'});
+    }
 }
 
-// [페이징 렌더링 함수] 10개씩 페이지 번호 생성
-function renderPagination(pageData) {
-    const contentNav = document.getElementById('contentNav');
-    contentNav.innerHTML = ''; // 기존 내용 삭제
+// ============================================================
+// [4] 페이징 UI
+// ============================================================
+window.changePageSize = function (val) {
+    viewSize = parseInt(val);
+    currentDisplayPage = 0;
+    loadDataForCurrentPage();
+};
 
-    // 전체 페이지가 0이면 페이징 숨김
-    if (pageData.totalPages === 0) return;
+window.changePage = function (pageNum) {
+    if (pageNum < 0) return;
+    const maxPage = Math.ceil(totalElements / viewSize) - 1;
+    if (pageNum > maxPage) return;
 
-    const current = pageData.number; // 현재 페이지 (0부터 시작)
-    const totalPages = pageData.totalPages;
+    currentDisplayPage = pageNum;
+    loadDataForCurrentPage();
+};
 
-    // 10개씩 보여주기 로직
+function renderPagination() {
+    const nav = document.getElementById('contentNav');
+    // 안전장치: 전체 개수가 0이면 숨김
+    if (!totalElements || totalElements <= 0) {
+        nav.innerHTML = '';
+        return;
+    }
+
+    const totalPages = Math.ceil(totalElements / viewSize);
     const pageBlock = 10;
-    const startPage = Math.floor(current / pageBlock) * pageBlock;
+    const startPage = Math.floor(currentDisplayPage / pageBlock) * pageBlock;
     const endPage = Math.min(startPage + pageBlock - 1, totalPages - 1);
 
-    let navHtml = '<nav class="pagination">';
+    let html = '<div class="pagination-container"><nav class="pagination">';
 
-    // [이전] 버튼
-    // 0페이지면 비활성화
-    const prevDisabled = (current === 0) ? 'disabled' : '';
-    // 클릭하면 이전 페이지로 이동
-    navHtml += `<button class="pageBtn prev" ${prevDisabled} 
-                        onclick="changePage(${current - 1})">&lt;</button>`;
+    // 이전
+    html += `<button class="pageBtn prev" ${currentDisplayPage === 0 ? 'disabled' : ''} 
+             onclick="changePage(${currentDisplayPage - 1})">&lt;</button>`;
 
-    navHtml += '<ul class="pageList">';
-
-    // 페이지 번호 생성 (startPage ~ endPage)
+    // 숫자 (확실하게 루프 돌도록 수정)
+    html += '<ul class="pageList">';
     for (let i = startPage; i <= endPage; i++) {
-        // ★ 현재 페이지와 i가 같으면 'active' 클래스 추가
-        // 주의: i는 숫자형, current도 숫자형이어야 정확히 일치함
-        const activeClass = (i === current) ? 'active' : '';
-
-        navHtml += `
-            <li>
-                <button type="button" class="${activeClass}" onclick="changePage(${i})">
-                    ${i + 1}
-                </button>
-            </li>
-        `;
+        const active = (i === currentDisplayPage) ? 'active' : '';
+        html += `<li><button type="button" class="${active}" onclick="changePage(${i})">${i + 1}</button></li>`;
     }
-    navHtml += '</ul>';
+    html += '</ul>';
 
-    // [다음] 버튼
-    const nextDisabled = (current === totalPages - 1) ? 'disabled' : '';
-    navHtml += `<button class="pageBtn next" ${nextDisabled} 
-                        onclick="changePage(${current + 1})">&gt;</button>`;
+    // 다음
+    html += `<button class="pageBtn next" ${currentDisplayPage >= totalPages - 1 ? 'disabled' : ''} 
+             onclick="changePage(${currentDisplayPage + 1})">&gt;</button>`;
 
-    navHtml += '</nav>';
+    html += '</nav>';
 
-    // 화면에 삽입
-    contentNav.innerHTML = navHtml;
+    // 셀렉트 박스
+    const opts = [8, 16, 24, 32, 40];
+    let optHtml = '';
+    opts.forEach(o => {
+        const selected = (o === viewSize) ? 'selected' : '';
+        optHtml += `<option value="${o}" ${selected}>${o}개씩</option>`;
+    });
+
+    html += `<div class="page-size-control">
+                <select id="pageSizeSelect" onchange="changePageSize(this.value)">
+                    ${optHtml}
+                </select>
+             </div></div>`;
+
+    nav.innerHTML = html;
 }
