@@ -18,41 +18,41 @@
         <div class="headerContent">
             <div id="user">
 
-                <!-- ========================= -->
-                <!-- 비로그인 상태 -->
-                <!-- ========================= -->
-                <div th:if="${session.loginUser == null}" class="userLoggedOut">
-                    <p><a th:href="@{/login/login}">로그인</a></p>
+                <!-- 비로그인 -->
+                <div class="userBox" th:if="${session.loginUser == null}">
+                    <p><a th:href="@{/login}">로그인</a></p>
                     <span>|</span>
                     <p><a th:href="@{/login/register}">회원가입</a></p>
                 </div>
 
-                <div th:if="${session.loginUser != null}" class="userLoggedIn">
+                <!-- 일반 유저 -->
+                <div class="userBox"
+                     th:if="${session.loginUser != null and session.loginUser.role.name() == 'USER'}">
                     <p>
-                        <span th:text="${session.loginUser.nickName}">유저</span>님 안녕하세요
+                        <span th:text="${session.loginUser.nickName}"></span>님 안녕하세요
                     </p>
                     <span>|</span>
                     <p><a th:href="@{/login/userBoardList}">마이 페이지</a></p>
                     <span>|</span>
-                    <p><a th:href="@{/user/logout}">로그아웃</a></p>
+                    <p><a href="#" class="logoutBtn">로그아웃</a></p>
                 </div>
 
-                <div th:if="${session.loginUser != null 
-        and session.loginUser.role.name() == 'ADMIN'}"
-                     class="adminLoggedIn">
+                <!-- 관리자 -->
+                <div class="userBox admin"
+                     th:if="${session.loginUser != null and session.loginUser.role.name() == 'ADMIN'}">
                     <p>
-                        <span th:text="${session.loginUser.nickName}">관리자</span>님
+                        <span th:text="${session.loginUser.nickName}"></span>님 안녕하세요
                     </p>
                     <span>|</span>
                     <p><a th:href="@{/manager/managerMain}">관리자 페이지</a></p>
                     <span>|</span>
-                    <p><a th:href="@{/user/logout}">로그아웃</a></p>
+                    <p><a href="#" class="logoutBtn">로그아웃</a></p>
                 </div>
-
 
                 <div id="google_translate_element"></div>
             </div>
 
+            <!-- 🔍 검색 영역 유지 -->
             <div class="searchWrap">
                 <input type="text" id="search" placeholder=" Search..."/>
                 <button id="search-button">
@@ -61,4 +61,6 @@
             </div>
         </div>
     </div>
+
+    <script th:src="@{/js/logout.js}"></script>
 </header>

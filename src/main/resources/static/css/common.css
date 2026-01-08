@@ -152,6 +152,19 @@ body {
   display: flex;
 }
 
+/* 로그인 영역 공통 규격 */
+.userBox {
+  display: flex;
+  align-items: center;
+  gap: 0;
+}
+
+/* 관리자 강조 (선택사항) */
+.userBox.admin p a {
+  font-weight: 600;
+}
+
+
 /* header end */
 
 /* footer */

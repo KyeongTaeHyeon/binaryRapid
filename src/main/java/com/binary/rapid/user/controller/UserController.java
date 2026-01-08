@@ -1,6 +1,5 @@
 package com.binary.rapid.user.controller;
 
-import com.binary.rapid.user.dto.UserLoginDto;
 import com.binary.rapid.user.dto.UserResponseDto;
 import com.binary.rapid.user.form.UserLoginForm;
 import com.binary.rapid.user.form.UserSignUpForm;
@@ -10,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -46,12 +46,18 @@ public class UserController {
 
 
     // 소셜 회원가입
-    @PostMapping("/user/SocialSignup")
-    public ResponseEntity<Void> userSocialSignup(@RequestBody UserSignUpForm form) {
+    @PostMapping("/user/SocialSignup")    public ResponseEntity<Void> userSocialSignup(@RequestBody UserSignUpForm form) {
 
         service.localSignup(form);
 
         return ResponseEntity.ok().build();
+    }
+
+    // 로컬 로그아웃
+    @PostMapping("/user/logout")
+    public String localLogout(HttpSession session) {
+        session.invalidate(); 
+        return "redirect:/";
     }
     
 }

@@ -1,6 +1,4 @@
-// ======================
-// 구글 로그인 (유지)
-// ======================
+// 구글
 function handleCredentialResponse(response) {
   const token = response.credential;
 
@@ -17,12 +15,16 @@ function handleCredentialResponse(response) {
   window.location.href = '/';
 }
 
-// ======================
-// 로컬 로그인 AJAX 처리
-// ======================
+// 로컬
 document.addEventListener('DOMContentLoaded', function () {
-  document.getElementById('loginForm').addEventListener('submit', function (e) {
+  const form = document.getElementById('loginForm');
+  const errorMsg = document.getElementById('loginErrorMsg');
+
+  form.addEventListener('submit', function (e) {
     e.preventDefault();
+
+    errorMsg.style.display = 'none';
+    errorMsg.textContent = '';
 
     const requestData = {
       id: document.getElementById('userName').value.trim(),
@@ -30,7 +32,8 @@ document.addEventListener('DOMContentLoaded', function () {
     };
 
     if (!requestData.id || !requestData.password) {
-      alert('아이디와 비밀번호를 입력하세요.');
+      errorMsg.textContent = '아이디와 비밀번호를 입력하세요.';
+      errorMsg.style.display = 'block';
       return;
     }
 
@@ -38,25 +41,21 @@ document.addEventListener('DOMContentLoaded', function () {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(requestData),
-      credentials: 'same-origin' 
-      /*프론트와 서버가 다른 도메인이면
-        credentials: 'include'*/
+      credentials: 'same-origin'
     })
       .then(response => {
         if (!response.ok) {
           return response.text().then(msg => {
-            throw new Error(msg || '로그인 실패');
+            throw new Error(msg);
           });
         }
-        // ✅ JSON 파싱 ❌
-        // 그냥 성공으로 처리
       })
       .then(() => {
-        // 로그인 성공 → 서버 세션이 진짜 로그인 상태
         window.location.href = '/';
       })
       .catch(error => {
-        alert(error.message);
+        errorMsg.textContent = error.message;
+        errorMsg.style.display = 'block';
       });
   });
 });

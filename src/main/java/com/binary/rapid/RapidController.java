@@ -19,14 +19,9 @@ public class RapidController {
         return "index"; // templates/index.html
     }
 
-    @GetMapping("/origin/origin")
+    @GetMapping("/origin")
     public String originPage() {
         return "origin/origin";
-    }
-
-    @GetMapping("/regionTheme/regionTheme")
-    public String regionThemePage() {
-        return "regionTheme/regionTheme";
     }
 
     @GetMapping("/board/news")
