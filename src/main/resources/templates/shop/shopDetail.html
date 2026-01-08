@@ -16,18 +16,29 @@
     <body class="content" layout:fregment="content">
         <main class="shop-detail-main-wrapper">
             <div class="shop-detail-card">
-                <input type="hidden" id="shopId" th:value="${shopId}"/>
-                <h1 id="shopName" th:text="${shopName}"></h1>
-                <div class="detail-tags-section" id="detailTagsSection"></div>
+                <div style="margin-bottom: 15px;">
+                    <a th:href="@{/shop}"
+                       style="text-decoration: none; color: #333; cursor: pointer; background-color: #f0f0f0; border: 1px solid #ccc; padding: 5px 12px; border-radius: 4px; font-size: 14px; display: inline-block;">
+                        &lt; 뒤로가기
+                    </a>
+                </div>
+
+                <input type="hidden" id="shopId" th:value="${shopInfo.shopId}"/>
+                <h1 id="shopName" th:text="${shopInfo.shopName}"></h1>
+                <div class="detail-tags-section" id="detailTagsSection">
+                    <th:block th:each="category : ${shopInfo.categories}">
+                        <span class="tag"
+                              th:text="${category.categoryName}"></span>
+                    </th:block>
+                </div>
                 <div class="detail-content-area">
                     <div class="detail-image-box">
-                        <img id="shopImage" src="" alt="라멘 가게 이미지"/>
+                        <img id="shopImage" src="" alt="라멘 가게 이미지" th:src="${shopInfo.imgUrl}"
+                             th:value="${shopInfo.shopName}"/>
                     </div>
                     <div class="detail-info-text">
-                        <p><strong>지역:</strong> <span id="shopRegion" th:text="${shopRegion}"></span></p>
-                        <p><strong>상세주소:</strong> <span id="shopAddress" th:text="${}"></span></p>
-                        <p class="content-label"><strong>내용:</strong></p>
-                        <p id="shopContent"></p>
+                        <p><strong>상세주소:</strong> <span id="shopAddress" th:text="${shopInfo.shopAddress}"></span></p>
+                        <p class="content-label"><strong th:text="${shopInfo.shopContent}">내용:</strong></p>
                     </div>
                 </div>
             </div>

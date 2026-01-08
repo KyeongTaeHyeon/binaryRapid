@@ -4,9 +4,9 @@ spring:
   datasource:
     driver-class-name: net.sf.log4jdbc.sql.jdbcapi.DriverSpy
     # com.mysql.cj.jdbc.Driver
-    url: jdbc:log4jdbc:mysql://168.107.27.154:3306/rapid?serverTimezone=UTC&useUnicode=true&characterEncoding=utf-8
-    username: k2512p1t2
-    password: km2512p1t2
+    url: jdbc:log4jdbc:mysql://proxogus.codns.com:32270/rapid?serverTimezone=UTC&useUnicode=true&characterEncoding=utf-8
+    username: rapid_user
+    password: rapid!234
   servlet:
     multipart:
       max-file-size: 5MB

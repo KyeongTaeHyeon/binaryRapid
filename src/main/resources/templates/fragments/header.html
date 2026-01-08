@@ -1,47 +1,47 @@
 <header id="header" th:fragment="header" xmlns:th="http://www.thymeleaf.org">
-  <div class="inner">
-    <div id="logo">
-      <a th:href="@{/}">
-        <img th:src="@{/img/raFeed_Logo-Photoroom.png}" alt="RaFeed_Logo" />
-      </a>
-    </div>
-    <div class="navigation">
-      <ul class="navMenu">
-        <li><a th:href="@{/origin/origin}">유래</a></li>
-        <li><a th:href="@{/regionTheme/regionTheme}">지역별/테마별</a></li>
-        <li><a th:href="@{/board/news}">뉴스</a></li>
-        <li><a th:href="@{/board/boardList}">게시판</a></li>
-      </ul>
-    </div>
-    <div class="headerContent">
-      <div id="user">
-        <div class="userLoggedOut">
-          <p><a th:href="@{/login/login}">로그인</a></p>
-          <span>|</span>
-          <p><a th:href="@{/login/register}">회원가입</a></p>
+    <div class="inner">
+        <div id="logo">
+            <a th:href="@{/}">
+                <img th:src="@{/img/raFeed_Logo-Photoroom.png}" alt="RaFeed_Logo"/>
+            </a>
         </div>
-        <div class="userLoggedIn hide">
-          <p><span id="loginUserName">로그인 유저</span>님</p>
-          <span>|</span>
-          <p><a th:href="@{/login/userBoardList}">마이 페이지</a></p>
-          <span>|</span>
-          <p><a href="#" id="logoutBtn">로그아웃</a></p>
+        <div class="navigation">
+            <ul class="navMenu">
+                <li><a th:href="@{/origin}">유래</a></li>
+                <li><a th:href="@{/shop}">지역별/테마별</a></li>
+                <li><a th:href="@{/board/news}">뉴스</a></li>
+                <li><a th:href="@{/board/boardList}">게시판</a></li>
+            </ul>
         </div>
-        <div class="adminLoggedIn hide">
-          <p><span id="loginName">로그인 관리자</span>님</p>
-          <span>|</span>
-          <p><a th:href="@{/manager/managerMain}">관리자 페이지</a></p>
-          <span>|</span>
-          <p><a href="#" id="logoutBtn">로그아웃</a></p>
+        <div class="headerContent">
+            <div id="user">
+                <div class="userLoggedOut">
+                    <p><a th:href="@{/login/login}">로그인</a></p>
+                    <span>|</span>
+                    <p><a th:href="@{/login/register}">회원가입</a></p>
+                </div>
+                <div class="userLoggedIn hide">
+                    <p><span id="loginUserName">로그인 유저</span>님</p>
+                    <span>|</span>
+                    <p><a th:href="@{/login/userBoardList}">마이 페이지</a></p>
+                    <span>|</span>
+                    <p><a href="#" id="logoutBtn">로그아웃</a></p>
+                </div>
+                <div class="adminLoggedIn hide">
+                    <p><span id="loginName">로그인 관리자</span>님</p>
+                    <span>|</span>
+                    <p><a th:href="@{/manager/managerMain}">관리자 페이지</a></p>
+                    <span>|</span>
+                    <p><a href="#" id="logoutBtn">로그아웃</a></p>
+                </div>
+                <div id="google_translate_element"></div>
+            </div>
+            <div class="searchWrap">
+                <input type="text" id="search" placeholder=" Search..."/>
+                <button id="search-button">
+                    <img th:src="@{/img/ico-search-wh-56x56.png}" alt="Search"/>
+                </button>
+            </div>
         </div>
-        <div id="google_translate_element"></div>
-      </div>
-      <div class="searchWrap">
-        <input type="text" id="search" placeholder=" Search..." />
-        <button id="search-button">
-          <img th:src="@{/img/ico-search-wh-56x56.png}" alt="Search" />
-        </button>
-      </div>
     </div>
-  </div>
 </header>

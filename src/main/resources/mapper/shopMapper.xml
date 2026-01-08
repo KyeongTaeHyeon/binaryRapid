@@ -3,21 +3,84 @@
     PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.binary.rapid.shop.mapper.ShopMapper">
-    <select id="allShopList" resultType="shopForm" parameterType="Map">
-        <![CDATA[
-        SELECT s.id AS shop_id
-            , s.name AS shop_name
-            , s.address AS shop_address
-            , s.content AS shop_content
-            , c.id AS category_id
-            , c.name AS category_name
-            , si.img_url AS img_url
-        FROM tb_shop s
-	        JOIN tb_shopdetail sd ON sd.id = s.id
-	        JOIN tb_category c ON c.id = sd.contents
-            LEFT OUTER JOIN tb_shopimg si ON si.id = s.id AND si.main_img = 'Y'
+    
+    <resultMap id="shopResultMap" type="com.binary.rapid.shop.form.ShopForm">
+        <id property="shopId" column="shop_id"/>
+        <result property="shopName" column="shop_name"/>
+        <result property="shopAddress" column="shop_address"/>
+        <result property="shopContent" column="shop_content"/>
+        <result property="imgUrl" column="img_url"/>
+        <collection property="categories" ofType="com.binary.rapid.shop.form.ShopForm$CategoryInfo">
+            <result property="categoryId" column="category_id"/>
+            <result property="categoryName" column="category_name"/>
+        </collection>
+    </resultMap>
+
+    <sql id="searchConditions">
         WHERE COALESCE(s.req_type, '') = 'Y'
-        ORDER BY s.id, c.view;
-        ]]>
+        <if test="conditions != null and conditions.size > 0">
+            <foreach collection="conditions" index="groupId" item="idList">
+                <if test="idList != null and idList.size > 0">
+                    AND EXISTS (
+                        SELECT 1 FROM tb_shopdetail sd 
+                        WHERE sd.id = s.id 
+                        AND sd.contents IN 
+                        <foreach collection="idList" item="id" open="(" separator="," close=")">
+                            #{id}
+                        </foreach>
+                    )
+                </if>
+            </foreach>
+        </if>
+    </sql>
+
+    <select id="allShopList" resultMap="shopResultMap" parameterType="map">
+        SELECT s.id      AS shop_id
+             , s.name    AS shop_name
+             , s.address AS shop_address
+             , s.content AS shop_content
+             , si.img_url AS img_url
+             , c.id      AS category_id
+             , c.name    AS category_name
+        FROM tb_shop s
+            INNER JOIN (
+                SELECT s.id
+                FROM tb_shop s
+                <include refid="searchConditions"/>
+                ORDER BY s.id
+                <if test="limit != null and offset != null">
+                    LIMIT #{limit} OFFSET #{offset}
+                </if>
+            ) paged_s ON s.id = paged_s.id
+            
+            JOIN tb_shopdetail sd_main ON sd_main.id = s.id
+            JOIN tb_category c ON c.id = sd_main.contents
+            LEFT OUTER JOIN tb_shopimg si ON si.id = s.id AND si.main_img = 'Y'
+        
+        ORDER BY s.id, c.view
     </select>
+    
+    <select id="countShopList" resultType="int" parameterType="map">
+        SELECT COUNT(DISTINCT s.id)
+        FROM tb_shop s
+        <include refid="searchConditions"/>
+    </select>
+    
+    <select id="shopInfo" resultMap="shopResultMap" parameterType="String">
+        SELECT s.id       AS shop_id
+             , s.name     AS shop_name
+             , s.address  AS shop_address
+             , s.content  AS shop_content
+             , si.img_url AS img_url
+             , c.id       AS category_id
+             , c.name     AS category_name
+        FROM tb_shop s
+                 JOIN tb_shopdetail sd ON sd.id = s.id
+                 LEFT OUTER JOIN tb_shopimg si ON si.id = s.id AND si.main_img = 'Y'
+                 JOIN tb_category c ON c.id = sd.contents
+        WHERE COALESCE(s.req_type, '') = 'Y'
+          AND s.id = #{shopId}
+        ORDER BY s.id, c.view
+    </select>
+
 </mapper>
