@@ -129,10 +129,10 @@ public class UserService {
 
     // 유저 id로 게시글 select
 
-    public List<BoardDto> getMyBoards(String loginUser) {
+    public List<BoardDto> getMyBoards(int loginUser) {
 
         // ✅ Service는 세션을 직접 보지 않는다
-        if (loginUser == null) {
+        if (loginUser == 0) {
             throw new LoginRequiredException();
         }
 

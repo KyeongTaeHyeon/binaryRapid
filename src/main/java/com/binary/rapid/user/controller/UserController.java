@@ -72,6 +72,8 @@ public class UserController {
         UserResponseDto loginUser =
                 (UserResponseDto) session.getAttribute("loginUser");
 
+        log.info("로그인 유저 정보"+ loginUser.toString());
+        
         if (loginUser == null) {
             return ResponseEntity
                     .status(HttpStatus.UNAUTHORIZED)

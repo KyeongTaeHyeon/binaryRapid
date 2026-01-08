@@ -13,8 +13,10 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class UserResponseDto {
     
-    // 유저 고으값
-    String userId;
+    // 유저 고유값
+    int userId;
+    // 유저 로그인 아이디
+    String id;
     // 유저가 사이트 내에서 사용할 별칭
     String nickName;
     String name;

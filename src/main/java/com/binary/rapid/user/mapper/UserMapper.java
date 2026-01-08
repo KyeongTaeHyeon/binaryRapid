@@ -16,5 +16,5 @@ public interface UserMapper {
     
     UserResponseDto selectUserId(String id);
 
-    List<BoardDto> selectBoardsByUserId(String userId);
+    List<BoardDto> selectBoardsByUserId(int id);
 }

@@ -3,7 +3,7 @@
 let allPosts = [];
 let currentPage = 1;
 let ITEMS_PER_PAGE = 10;
-const MAX_TITLE_LENGTH = 30;
+const MAX_TITLE_LENGTH = 20;
 
 // DOM
 const userTableBody = document.getElementById('userTableBody');
