@@ -41,7 +41,7 @@
             title       = #{title},
             contents    = #{contents},
             update_date = NOW()
-        WHERE id = #{id}
+        WHERE id = #{id} AND user_id =#{userId}
     </update>
 
     <update id="deleteBoard" parameterType="int">

@@ -15,13 +15,13 @@ document.addEventListener("DOMContentLoaded", function () {
         initDetailPage();
     }
 
-    // 3. 게시글 등록 버튼 (boardList4)
+    // 3. 게시글 등록 버튼
     const submitPostBtn = document.getElementById("submitPostBtn");
     if (submitPostBtn) {
         submitPostBtn.onclick = saveBoard;
     }
 
-    // 4. 댓글 등록 버튼 (boardList2)
+    // 4. 댓글 등록 버튼
     const commentSubmitBtn = document.getElementById("commentSubmit");
     if (commentSubmitBtn) {
         commentSubmitBtn.onclick = saveComment;
@@ -36,15 +36,14 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 });
 
-/**
- * [게시글 저장]
- */
+/* ================= 게시글 관련 함수 ================= */
+
 async function saveBoard() {
     const category = document.getElementById("boardCategory")?.value || "B01";
     const title = document.getElementById("postTitle")?.value;
     const contents = document.getElementById("postContent")?.value;
 
-    if (!title || !title.trim() || !contents || !contents.trim()) {
+    if (!title?.trim() || !contents?.trim()) {
         alert("제목과 내용을 입력해주세요.");
         return;
     }
@@ -72,9 +71,6 @@ async function saveBoard() {
     }
 }
 
-/**
- * [목록 렌더링]
- */
 async function loadAndRenderList() {
     try {
         const response = await fetch("/api/board/list");
@@ -106,9 +102,6 @@ async function loadAndRenderList() {
     }
 }
 
-/**
- * [상세 페이지 초기화]
- */
 async function initDetailPage() {
     const urlParams = new URLSearchParams(window.location.search);
     const postId = urlParams.get("id");
@@ -119,23 +112,49 @@ async function initDetailPage() {
         const post = await response.json();
 
         if (post) {
-            // 상세 페이지 필드가 있다면 매핑 (ID 확인 필요)
-            const detailTitle = document.getElementById("detailTitle");
-            if (detailTitle) detailTitle.innerText = post.title;
-
-            const detailContent = document.getElementById("detailContent");
-            if (detailContent) detailContent.value = post.contents;
+            if (document.getElementById("detailTitle")) document.getElementById("detailTitle").innerText = post.title;
+            if (document.getElementById("detailContent")) document.getElementById("detailContent").value = post.contents;
 
             fetchCommentList(postId);
+
+            // 본인 확인 후 수정/삭제 버튼 노출
+            const isOwner = String(post.userId) === String(currentUserId);
+            const editBtn = document.getElementById("editBtn");
+            const delBtn = document.getElementById("deleteBtn");
+
+            if(editBtn) {
+                editBtn.style.display = isOwner ? "inline-block" : "none";
+                editBtn.onclick = () => goToEditPage(postId);
+            }
+            if(delBtn) {
+                delBtn.style.display = isOwner ? "inline-block" : "none";
+                delBtn.onclick = () => deleteBoard(postId);
+            }
         }
     } catch (error) {
         console.error("데이터 로드 실패:", error);
     }
 }
 
-/**
- * [댓글 목록 가져오기]
- */
+async function deleteBoard(id) {
+    if (!confirm("정말로 이 게시글을 삭제하시겠습니까?")) return;
+    try {
+        const response = await fetch(`/api/board/delete/${id}`, { method: "DELETE" });
+        if (response.ok) {
+            alert("삭제되었습니다.");
+            location.href = "/board/boardList";
+        }
+    } catch (e) {
+        console.error("삭제 실패:", e);
+    }
+}
+
+function goToEditPage(id){
+    location.href=`/board/boardEdit?id=${id}`;
+}
+
+/* ================= 댓글 관련 함수 ================= */
+
 async function fetchCommentList(postId) {
     try {
         const response = await fetch(`/api/board/comment/list/${postId}`);
@@ -148,15 +167,12 @@ async function fetchCommentList(postId) {
     }
 }
 
-/**
- * [댓글 저장]
- */
 async function saveComment() {
     const urlParams = new URLSearchParams(window.location.search);
     const postId = urlParams.get("id");
     const commentInput = document.getElementById("commentInput");
 
-    if (!commentInput || !commentInput.value.trim()) {
+    if (!commentInput?.value.trim()) {
         alert("내용을 입력해주세요.");
         return;
     }
@@ -177,16 +193,13 @@ async function saveComment() {
         if (response.ok) {
             alert("댓글이 등록되었습니다.");
             commentInput.value = "";
-            fetchCommentList(postId); // 페이지 새로고침 대신 목록만 새로고침
+            fetchCommentList(postId);
         }
     } catch (error) {
         console.error("댓글 저장 에러:", error);
     }
 }
 
-/**
- * [댓글 렌더링]
- */
 function renderComments(comments) {
     const container = document.getElementById("detailCommentList");
     if (!container) return;
@@ -211,4 +224,45 @@ function renderComments(comments) {
             </div>
         </div>`;
     }).join('');
+}
+
+async function updateComment(id, seq){
+    const newComment = prompt("수정할 내용을 입력하세요.");
+    if (!newComment || !newComment.trim()) return;
+
+    const updateDto = {
+        id: id,
+        commentSeq: seq,
+        comment: newComment,
+        userId: currentUserId
+    };
+
+    try {
+        const response = await fetch("/api/board/comment/update", { // 앞에 / 추가
+            method: "POST",
+            headers: {"Content-Type":"application/json"},
+            body: JSON.stringify(updateDto)
+        });
+        if (response.ok){
+            alert("댓글수정이 완료되었습니다.");
+            location.reload();
+        }
+    } catch (e) {
+        console.error("댓글수정 실패:", e);
+    }
+}
+
+async function deleteComment(id, seq) {
+    if (!confirm("댓글을 삭제하시겠습니까?")) return;
+    try {
+        const response = await fetch(`/api/board/comment/delete?id=${id}&commentSeq=${seq}`, {
+            method: "POST"
+        });
+        if (response.ok) {
+            alert("삭제되었습니다.");
+            location.reload();
+        }
+    } catch (e) {
+        console.error("댓글 삭제 실패:", e);
+    }
 }
