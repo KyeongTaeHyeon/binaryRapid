@@ -43,9 +43,4 @@ public class RapidController {
     public String userBoardListPage() {
         return "login/userBoardList";
     }
-
-    @GetMapping("/manager/managerMain")
-    public String managerMainPage() {
-        return "manager/managerMain";
-    }
 }

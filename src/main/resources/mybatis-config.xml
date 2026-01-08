@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE configuration
-        PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
-        "https://mybatis.org/dtd/mybatis-3-config.dtd">
+    PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+    "https://mybatis.org/dtd/mybatis-3-config.dtd">
 <configuration>
     <settings>
         <setting name="mapUnderscoreToCamelCase" value="true"/>
@@ -9,13 +9,19 @@
     </settings>
 
     <typeAliases>
+        <!--    main    -->
         <typeAlias alias="infoDto" type="com.binary.rapid.ramen.dto.RamenInfoDto"/>
         <typeAlias alias="popupDto" type="com.binary.rapid.ramen.dto.RamenPopupDto"/>
         <typeAlias alias="heroDto" type="com.binary.rapid.ramen.dto.RamenHeroDto"/>
         <typeAlias alias="cateDto" type="com.binary.rapid.ramen.dto.RamenCateDto"/>
-        <typeAlias alias="shopForm" type="com.binary.rapid.shop.form.ShopForm"/>
+        <!--    user    -->
         <typeAlias alias="userDto" type="com.binary.rapid.user.dto.UserDto"/>
+        <!--    shop    -->
+        <typeAlias alias="shopForm" type="com.binary.rapid.shop.form.ShopForm"/>
         <typeAlias alias="shopSearchForm" type="com.binary.rapid.shop.form.ShopSearchForm"/>
+        <!--    category    -->
         <typeAlias alias="categoryForm" type="com.binary.rapid.category.form.CategoryForm"/>
+        <!--    admin    -->
+        <typeAlias alias="adminDto" type="com.binary.rapid.admin.dto.AdminDto"/>
     </typeAliases>
 </configuration>

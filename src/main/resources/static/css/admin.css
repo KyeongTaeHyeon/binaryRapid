@@ -1,0 +1,237 @@
+@charset "UTF-8";
+
+:root {
+    --primary-color: #5ac3f5;
+    --primary-dark: #2fb2ee;
+    --primary-light: #d6eefc;
+    --bg-color: #f4faff;
+    --text-main: #121212;
+    --text-sub: #555555;
+    --border-color: #e1e1e1;
+    --white: #ffffff;
+    --shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+}
+
+body {
+    font-family: 'SCoreDream', 'Malgun Gothic', sans-serif;
+    background-color: var(--bg-color);
+    color: var(--text-main);
+    margin: 0;
+}
+
+#wrapper {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+/* 레이아웃 */
+.admin-container {
+    display: flex;
+    max-width: 1440px;
+    width: 95%;
+    margin: 40px auto;
+    gap: 30px;
+    align-items: flex-start;
+}
+
+/* 사이드바 */
+#managerLeft {
+    width: 260px;
+    background: var(--white);
+    border-radius: 12px;
+    box-shadow: var(--shadow);
+    overflow: hidden;
+    flex-shrink: 0;
+}
+
+.profile-box {
+    background: var(--primary-color);
+    padding: 30px 20px;
+    text-align: center;
+    color: var(--white);
+}
+
+.admin-icon {
+    font-size: 24px;
+    display: block;
+    margin-bottom: 10px;
+}
+
+.admin-menu {
+    padding: 20px 0;
+}
+
+.admin-menu li a {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 15px 25px;
+    color: var(--text-sub);
+    font-size: 16px;
+    font-weight: 500;
+    text-decoration: none;
+    transition: 0.2s;
+}
+
+.admin-menu li.on a, .admin-menu li a:hover {
+    background: var(--primary-light);
+    color: var(--primary-dark);
+    border-right: 4px solid var(--primary-dark);
+}
+
+/* 우측 컨텐츠 */
+#managerRight {
+    flex: 1;
+    background: var(--white);
+    border-radius: 12px;
+    padding: 40px;
+    box-shadow: var(--shadow);
+    min-height: 600px;
+}
+
+.page-header {
+    margin-bottom: 30px;
+    border-bottom: 2px solid var(--bg-color);
+    padding-bottom: 20px;
+}
+
+.page-header h2 {
+    font-size: 24px;
+    margin: 0;
+}
+
+/* 검색바 */
+.search-container {
+    background: var(--bg-color);
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 30px;
+}
+
+.search-wrap {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+}
+
+.search-wrap select, .search-wrap input {
+    height: 45px;
+    border: 1px solid var(--border-color);
+    padding: 0 15px;
+    border-radius: 6px;
+    font-size: 14px;
+    outline: none;
+}
+
+.search-wrap input[type="text"] {
+    flex: 1;
+    min-width: 200px;
+}
+
+.date-range {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    background: white;
+    padding: 0 10px;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    height: 45px;
+}
+
+.date-range input {
+    border: none;
+    height: 100%;
+}
+
+.btn-search {
+    background: var(--text-sub);
+    color: white;
+    height: 45px;
+    padding: 0 20px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.btn-reset {
+    background: white;
+    border: 1px solid var(--border-color);
+    height: 45px;
+    padding: 0 20px;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+/* 테이블 */
+.table-top {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 15px;
+}
+
+.list-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 15px;
+}
+
+.list-table th {
+    background: #f8f9fa;
+    padding: 15px;
+    border-top: 2px solid var(--border-color);
+    border-bottom: 2px solid var(--border-color);
+    font-weight: 600;
+}
+
+.list-table td {
+    padding: 15px;
+    border-bottom: 1px solid #eee;
+    text-align: center;
+    color: var(--text-sub);
+}
+
+.list-table tr:hover td {
+    background: #fcfcfc;
+}
+
+/* 뱃지 & 버튼 */
+.badge {
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.badge.male {
+    background: #e3f2fd;
+    color: #1976d2;
+}
+
+.badge.female {
+    background: #fce4ec;
+    color: #c2185b;
+}
+
+.btn-mini {
+    padding: 6px 12px;
+    font-size: 13px;
+    border-radius: 4px;
+    border: 1px solid #ddd;
+    background: white;
+    cursor: pointer;
+    margin: 0 2px;
+}
+
+.btn-mini:hover {
+    background: #eee;
+}
+
+.btn-mini.red {
+    color: #e74c3c;
+    border-color: #fadbd8;
+    background: #fdedec;
+}

@@ -13,18 +13,15 @@
         <div id="wrapper">
             <header id="header" th:replace="~{fragments/header :: header}"></header>
             <main id="main">
-                <h2>작성글 관리</h2>
+                <h2>게시판 관리</h2>
                 <div id="inner">
                     <div id="managerLeft">
                         <div id="managerLeftInner">
-                            <span> asdasd123님</span>
+                            <span id="adminNick">관리자 *** 님</span>
                             <ul>
-                                <li>
-                                    <a href="./userModify">내 정보 변경</a>
-                                </li>
-                                <li class="on"><a href="">작성글 관리</a></li>
-                                <li><a href="./userMywish">찜 목록</a></li>
-                                <li><a href="./userRequestShop">등록 신청 관리</a></li>
+                                <li class="on"><a href="">게시판 관리</a></li>
+                                <li><a href="./managerMain">회원 관리</a></li>
+                                <li><a href="">카테고리 관리</a></li>
                             </ul>
                         </div>
                     </div>
@@ -37,7 +34,7 @@
                                         <option value="freeBoard">자유게시판</option>
                                         <option value="restaurantCert">식당인증</option>
                                     </select>
-                                    <button id="search-button">
+                                    <button id="search-button-category">
                                         <img th:src="@{/img/ico-search-wh-56x56.png}" alt="Search"/>
                                     </button>
                                 </form>
@@ -72,8 +69,8 @@
                             <tr>
                                 <th>id</th>
                                 <th>게시판</th>
-                                <th>제목</th>
-                                <th>작성 시간</th>
+                                <th>닉네임</th>
+                                <th>시간</th>
                             </tr>
                             </thead>
                             <tbody id="userTableBody"></tbody>

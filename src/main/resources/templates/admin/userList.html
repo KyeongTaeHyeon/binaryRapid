@@ -1,0 +1,64 @@
+<div class="search-container">
+    <form id="searchForm" action="/admin/users" method="get" class="search-wrap">
+
+        <select name="category" id="searchCategory">
+            <option value="">전체 취향</option>
+            <option th:each="item : ${tasteList}"
+                    th:value="${item.name}"
+                    th:text="${item.name}"
+                    th:selected="${paramCate == item.name}">
+                돈코츠
+            </option>
+        </select>
+
+        <input type="text" name="keyword" id="searchKeyword"
+               placeholder="닉네임, 이메일 검색" th:value="${paramKeyword}">
+
+        <div class="date-range">
+            <input type="date" name="startDate" id="startDate" th:value="${paramStart}">
+            <span>~</span>
+            <input type="date" name="endDate" id="endDate" th:value="${paramEnd}">
+        </div>
+
+        <button type="submit" class="btn-search">검색</button>
+
+        <button type="button" class="btn-reset" onclick="resetSearch()">초기화</button>
+    </form>
+</div>
+
+<table class="list-table">
+    <thead>
+    <tr>
+        <th><input type="checkbox" id="checkAll"></th>
+        <th>No</th>
+        <th>닉네임</th>
+        <th>이메일</th>
+        <th>취향</th>
+        <th>나이</th>
+        <th>성별</th>
+        <th>가입일</th>
+        <th>관리</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:if="${#lists.isEmpty(users)}">
+        <td colspan="9" style="padding: 50px 0;">검색 결과가 없습니다.</td>
+    </tr>
+    <tr th:each="user : ${users}">
+        <td><input type="checkbox" name="ids" th:value="${user.userId}"></td>
+        <td th:text="${user.userId}"></td>
+        <td style="font-weight:bold;" th:text="${user.nickName}"></td>
+        <td th:text="${user.email}"></td>
+        <td><span class="badge" th:text="${user.taste}"></span></td>
+        <td th:text="${user.age}"></td>
+        <td th:text="${user.gender}"></td>
+        <td th:text="${#temporals.format(user.createDate, 'yyyy-MM-dd')}"></td>
+        <td>
+            <button class="btn-mini">수정</button>
+        </td>
+    </tr>
+    </tbody>
+</table>
+
+<script th:src="@{/js/common.js}"></script>
+<script th:src="@{/js/userManagement.js}"></script>
