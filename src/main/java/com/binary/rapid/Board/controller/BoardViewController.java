@@ -13,4 +13,8 @@ public class BoardViewController {
         // templates/board/boardList4.html 인 경우
         return "board/boardList4";
     }
+    @GetMapping("/board/boardEdit")
+    public String boardEditPage() {
+        return "board/boardEdit";
+    }
 }

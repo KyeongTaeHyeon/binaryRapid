@@ -1,5 +1,6 @@
-const currentUserId = 1; // 테스트용 사용자 ID
-
+// const currentUserId = 1; // 테스트용 사용자 ID
+//const currentUserId = 2; // 테스트용 사용자 ID
+ const currentUserId = 3; // 테스트용 사용자 ID
 document.addEventListener("DOMContentLoaded", function () {
     const path = window.location.pathname;
     console.log("현재 경로:", path);
@@ -33,6 +34,59 @@ document.addEventListener("DOMContentLoaded", function () {
         goListBtn.onclick = () => {
             location.href = "/board/boardList";
         };
+    }
+
+    const updatePostBtn = document.getElementById('updatePostBtn');
+    if (updatePostBtn) {
+        updatePostBtn.addEventListener('click', (event) => {
+            event.preventDefault();
+
+            // URL에서 실제 ID 추출 (예: ?id=15)
+            const urlParams = new URLSearchParams(window.location.search);
+            const postId = urlParams.get("id");
+
+            if (postId) {
+                console.log('수정 시도 포스트 ID:', postId);
+                handlePostUpdate(postId);
+            } else {
+                alert("게시글 ID를 찾을 수 없습니다.");
+            }
+        });
+    }
+
+    async function handlePostUpdate(postId) {
+        // 서버의 API 명세에 맞춰 경로를 확인하세요.
+        // saveBoard 함수에서 /api/board/write를 썼으므로 수정은 아래와 같을 가능성이 높습니다.
+        const requestUrl = `/api/board/update`;
+
+        const boardDto = {
+            id: parseInt(postId),
+            category: document.getElementById("boardCategory")?.value || "B01",
+            title: document.getElementById("postTitle").value,
+            contents: document.getElementById("postContent").value, // content -> contents 확인 필요
+            userId: currentUserId
+        };
+
+        try {
+            const response = await fetch(requestUrl, {
+                method: 'POST', // 서버가 PUT이 아닌 POST를 받을 수도 있습니다. 기존 로직 확인 필요.
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(boardDto)
+            });
+
+            if (response.ok) {
+                alert('수정이 완료되었습니다.');
+                location.href = '/board/boardList';
+            } else {
+                const errorText = await response.text();
+                console.error('서버 응답 에러:', errorText);
+                alert('수정에 실패했습니다. 서버 로그를 확인하세요.');
+            }
+        } catch (error) {
+            console.error('네트워크 에러:', error);
+        }
     }
 });
 
@@ -264,5 +318,33 @@ async function deleteComment(id, seq) {
         }
     } catch (e) {
         console.error("댓글 삭제 실패:", e);
+    }
+}
+async function updateBoard(id) {
+    const boardDto = {
+        id: id,
+        category: document.getElementById("boardCategory").value,
+        title: document.getElementById("postTitle").value,
+        contents: document.getElementById("postContent").value,
+        userId: currentUserId
+    };
+
+    try {
+        const response = await fetch("/api/board/update", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(boardDto)
+        });
+
+        if (response.ok) {
+            alert("수정 완료되었습니다.");
+            // boardList.html을 보여주는 컨트롤러 주소가 /board/boardList 라면:
+            location.href = "/board/boardList";
+        } else {
+            const errorMsg = await response.text();
+            console.error("서버 에러 응답:", errorMsg);
+        }
+    } catch (e) {
+        console.error("네트워크 에러:", e);
     }
 }

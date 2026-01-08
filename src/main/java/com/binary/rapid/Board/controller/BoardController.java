@@ -45,7 +45,7 @@ public class BoardController {
         return ResponseEntity.status(HttpStatus.CREATED).body(boardId);
     }
 
-    @PutMapping("/update")
+    @PostMapping("/update")
     public ResponseEntity<String> updateBoard(@RequestBody BoardDto boardDto) {
         boardService.updateBoard(boardDto);
         return ResponseEntity.ok("수정 완료");
@@ -68,6 +68,10 @@ public class BoardController {
         } catch (IOException e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("파일 업로드 실패");
         }
+    }
+    @GetMapping("/board/boardEdit")
+    public String boardEditPage(@RequestParam("id") int id) {
+        return "board/boardEdit"; // templates/board/boardEdit.html 파일을 찾아감
     }
 
     // --- 댓글 관련 ---
