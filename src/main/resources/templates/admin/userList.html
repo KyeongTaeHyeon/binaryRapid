@@ -1,64 +1,102 @@
-<div class="search-container">
-    <form id="searchForm" action="/admin/users" method="get" class="search-wrap">
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+    <head>
+        <meta charset="UTF-8"/>
+        <title>회원 관리</title>
+        <link rel="stylesheet" th:href="@{/css/reset.css}"/>
+        <link rel="stylesheet" th:href="@{/css/common.css}"/>
+        <link rel="stylesheet" th:href="@{/css/admin.css}"/>
+    </head>
 
-        <select name="category" id="searchCategory">
-            <option value="">전체 취향</option>
-            <option th:each="item : ${tasteList}"
-                    th:value="${item.name}"
-                    th:text="${item.name}"
-                    th:selected="${paramCate == item.name}">
-                돈코츠
-            </option>
-        </select>
+    <body>
+        <div id="wrapper">
+            <header id="header" th:replace="~{fragments/header :: header}"></header>
 
-        <input type="text" name="keyword" id="searchKeyword"
-               placeholder="닉네임, 이메일 검색" th:value="${paramKeyword}">
+            <main id="main" class="admin-container">
+                <aside th:replace="~{fragments/sidebar :: sidebar(currentMenu='user')}"></aside>
 
-        <div class="date-range">
-            <input type="date" name="startDate" id="startDate" th:value="${paramStart}">
-            <span>~</span>
-            <input type="date" name="endDate" id="endDate" th:value="${paramEnd}">
+                <section id="managerRight">
+                    <div class="page-header">
+                        <h2>회원 관리</h2>
+                    </div>
+
+                    <div class="search-container">
+                        <form id="searchForm" action="/admin/users" method="get" class="search-wrap">
+
+                            <select name="category" id="searchCategory">
+                                <option value="">전체 취향</option>
+                                <option th:each="item : ${tasteList}"
+                                        th:value="${item.name}"
+                                        th:text="${item.name}"
+                                        th:selected="${search.category == item.name}">
+                                    돈코츠
+                                </option>
+                            </select>
+
+                            <input type="text" name="keyword" id="searchKeyword"
+                                   placeholder="닉네임, 이메일 검색" th:value="${search.keyword}">
+
+                            <div class="date-range">
+                                <input type="date" name="startDate" id="startDate" th:value="${search.startDate}">
+                                <span>~</span>
+                                <input type="date" name="endDate" id="endDate" th:value="${search.endDate}">
+                            </div>
+
+                            <button type="submit" class="btn-search">검색</button>
+
+                            <button type="button" class="btn-reset" onclick="resetSearch()">초기화</button>
+                        </form>
+                    </div>
+
+                    <div class="table-top">
+                        <span>총 <b style="color:#2fb2ee" th:text="${#lists.size(users)}">0</b>명</span>
+                    </div>
+
+                    <table class="list-table">
+                        <thead>
+                        <tr>
+                            <th width="5%"><input type="checkbox" id="checkAll"></th>
+                            <th width="5%">No</th>
+                            <th width="15%">닉네임</th>
+                            <th width="20%">이메일</th>
+                            <th width="10%">취향</th>
+                            <th width="5%">나이</th>
+                            <th width="5%">성별</th>
+                            <th width="15%">가입일</th>
+                            <th width="15%">관리</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:if="${#lists.isEmpty(users)}">
+                            <td colspan="9" style="padding: 50px 0;">검색 결과가 없습니다.</td>
+                        </tr>
+
+                        <tr th:each="user : ${users}">
+                            <td><input type="checkbox" name="ids" th:value="${user.userId}"></td>
+                            <td th:text="${user.userId}">1</td>
+                            <td style="font-weight:bold;" th:text="${user.nickName}">홍길동</td>
+                            <td th:text="${user.email}">test@email.com</td>
+                            <td><span class="badge" style="background:#eee; color:#555;"
+                                      th:text="${user.taste}">돈코츠</span></td>
+                            <td th:text="|${user.age}세|">25세</td>
+                            <td>
+                                <span class="badge"
+                                      th:classappend="${user.gender == 'M'} ? 'male' : 'female'"
+                                      th:text="${user.genderLabel}">남</span>
+                            </td>
+                            <td th:text="${#temporals.format(user.createDate, 'yyyy-MM-dd')}">2026-01-01</td>
+                            <td>
+                                <button class="btn-mini">수정</button>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </section>
+            </main>
+            <footer id="footer" th:replace="~{fragments/footer :: footer}"></footer>
         </div>
 
-        <button type="submit" class="btn-search">검색</button>
-
-        <button type="button" class="btn-reset" onclick="resetSearch()">초기화</button>
-    </form>
-</div>
-
-<table class="list-table">
-    <thead>
-    <tr>
-        <th><input type="checkbox" id="checkAll"></th>
-        <th>No</th>
-        <th>닉네임</th>
-        <th>이메일</th>
-        <th>취향</th>
-        <th>나이</th>
-        <th>성별</th>
-        <th>가입일</th>
-        <th>관리</th>
-    </tr>
-    </thead>
-    <tbody>
-    <tr th:if="${#lists.isEmpty(users)}">
-        <td colspan="9" style="padding: 50px 0;">검색 결과가 없습니다.</td>
-    </tr>
-    <tr th:each="user : ${users}">
-        <td><input type="checkbox" name="ids" th:value="${user.userId}"></td>
-        <td th:text="${user.userId}"></td>
-        <td style="font-weight:bold;" th:text="${user.nickName}"></td>
-        <td th:text="${user.email}"></td>
-        <td><span class="badge" th:text="${user.taste}"></span></td>
-        <td th:text="${user.age}"></td>
-        <td th:text="${user.gender}"></td>
-        <td th:text="${#temporals.format(user.createDate, 'yyyy-MM-dd')}"></td>
-        <td>
-            <button class="btn-mini">수정</button>
-        </td>
-    </tr>
-    </tbody>
-</table>
-
-<script th:src="@{/js/common.js}"></script>
-<script th:src="@{/js/userManagement.js}"></script>
+        <script th:src="@{/js/common.js}"></script>
+        <script th:src="@{/js/adminUserList.js}"></script>
+    </body>
+</html>
