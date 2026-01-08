@@ -14,7 +14,8 @@ import java.util.List;
 public class NewsService {
     private final NewsMapper newsMapper;
 
-    public List<NewsDto> showNews() {
-        return newsMapper.showNews();
+    public List<NewsDto> showNews(String tags, int size, int offset) {
+        return newsMapper.showNews(tags,size,offset);
     }
+    public int countNews(String tags){return newsMapper.countNews(tags);}
 }

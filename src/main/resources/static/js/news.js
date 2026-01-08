@@ -6,42 +6,42 @@ let currentFilter = 'all'; // 현재 선택된 필터 (초기값: 'all' - 전체
 let currentPage = 1; // 현재 페이지 번호 (초기값: 1)
 const itemsPerPage = 5; // 한 페이지에 표시할 뉴스 항목 수
 
-// ----------------- 데이터 로드 및 초기화 -----------------
-// DOMContentLoaded 이벤트는 HTML 문서가 완전히 로드되고 파싱되었을 때 발생하지만,
-// 여기서는 `LoadData`가 비동기적으로 데이터를 가져온 후 UI를 렌더링하도록 설정되어 있습니다.
-LoadData('/api/news').then((data) => {
-    newsList = data; // JSON 데이터 로드 후 newsList에 할당
-    showNewList(); // 초기 뉴스 목록 렌더링
-    setupFilterEvents(); // 필터 버튼 이벤트 설정
+
+document.addEventListener('DOMContentLoaded', () => {
+    setupFilterEvents(); // 1. 버튼들에 클릭 이벤트 연결
+    fetchNews();         // 2. 첫 페이지 데이터 로드
 });
+const fetchNews = () => {
+    const url = `/api/news?page=${currentPage}&size=${itemsPerPage}&tags=${currentFilter}`;
+
+    LoadData(url).then((data) => {
+        // 백엔드에서 Map으로 보낸 데이터를 받습니다.
+        newsList = data.newsList;
+        const totalItems = data.totalItems;
+
+        showNewList(newsList); // 뉴스 목록 출력
+        renderPaginationButtons(totalItems); // 페이징 버튼 생성
+
+    });
+};
+
+
 
 // ----------------- 함수: 뉴스 목록 렌더링 -----------------
-let showNewList = () => {
+let showNewList = (dataToShow) => {
     /** @type {HTMLTemplateElement} */
     const newsTemplate = document.getElementById('newsTemplate'); // 템플릿 요소 가져오기
     const newsContainer = document.getElementById('postNumber'); // 뉴스가 표시될 컨테이너
     if (!newsContainer || !newsTemplate) return;
     newsContainer.innerHTML = ''; // 기존 뉴스 목록을 지우고 다시 렌더링
 
-    // 현재 필터(currentFilter)에 따라 뉴스 데이터 필터링
-    const filteredNews = newsList.filter((news) => {
-        if (currentFilter === 'all') {
-            return true; // 'all' 필터일 때는 모든 뉴스 반환
-        } else if (currentFilter === 'issue') {
-            return news.tags === 'issue'; // 'issue' 태그를 가진 뉴스만 반환
-        } else if (currentFilter === 'years') {
-            return news.tags === 'years'; // 'years' 태그를 가진 뉴스만 반환
-        }
-        return false; // 그 외의 경우는 반환하지 않음 (이 부분은 사실상 도달하지 않을 수 있음)
-    });
-
-    // 현재 페이지에 해당하는 뉴스만 슬라이스하여 표시 (페이지네이션)
+    // // 현재 페이지에 해당하는 뉴스만 슬라이스하여 표시 (페이지네이션)
     const startIndex = (currentPage - 1) * itemsPerPage;
-    const endIndex = startIndex + itemsPerPage;
-    const paginatedNews = filteredNews.slice(startIndex, endIndex);
+    // const endIndex = startIndex + itemsPerPage;
+    // const paginatedNews = filteredNews.slice(startIndex, endIndex);
 
     // 필터링 및 페이지네이션된 뉴스를 HTML로 변환하여 컨테이너에 추가
-    paginatedNews.forEach((news, index) => {
+    dataToShow.forEach((news, index) => {
         // newsTemplate의 내용을 복제하여 사용
         const newsItem = newsTemplate.content.firstElementChild.cloneNode(true);
         // 뉴스 링크 설정 (links 속성이 없으면 기본값으로 '../index.html')
@@ -50,14 +50,8 @@ let showNewList = () => {
         const newsNameDiv = newsItem.querySelector('.name');
         newsNameDiv.innerHTML = ''; // 기존 .name div의 내용을 모두 지우기
 
-        // 필터에 따라 표시할 ID (원본 ID 또는 필터링된 목록 내 순번) 결정
-        let displayId;
-        if (currentFilter === 'all') {
-            displayId = news.id; // '전체'일 때는 원본 ID 사용
-        } else {
-            displayId = startIndex + index + 1; // 필터링된 목록 내에서의 순번 계산
-        }
 
+        let displayId =startIndex + index + 1;
         // 1. ID span 생성 및 추가
         const newsId = document.createElement('span');
         newsId.textContent = `${displayId}. `; // ID 뒤에 점과 공백 추가
@@ -95,8 +89,6 @@ let showNewList = () => {
         });
     });
 
-    // 뉴스 렌더링 후 페이지네이션 버튼 업데이트
-    renderPaginationButtons(filteredNews.length);
 };
 
 // ----------------- 함수: 페이지네이션 버튼 렌더링 -----------------
@@ -112,7 +104,7 @@ let renderPaginationButtons = (totalItems) => {
         prevButton.onclick = () => {
             if (currentPage > 1) {
                 currentPage--; // 페이지 감소
-                showNewList(); // 뉴스 목록 다시 렌더링
+                fetchNews(); // 뉴스 목록 다시 렌더링
             }
         };
         prevButton.disabled = currentPage === 1; // 첫 페이지면 비활성화
@@ -150,7 +142,7 @@ let renderPaginationButtons = (totalItems) => {
         pageButton.textContent = i; // 버튼 텍스트는 페이지 번호
         pageButton.onclick = () => {
             currentPage = i; // 클릭된 페이지로 현재 페이지 설정
-            showNewList(); // 뉴스 목록 다시 렌더링
+            fetchNews(); // 뉴스 목록 다시 렌더링
         };
         pageItem.appendChild(pageButton);
         paginationList.appendChild(pageItem);
@@ -175,7 +167,7 @@ let renderPaginationButtons = (totalItems) => {
         lastPageButton.textContent = totalPages;
         lastPageButton.onclick = () => {
             currentPage = totalPages; // 클릭 시 마지막 페이지로 이동
-            showNewList();
+            fetchNews();
         };
         lastPageItem.appendChild(lastPageButton);
         paginationList.appendChild(lastPageItem);
@@ -188,7 +180,7 @@ let renderPaginationButtons = (totalItems) => {
         nextButton.onclick = () => {
             if (currentPage < totalPages) {
                 currentPage++; // 페이지 증가
-                showNewList(); // 뉴스 목록 다시 렌더링
+                fetchNews(); // 뉴스 목록 다시 렌더링
             }
         };
         nextButton.disabled = currentPage === totalPages; // 마지막 페이지면 비활성화
@@ -234,7 +226,7 @@ let setupFilterEvents = () => {
                 currentFilter = 'years';
             }
             currentPage = 1; // 필터 변경 시 현재 페이지를 1로 리셋
-            showNewList(); // 새 필터로 뉴스 목록 다시 렌더링
+            fetchNews(); // 새 필터로 뉴스 목록 다시 렌더링
         });
     });
 };
