@@ -14,8 +14,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
 @AutoConfigureMockMvc
-// user insert Test
-public class UserInsertTest {
+// user update Test
+public class UserMyInfoUpdateTest {
 
     @Autowired
     private UserService service;
@@ -24,22 +24,20 @@ public class UserInsertTest {
     @Test
     public void insertMemberTest() {
 
-        UserSignUpForm member = new UserSignUpForm();
-        member.setId("test2");
-        member.setPassword("123444dd!");
-        member.setNickName("테스트2");
-        member.setName("김자바");
-        member.setTaste("돈코츠");
-        member.setBirth("2026.01.06");
+        UserResponseDto member = new UserResponseDto();
+        member.setNickName("업데이트 테스트맨");
+        member.setTaste("시오");
         member.setEmail("test2@naver.com");
-        member.setSocial(SocialType.LOCAL);
-        member.setGender("M");
-        member.setRole(UserRole.USER);
 
-        int result = service.localSignup(member);
+        UserResponseDto result = service.updateMyInfo(member);
 
+        System.out.println("결과 데이터: " + result.toString());
         // ✅ 핵심 검증
         assertThat(result).isNotNull();
+        assertThat(result.getEmail()).isEqualTo("test2@naver.com");
+
+        // 콘솔에 출력해서 확인
+        System.out.println("결과 데이터: " + result.toString());
     }
 
 

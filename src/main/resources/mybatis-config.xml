@@ -17,6 +17,8 @@
         <typeAlias alias="cateDto" type="com.binary.rapid.ramen.dto.RamenCateDto"/>
         <typeAlias alias="shopForm" type="com.binary.rapid.shop.form.ShopForm"/>
         <typeAlias alias="userDto" type="com.binary.rapid.user.dto.UserDto"/>
+        <typeAlias alias="myBoardDto" type="com.binary.rapid.user.dto.myBoardDto"/>
+        <typeAlias alias="UserResponseDto" type="com.binary.rapid.user.dto.UserResponseDto"/>
         <typeAlias alias="shopSearchForm" type="com.binary.rapid.shop.form.ShopSearchForm"/>
         <typeAlias alias="categoryForm" type="com.binary.rapid.category.form.CategoryForm"/>
     </typeAliases>

@@ -46,6 +46,18 @@ public class RapidController {
     public String userBoardListPage() {
         return "login/userBoardList";
     }
+    @GetMapping("/login/modify")
+    public String userInfoModify() {
+        return "login/userModify";
+    }
+    @GetMapping("/login/mywish")
+    public String userMywish() {
+        return "login/userMywish";
+    }
+    @GetMapping("/login/requestShop")
+    public String userRequestShop() {
+        return "login/userRequestShop";
+    }
 
     @GetMapping("/manager/managerMain")
     public String managerMainPage() {

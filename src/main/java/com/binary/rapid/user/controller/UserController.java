@@ -1,6 +1,5 @@
 package com.binary.rapid.user.controller;
 
-import com.binary.rapid.Board.dto.BoardDto;
 import com.binary.rapid.user.dto.UserResponseDto;
 import com.binary.rapid.user.form.UserLoginForm;
 import com.binary.rapid.user.form.UserSignUpForm;
@@ -8,12 +7,9 @@ import com.binary.rapid.user.service.UserService;
 import jakarta.servlet.http.HttpSession;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 
 @Slf4j
@@ -49,7 +45,8 @@ public class UserController {
 
 
     // 소셜 회원가입
-    @PostMapping("/SocialSignup")    public ResponseEntity<Void> userSocialSignup(@RequestBody UserSignUpForm form) {
+    @PostMapping("/SocialSignup")    
+    public ResponseEntity<Void> userSocialSignup(@RequestBody UserSignUpForm form) {
 
         service.localSignup(form);
 
@@ -64,28 +61,6 @@ public class UserController {
     }
     
     
-    // 유저 게시글 관리
-    @GetMapping("/api/my/board")
-    @ResponseBody
-    public ResponseEntity<?> myBoardList(HttpSession session) {
-
-        UserResponseDto loginUser =
-                (UserResponseDto) session.getAttribute("loginUser");
-
-        log.info("로그인 유저 정보"+ loginUser.toString());
-        
-        if (loginUser == null) {
-            return ResponseEntity
-                    .status(HttpStatus.UNAUTHORIZED)
-                    .body("LOGIN_REQUIRED");
-        }
-
-        List<BoardDto> result =  service.getMyBoards(loginUser.getUserId());
-        
-        log.info("리턴된 listData"+ result);
-        return ResponseEntity.ok(
-                result
-        );
-    }
+ 
 
 }

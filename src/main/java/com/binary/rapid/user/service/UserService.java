@@ -1,11 +1,8 @@
 package com.binary.rapid.user.service;
 
-import com.binary.rapid.Board.dto.BoardDto;
-import com.binary.rapid.Board.mapper.BoardMapper;
 import com.binary.rapid.user.dto.UserDto;
-import com.binary.rapid.user.dto.UserLoginDto;
 import com.binary.rapid.user.dto.UserResponseDto;
-import com.binary.rapid.user.factory.RandomPass;
+import com.binary.rapid.user.dto.myBoardDto;
 import com.binary.rapid.user.factory.UserCreateFactory;
 import com.binary.rapid.user.form.UserLoginForm;
 import com.binary.rapid.user.form.UserSignUpForm;
@@ -16,7 +13,6 @@ import com.binary.rapid.user.handler.UserNotFoundException;
 import com.binary.rapid.user.mapper.UserMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.ibatis.annotations.Select;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -129,7 +125,7 @@ public class UserService {
 
     // 유저 id로 게시글 select
 
-    public List<BoardDto> getMyBoards(int loginUser) {
+    public List<myBoardDto> getMyBoards(int loginUser) {
 
         // ✅ Service는 세션을 직접 보지 않는다
         if (loginUser == 0) {
@@ -140,4 +136,15 @@ public class UserService {
     }
 
 
+    @Transactional
+    public UserResponseDto updateMyInfo(UserResponseDto loggerUser) {
+
+        if (loggerUser == null) {
+            throw new LoginRequiredException();
+        }
+        
+        userMapper.updateMyInfo(loggerUser);
+
+        return userMapper.selectUserId(loggerUser.getId());
+    }
 }
