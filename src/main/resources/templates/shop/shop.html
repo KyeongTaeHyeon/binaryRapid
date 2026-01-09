@@ -8,7 +8,7 @@
         <link rel="stylesheet" th:href="@{/css/common.css}"/>
         <link rel="stylesheet" th:href="@{/css/shop.css}"/>
     </head>
-    <body>
+    <body th:attr="data-authenticated=${session.loginUser != null}, data-login-url=@{/login}">
         <div id="wrapper">
             <header id="header" th:replace="~{fragments/header :: header}"></header>
 
@@ -88,22 +88,42 @@
                             <div class="contentItem">
                                 <a th:href="@{/shop/{id}(id=${shop.shopId})}">
                                     <div class="contentImage">
-                                        <img th:src="${shop.imgUrl}" th:alt="${shop.shopName}"/>
+                                        <img th:if="${shop.imgUrl != null}"
+                                             th:src="${shop.imgUrl}"
+                                             th:alt="${shop.shopName}"/>
+                                        <div th:if="${shop.imgUrl == null}" class="no-image">No Image</div>
                                     </div>
+
                                     <div class="contentsInfo">
                                         <div class="contentTitle" th:text="${shop.shopName}"></div>
+
                                         <div class="contentCategory">
                                             <ul class="categoryList">
                                                 <li th:each="category : ${shop.categories}">
-                                                    <span class="badge" th:text="${category.categoryName}">카테고리명</span>
+                                                    <span class="badge"
+                                                          th:text="${category.categoryName}">
+                                                    </span>
                                                 </li>
                                             </ul>
                                         </div>
-                                        <div class="contentDescription" th:text="${shop.shopContent}"></div>
+
+                                        <div class="contentDescription"
+                                             th:text="${shop.shopContent}">
+                                        </div>
                                     </div>
                                 </a>
-                                <button class="contentLike" type="button"></button>
+
+                                <!-- ✅ 좋아요 버튼 (SSR에서 상태 주입) -->
+                                <button class="contentLike"
+                                        type="button"
+                                        th:if="${session.loginUser != null}"
+                                        th:classappend="${shop.liked} ? ' active' : ''"
+                                        th:attr="data-shop-id=${shop.shopId},
+                                                data-liked=${shop.liked},
+                                                aria-pressed=${shop.liked}">
+                                </button>
                             </div>
+
                         </div>
                     </div>
 
