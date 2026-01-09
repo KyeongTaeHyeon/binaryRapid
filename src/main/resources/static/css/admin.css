@@ -392,6 +392,29 @@ body {
     vertical-align: middle;
 }
 
+/* [수정] 회원 상세 모달 - 현재 상태 영역 정렬 */
+.status-section {
+    display: flex; /* 요소를 가로로 배치 */
+    align-items: center; /* 수직 중앙 정렬 (핵심) */
+    gap: 15px; /* '현재 상태' 글자와 뱃지 사이 간격 */
+    margin-top: 20px; /* 위쪽 요소와의 간격 */
+    margin-bottom: 10px; /* 아래쪽 여백 */
+}
+
+/* (선택) 라벨 스타일 미세 조정 */
+.status-section label {
+    font-size: 13px; /* 글자 크기 살짝 키움 */
+    font-weight: bold; /* 굵게 처리 */
+    color: #333; /* 진한 회색 */
+    margin: 0; /* 기본 마진 제거 (flex 정렬 위해) */
+}
+
+.status-section .badge {
+    width: auto !important; /* 60px 고정 해제 */
+    padding: 6px 12px; /* 내부 여백 확보 */
+    white-space: nowrap; /* 줄바꿈 방지 */
+}
+
 /*
     Notice
 */
