@@ -13,6 +13,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const requestData = {
       id: document.getElementById('userName').value,
       password: document.getElementById('userPassword').value,
+      name: document.getElementById('name').value,
       nickName: document.getElementById('nickName').value,
       email: document.getElementById('userEmail').value,
       gender: document.getElementById('selGender').value,

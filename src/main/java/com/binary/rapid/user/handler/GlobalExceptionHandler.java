@@ -10,7 +10,8 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler({
             InvalidPasswordException.class,
-            UserNotFoundException.class
+            UserNotFoundException.class,
+            LoginRequiredException.class
     })
     public ResponseEntity<String> handleLoginExceptions(RuntimeException e) {
         return ResponseEntity

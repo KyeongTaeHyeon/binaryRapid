@@ -14,6 +14,7 @@
         <typeAlias alias="boardCommentDto" type="com.binary.rapid.Board.dto.BoardCommentDto"/>
         <typeAlias alias="shopForm" type="com.binary.rapid.shop.form.ShopForm"/>
         <typeAlias alias="newsDto" type="com.binary.rapid.news.dto.NewsDto"/>
+        <typeAlias alias="boardDto" type="com.binary.rapid.Board.dto.BoardDto"/>
         <typeAlias alias="infoDto" type="com.binary.rapid.ramen.dto.RamenInfoDto"/>
         <typeAlias alias="popupDto" type="com.binary.rapid.ramen.dto.RamenPopupDto"/>
         <typeAlias alias="cateDto" type="com.binary.rapid.ramen.dto.RamenCateDto"/>
@@ -21,6 +22,9 @@
         <typeAlias alias="userDto" type="com.binary.rapid.user.dto.UserDto"/>
         <!--    shop    -->
         <typeAlias alias="shopForm" type="com.binary.rapid.shop.form.ShopForm"/>
+        <typeAlias alias="userDto" type="com.binary.rapid.user.dto.UserDto"/>
+        <typeAlias alias="myBoardDto" type="com.binary.rapid.user.dto.myBoardDto"/>
+        <typeAlias alias="UserResponseDto" type="com.binary.rapid.user.dto.UserResponseDto"/>
         <typeAlias alias="shopSearchForm" type="com.binary.rapid.shop.form.ShopSearchForm"/>
         <!--    category    -->
         <typeAlias alias="categoryForm" type="com.binary.rapid.category.form.CategoryForm"/>

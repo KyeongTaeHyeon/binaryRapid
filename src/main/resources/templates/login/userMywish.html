@@ -1,243 +1,241 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
-    <head>
-        <meta charset="UTF-8"/>
-        <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-        <title>RaFeed - 찜 목록</title>
-        <link rel="stylesheet" th:href="@{/css/reset.css}"/>
-        <link rel="stylesheet" th:href="@{/css/common.css}"/>
-        <link rel="stylesheet" th:href="@{/css/admin.css}"/>
-        <style>
-            /* 찜 목록 카드 레이아웃을 위한 기본 스타일 */
-            #contentList {
-                display: flex; /* Flexbox 또는 Grid 사용 */
-                flex-direction: column; /* 세로로 나열 */
-                gap: 20px; /* 카드 사이 간격 */
-                padding: 20px 0;
-                width: 100%;
-                max-width: 800px; /* 컨텐츠 너비 제한 (필요시 조정) */
-                margin: 0 auto; /* 가운데 정렬 */
-            }
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>RaFeed - 찜 목록</title>
+    <link rel="stylesheet" th:href="@{/css/reset.css}"/>
+    <link rel="stylesheet" th:href="@{/css/common.css}"/>
+    <link rel="stylesheet" th:href="@{/css/manager.css}"/>
+    <style>
+        /* 찜 목록 카드 레이아웃을 위한 기본 스타일 */
+        #contentList {
+          display: flex; /* Flexbox 또는 Grid 사용 */
+          flex-direction: column; /* 세로로 나열 */
+          gap: 20px; /* 카드 사이 간격 */
+          padding: 20px 0;
+          width: 100%;
+          max-width: 800px; /* 컨텐츠 너비 제한 (필요시 조정) */
+          margin: 0 auto; /* 가운데 정렬 */
+        }
+  
+        .contentItem {
+          border: 1px solid #eee;
+          border-radius: 8px;
+          overflow: hidden;
+          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+          display: flex; /* 이미지와 텍스트를 옆으로 나열 */
+          padding: 15px;
+          box-sizing: border-box; /* 패딩이 너비에 포함되도록 */
+        }
+  
+        .contentImageWrapper {
+          /* 이미지 컨테이너 추가 */
+          flex-shrink: 0; /* 줄어들지 않도록 */
+          width: 150px; /* 이미지 너비 고정 */
+          height: 150px; /* 이미지 높이 고정 */
+          margin-right: 15px;
+          border-radius: 4px;
+          overflow: hidden;
+        }
+  
+        .contentImageWrapper img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover; /* 이미지를 비율 유지하며 채움 */
+        }
+  
+        .contentInfo {
+          /* 텍스트 정보 컨테이너 */
+          flex-grow: 1;
+          display: flex;
+          flex-direction: column;
+          justify-content: space-between; /* 내용과 링크를 위아래로 분리 */
+        }
+  
+        .contentHeader {
+          display: flex;
+          align-items: baseline; /* 번호와 제목을 기준선에 맞춤 */
+          margin-bottom: 5px;
+        }
+  
+        .contentNumber {
+          font-size: 1.1em;
+          font-weight: bold;
+          margin-right: 8px;
+          color: #333;
+        }
+  
+        .contentTitle {
+          font-size: 1.1em;
+          font-weight: bold;
+          color: #000;
+        }
+        .contentCategory {
+          /* 분류를 위한 스타일 */
+          font-size: 0.9em;
+          color: #666;
+          margin-left: 8px;
+        }
+  
+        .contentDescription {
+          font-size: 0.9em;
+          color: #555;
+          margin-top: 5px;
+          line-height: 1.4;
+          /* 캡처된 화면처럼 텍스트가 잘리도록 제한 */
+          display: -webkit-box;
+          -webkit-line-clamp: 2; /* 2줄로 제한 (필요시 조정) */
+          -webkit-box-orient: vertical;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+  
+        .siteLink {
+          display: inline-block;
+          padding: 8px 15px;
+          background-color: #f0f0f0; /* 배경색 변경 */
+          color: #007bff; /* 글씨색 변경 */
+          text-decoration: none;
+          border-radius: 5px;
+          font-size: 0.9em;
+          margin-top: 10px; /* 상단 여백 추가 */
+          align-self: flex-start; /* 링크가 왼쪽으로 정렬되도록 */
+        }
+  
+        .siteLink:hover {
+          background-color: #e0e0e0;
+          color: #0056b3;
+        }
+  
+        /* 페이지네이션 및 select box는 이전과 동일한 스타일 유지 */
+        .pagination {
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          margin-top: 20px;
+        }
+  
+        .page-list {
+          display: flex;
+          list-style: none;
+          padding: 0;
+          margin: 0 10px;
+        }
+  
+        .page-item button {
+          border: 1px solid #ddd;
+          padding: 8px 12px;
+          margin: 0 3px;
+          cursor: pointer;
+          background-color: #fff;
+          border-radius: 4px;
+          font-size: 1em;
+        }
+  
+        .page-item button:hover:not(.active button) {
+          background-color: #f0f0f0;
+        }
+  
+        .page-item.active button {
+          background-color: #007bff;
+          color: white;
+          border-color: #007bff;
+          cursor: default;
+        }
+  
+        .page-btn {
+          border: 1px solid #ddd;
+          padding: 8px 12px;
+          cursor: pointer;
+          background-color: #fff;
+          border-radius: 4px;
+        }
+  
+        .page-btn:disabled {
+          opacity: 0.5;
+          cursor: not-allowed;
+        }
+  
+        .select_box {
+          margin-left: 20px;
+        }
+  
+        .select_box select {
+          padding: 8px;
+          border: 1px solid #ddd;
+          border-radius: 4px;
+        }
+    </style>
+</head>
 
-            .contentItem {
-                border: 1px solid #eee;
-                border-radius: 8px;
-                overflow: hidden;
-                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-                display: flex; /* 이미지와 텍스트를 옆으로 나열 */
-                padding: 15px;
-                box-sizing: border-box; /* 패딩이 너비에 포함되도록 */
-            }
+<body>
+<div id="wrapper">
+    <header id="header" th:replace="~{fragments/header :: header}"></header>
+    <main id="main">
+        <h2>찜 목록</h2>
+        <div id="inner">
+            <div id="managerLeft">
+                <div th:if="${session.loginUser != null and session.loginUser.role.name() == 'USER'}"
+                     id="managerLeftInner">
+                    <span th:text="${session.loginUser.nickName + '님 안녕하세요'}"></span>
+                    <ul>
+                        <li>
+                            <a href="/login/modify">내 정보 변경</a>
+                        </li>
+                        <li><a href="/login/userBoardList">작성글 관리</a></li>
+                        <li  class="on"><a href="/login/mywish">찜 목록</a></li>
+                        <li><a href="/login/requestShop">등록 신청 관리</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div id="managerRight">
+                <div id="contentList"></div>
 
-            .contentImageWrapper {
-                /* 이미지 컨테이너 추가 */
-                flex-shrink: 0; /* 줄어들지 않도록 */
-                width: 150px; /* 이미지 너비 고정 */
-                height: 150px; /* 이미지 높이 고정 */
-                margin-right: 15px;
-                border-radius: 4px;
-                overflow: hidden;
-            }
-
-            .contentImageWrapper img {
-                width: 100%;
-                height: 100%;
-                object-fit: cover; /* 이미지를 비율 유지하며 채움 */
-            }
-
-            .contentInfo {
-                /* 텍스트 정보 컨테이너 */
-                flex-grow: 1;
-                display: flex;
-                flex-direction: column;
-                justify-content: space-between; /* 내용과 링크를 위아래로 분리 */
-            }
-
-            .contentHeader {
-                display: flex;
-                align-items: baseline; /* 번호와 제목을 기준선에 맞춤 */
-                margin-bottom: 5px;
-            }
-
-            .contentNumber {
-                font-size: 1.1em;
-                font-weight: bold;
-                margin-right: 8px;
-                color: #333;
-            }
-
-            .contentTitle {
-                font-size: 1.1em;
-                font-weight: bold;
-                color: #000;
-            }
-
-            .contentCategory {
-                /* 분류를 위한 스타일 */
-                font-size: 0.9em;
-                color: #666;
-                margin-left: 8px;
-            }
-
-            .contentDescription {
-                font-size: 0.9em;
-                color: #555;
-                margin-top: 5px;
-                line-height: 1.4;
-                /* 캡처된 화면처럼 텍스트가 잘리도록 제한 */
-                display: -webkit-box;
-                -webkit-line-clamp: 2; /* 2줄로 제한 (필요시 조정) */
-                -webkit-box-orient: vertical;
-                overflow: hidden;
-                text-overflow: ellipsis;
-            }
-
-            .siteLink {
-                display: inline-block;
-                padding: 8px 15px;
-                background-color: #f0f0f0; /* 배경색 변경 */
-                color: #007bff; /* 글씨색 변경 */
-                text-decoration: none;
-                border-radius: 5px;
-                font-size: 0.9em;
-                margin-top: 10px; /* 상단 여백 추가 */
-                align-self: flex-start; /* 링크가 왼쪽으로 정렬되도록 */
-            }
-
-            .siteLink:hover {
-                background-color: #e0e0e0;
-                color: #0056b3;
-            }
-
-            /* 페이지네이션 및 select box는 이전과 동일한 스타일 유지 */
-            .pagination {
-                display: flex;
-                justify-content: center;
-                align-items: center;
-                margin-top: 20px;
-            }
-
-            .page-list {
-                display: flex;
-                list-style: none;
-                padding: 0;
-                margin: 0 10px;
-            }
-
-            .page-item button {
-                border: 1px solid #ddd;
-                padding: 8px 12px;
-                margin: 0 3px;
-                cursor: pointer;
-                background-color: #fff;
-                border-radius: 4px;
-                font-size: 1em;
-            }
-
-            .page-item button:hover:not(.active button) {
-                background-color: #f0f0f0;
-            }
-
-            .page-item.active button {
-                background-color: #007bff;
-                color: white;
-                border-color: #007bff;
-                cursor: default;
-            }
-
-            .page-btn {
-                border: 1px solid #ddd;
-                padding: 8px 12px;
-                cursor: pointer;
-                background-color: #fff;
-                border-radius: 4px;
-            }
-
-            .page-btn:disabled {
-                opacity: 0.5;
-                cursor: not-allowed;
-            }
-
-            .select_box {
-                margin-left: 20px;
-            }
-
-            .select_box select {
-                padding: 8px;
-                border: 1px solid #ddd;
-                border-radius: 4px;
-            }
-        </style>
-    </head>
-
-    <body>
-        <div id="wrapper">
-            <header id="header" th:replace="~{fragments/header :: header}"></header>
-            <main id="main">
-                <h2>찜 목록</h2>
-                <div id="inner">
-                    <div id="managerLeft">
-                        <div id="managerLeftInner">
-                            <span> asdasd123님</span>
-                            <ul>
-                                <li>
-                                    <a href="./userModify">내 정보 변경</a>
-                                </li>
-                                <li>
-                                    <a href="./userBoardList">작성글 관리</a>
-                                </li>
-                                <li class="on"><a href="./userMywish">찜 목록</a></li>
-                                <li><a href="./userRequestShop">등록 신청 관리</a></li>
-                            </ul>
+                <template id="contentItemTemplate">
+                    <div class="contentItem">
+                        <div class="contentImageWrapper">
+                            <img src="" alt="가게 이미지"/>
+                        </div>
+                        <div class="contentInfo">
+                            <div class="contentHeader">
+                                <div class="contentNumber"></div>
+                                <div class="contentTitle"></div>
+                                <div class="contentCategory"></div>
+                            </div>
+                            <div class="contentDescription"></div>
+                            <a href="#" target="_blank" class="siteLink"
+                            >사이트 바로가기</a
+                            >
                         </div>
                     </div>
-                    <div id="managerRight">
-                        <div id="contentList"></div>
+                </template>
 
-                        <template id="contentItemTemplate">
-                            <div class="contentItem">
-                                <div class="contentImageWrapper">
-                                    <img src="" alt="가게 이미지"/>
-                                </div>
-                                <div class="contentInfo">
-                                    <div class="contentHeader">
-                                        <div class="contentNumber"></div>
-                                        <div class="contentTitle"></div>
-                                        <div class="contentCategory"></div>
-                                    </div>
-                                    <div class="contentDescription"></div>
-                                    <a href="#" target="_blank" class="siteLink"
-                                    >사이트 바로가기</a
-                                    >
-                                </div>
-                            </div>
-                        </template>
-
-                        <div id="contentNav">
-                            <nav class="pagination">
-                                <button class="page-btn prev" aria-label="이전 페이지">
-                                    &lt;
-                                </button>
-                                <ul class="page-list"></ul>
-                                <button class="page-btn next" aria-label="다음 페이지">
-                                    &gt;
-                                </button>
-                            </nav>
-                            <div class="select_box array_num">
-                                <select name="numbers" id="sarray_numbers">
-                                    <option value="5">5개</option>
-                                    <option value="7" selected>7개</option>
-                                    <option value="10">10개</option>
-                                </select>
-                            </div>
-                        </div>
+                <div id="contentNav">
+                    <nav class="pagination">
+                        <button class="page-btn prev" aria-label="이전 페이지">
+                            &lt;
+                        </button>
+                        <ul class="page-list"></ul>
+                        <button class="page-btn next" aria-label="다음 페이지">
+                            &gt;
+                        </button>
+                    </nav>
+                    <div class="select_box array_num">
+                        <select name="numbers" id="sarray_numbers">
+                            <option value="5">5개</option>
+                            <option value="7" selected>7개</option>
+                            <option value="10">10개</option>
+                        </select>
                     </div>
                 </div>
-            </main>
-            <footer id="footer" th:replace="~{fragments/footer :: footer}"></footer>
+            </div>
         </div>
-        <script th:src="@{/js/common.js}"></script>
-        <script th:src="@{/js/main.js}"></script>
-        <script th:src="@{/js/userMywish.js}"></script>
-    </body>
+    </main>
+    <footer id="footer" th:replace="~{fragments/footer :: footer}"></footer>
+</div>
+<script th:src="@{/js/common.js}"></script>
+<script th:src="@{/js/main.js}"></script>
+<script th:src="@{/js/userMywish.js}"></script>
+</body>
 </html>

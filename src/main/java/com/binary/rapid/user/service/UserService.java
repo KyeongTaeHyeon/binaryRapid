@@ -1,22 +1,23 @@
 package com.binary.rapid.user.service;
 
 import com.binary.rapid.user.dto.UserDto;
-import com.binary.rapid.user.dto.UserLoginDto;
 import com.binary.rapid.user.dto.UserResponseDto;
-import com.binary.rapid.user.factory.RandomPass;
+import com.binary.rapid.user.dto.myBoardDto;
 import com.binary.rapid.user.factory.UserCreateFactory;
 import com.binary.rapid.user.form.UserLoginForm;
 import com.binary.rapid.user.form.UserSignUpForm;
 import com.binary.rapid.user.handler.DuplicateEmailException;
 import com.binary.rapid.user.handler.InvalidPasswordException;
+import com.binary.rapid.user.handler.LoginRequiredException;
 import com.binary.rapid.user.handler.UserNotFoundException;
 import com.binary.rapid.user.mapper.UserMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.ibatis.annotations.Select;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @Slf4j
 @Service
@@ -71,17 +72,18 @@ public class UserService {
 
         UserResponseDto selectUser = userMapper.selectUserId(form.getId());
 
-        log.info("로컬 로그인시 select된 유저 정보 : " + selectUser.toString());
 
         if (selectUser == null) {
             throw new UserNotFoundException();
         }
 
+        log.info("로컬 로그인시 select된 유저 정보 : " + selectUser.toString());
+
         // 비밀번호 검증
         if (!passwordEncoder.matches(form.getPassword(), selectUser.getPassword())) {
             throw new InvalidPasswordException();
         }
-        
+
         return selectUser;
     }
 
@@ -118,5 +120,31 @@ public class UserService {
         }
 
         return userSignUpOk;
+    }
+
+
+    // 유저 id로 게시글 select
+
+    public List<myBoardDto> getMyBoards(int loginUser) {
+
+        // ✅ Service는 세션을 직접 보지 않는다
+        if (loginUser == 0) {
+            throw new LoginRequiredException();
+        }
+
+        return userMapper.selectBoardsByUserId(loginUser);
+    }
+
+
+    @Transactional
+    public UserResponseDto updateMyInfo(UserResponseDto loggerUser) {
+
+        if (loggerUser == null) {
+            throw new LoginRequiredException();
+        }
+        
+        userMapper.updateMyInfo(loggerUser);
+
+        return userMapper.selectUserId(loggerUser.getId());
     }
 }
