@@ -391,3 +391,38 @@ body {
     font-weight: normal;
     vertical-align: middle;
 }
+
+/*
+    Notice
+*/
+/* 우측 상단 메인 버튼 */
+.btn-primary {
+    background-color: var(--primary-dark); /* #2fb2ee */
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 6px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.btn-primary:hover {
+    background-color: #1e9bd6;
+}
+
+/* 모달 내부 입력 스타일 */
+.input-style, .textarea-style {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    box-sizing: border-box; /* padding 포함 크기 계산 */
+    font-size: 14px;
+    font-family: inherit;
+}
+
+.input-style:focus, .textarea-style:focus {
+    outline: none;
+    border-color: var(--primary-color);
+}

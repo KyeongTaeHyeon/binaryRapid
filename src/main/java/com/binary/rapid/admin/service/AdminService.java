@@ -1,6 +1,7 @@
 package com.binary.rapid.admin.service;
 
 import com.binary.rapid.admin.dto.AdminDto;
+import com.binary.rapid.admin.dto.NoticeDto;
 import com.binary.rapid.admin.mapper.AdminMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -26,5 +27,22 @@ public class AdminService {
         } else if ("restore".equals(action)) {
             adminMapper.updateUserStatusToRestore(userId);
         }
+    }
+
+    // [공지사항 추가]
+    // 목록 조회
+    public List<NoticeDto> getNoticeList(String type, String keyword) {
+        return adminMapper.selectNoticeList(type, keyword);
+    }
+
+    // 등록
+    public void addNotice(NoticeDto noticeDto) {
+        // 필요 시 여기서 데이터 검증 로직 추가
+        adminMapper.insertNotice(noticeDto);
+    }
+
+    // 공지사항 수정
+    public void updateNotice(NoticeDto noticeDto) {
+        adminMapper.updateNotice(noticeDto);
     }
 }

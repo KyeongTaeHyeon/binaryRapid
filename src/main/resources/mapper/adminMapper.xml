@@ -48,6 +48,61 @@
         WHERE user_id = #{userId}
     </update>
 
+
+    <!--  Notice  -->
+    <select id="selectNoticeList" resultType="com.binary.rapid.admin.dto.NoticeDto">
+        SELECT notice_id       AS noticeId
+             , notice_title    AS noticeTitle
+             , notice_content  AS noticeContent
+             , notice_type     AS noticeType
+             , admin_id        AS adminId
+             , id              AS id
+             , nickname        AS nickName
+             , notice_createAt AS noticeCreateAt
+             , notice_updateAt AS noticeUpdateAt
+             , notice_YN       AS noticeYN
+        FROM tb_notice
+        WHERE 1=1
+        
+        <if test="type != null and type != ''">
+            AND notice_type = #{type}
+        </if>
+        
+        <if test="keyword != null and keyword != ''">
+            AND notice_title LIKE CONCAT('%', #{keyword}, '%')
+        </if>
+        
+        ORDER BY notice_id DESC
+    </select>
+
+    <insert id="insertNotice" parameterType="com.binary.rapid.admin.dto.NoticeDto">
+        INSERT INTO tb_notice ( notice_title
+                              , notice_content
+                              , notice_type
+                              , admin_id
+                              , id
+                              , nickname
+                              , notice_createAt
+                              , notice_YN)
+        VALUES ( #{noticeTitle}
+               , #{noticeContent}
+               , #{noticeType}
+               , #{adminId}
+               , #{id}
+               , #{nickName}
+               , NOW(), #{noticeYN})
+    </insert>
+    
+    <update id="updateNotice" parameterType="noticeDto">
+        UPDATE tb_notice
+        SET notice_title    = #{noticeTitle}
+          , notice_content  = #{noticeContent}
+          , notice_type     = #{noticeType}
+          , notice_YN       = #{noticeYN}
+          , notice_updateAt = NOW()
+        WHERE notice_id = #{noticeId}
+    </update>
+
 </mapper>
 
 

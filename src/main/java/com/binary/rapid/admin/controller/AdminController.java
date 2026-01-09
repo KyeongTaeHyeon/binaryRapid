@@ -2,6 +2,7 @@ package com.binary.rapid.admin.controller;
 
 import com.binary.rapid.admin.dto.AdminDto;
 import com.binary.rapid.admin.dto.AdminSearchCondition; // 위에서 만든 DTO
+import com.binary.rapid.admin.dto.NoticeDto;
 import com.binary.rapid.admin.service.AdminService;
 import com.binary.rapid.category.form.CategoryForm;
 import com.binary.rapid.category.service.CategoryService;
@@ -59,5 +60,53 @@ public class AdminController {
             e.printStackTrace();
             return ResponseEntity.badRequest().body("fail");
         }
+    }
+
+    // 1. 공지사항 리스트 페이지 (검색 기능 포함)
+    @GetMapping("/notices")
+    public String noticeList(
+            Model model,
+            @RequestParam(required = false) String type,
+            @RequestParam(required = false) String keyword
+    ) {
+        // 1. 서비스 호출
+        List<NoticeDto> noticeList = adminService.getNoticeList(type, keyword);
+
+        // 2. 화면에 데이터 전달
+        model.addAttribute("notices", noticeList);
+
+        // 3. 검색 조건 유지 (HTML 검색창에 값 남기기 위해)
+        model.addAttribute("searchType", type);
+        model.addAttribute("searchKeyword", keyword);
+
+        return "admin/noticeList"; // templates/admin/noticeList.html
+    }
+
+    /**
+     * 공지사항 등록 처리 (모달 Form Submit)
+     */
+    @PostMapping("/notices/add")
+    public String addNotice(NoticeDto noticeDto) {
+
+        // [TODO] 로그인한 관리자 정보 세팅 (Spring Security 사용 시 변경 필요)
+        // 현재는 임시 데이터
+        noticeDto.setAdminId(11);
+        noticeDto.setId("admin");
+        noticeDto.setNickName("관리자");
+
+        // DB 저장
+        adminService.addNotice(noticeDto);
+
+        // 저장 후 목록 페이지로 리다이렉트
+        return "redirect:/admin/notices";
+    }
+
+    @PostMapping("/notices/update") // 경로 주의: /admin이 클래스 위에 있으므로 /notices/update가 맞음
+    public String updateNotice(NoticeDto params) {
+
+        // [수정] 대문자 AdminService -> 소문자 adminService (의존성 주입된 빈 사용)
+        adminService.updateNotice(params);
+
+        return "redirect:/admin/notices";
     }
 }

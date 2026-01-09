@@ -23,5 +23,6 @@
         <typeAlias alias="categoryForm" type="com.binary.rapid.category.form.CategoryForm"/>
         <!--    admin    -->
         <typeAlias alias="adminDto" type="com.binary.rapid.admin.dto.AdminDto"/>
+        <typeAlias alias="noticeDto" type="com.binary.rapid.admin.dto.NoticeDto"/>
     </typeAliases>
 </configuration>

@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+    <head>
+        <meta charset="UTF-8"/>
+        <title>공지 관리</title>
+        <link rel="stylesheet" th:href="@{/css/reset.css}"/>
+        <link rel="stylesheet" th:href="@{/css/common.css}"/>
+        <link rel="stylesheet" th:href="@{/css/admin.css}"/>
+    </head>
+
+    <body>
+        <div id="wrapper">
+            <header th:replace="~{fragments/header :: header}"></header>
+
+            <main id="main" class="admin-container">
+                <aside th:replace="~{fragments/sidebar :: sidebar(currentMenu='notice')}"></aside>
+
+                <section id="managerRight">
+                    <div class="page-header" style="display:flex; justify-content:space-between; align-items:center;">
+                        <h2>공지 관리</h2>
+                        <button type="button" class="btn-primary" onclick="openNoticeModal()">
+                            + 공지 등록
+                        </button>
+                    </div>
+
+                    <div class="search-container">
+                        <form action="/admin/notices" method="get" class="search-wrap">
+                            <select name="type" class="input-style" style="width:150px;">
+                                <option value="">전체 유형</option>
+                                <option value="1" th:selected="${searchType == '1'}">일반</option>
+                                <option value="2" th:selected="${searchType == '2'}">이벤트</option>
+                                <option value="3" th:selected="${searchType == '3'}">긴급</option>
+                                <option value="4" th:selected="${searchType == '4'}">기타</option>
+                            </select>
+
+                            <input type="text" name="keyword"
+                                   placeholder="제목을 검색하세요"
+                                   th:value="${searchKeyword}"
+                                   style="flex:1;">
+
+                            <button type="submit" class="btn-search">검색</button>
+
+                            <button type="button" class="btn-reset" onclick="location.href='/admin/notices'">초기화
+                            </button>
+                        </form>
+                    </div>
+
+                    <div class="table-top">
+                        <span>총 <b style="color:#2fb2ee">0</b>건</span>
+                    </div>
+
+                    <table class="list-table">
+                        <thead>
+                        <tr>
+                            <th width="5%">No</th>
+                            <th width="10%">유형</th>
+                            <th width="45%">제목</th>
+                            <th width="10%">작성자</th>
+                            <th width="10%">게시여부</th>
+                            <th width="10%">등록일</th>
+                            <th width="10%">관리</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:if="${#lists.isEmpty(notices)}">
+                            <td colspan="7" style="padding: 50px 0; text-align: center; color: #999;">
+                                등록된 공지사항이 없습니다.
+                            </td>
+                        </tr>
+
+                        <tr th:each="notice : ${notices}">
+                            <td th:text="${notice.noticeId}">1</td>
+                            <td>
+                                <span class="badge"
+                                      th:style="${notice.noticeType == 1} ? 'background:#e6f7ff; color:#1890ff;' 
+                                               : (${notice.noticeType == 2} ? 'background:#f6ffed; color:#52c41a;' 
+                                               : 'background:#fff1f0; color:#ff4d4f;')"
+                                      th:text="${notice.noticeTypeLabel}">
+                                    일반
+                                </span>
+                            </td>
+
+                            <td style="text-align:left; padding-left:20px; font-weight:bold;">
+                                <a href="#" style="text-decoration: none; color: inherit;"
+                                   th:text="${notice.noticeTitle}">
+                                    공지사항 제목입니다.
+                                </a>
+                            </td>
+
+                            <td th:text="${notice.nickName}">관리자</td>
+
+                            <td>
+                                <span class="badge"
+                                      th:style="${notice.noticeYN == 'Y'} ? 'background:#f6ffed; color:#52c41a;' : 'background:#fff1f0; color:#ff4d4f;'"
+                                      th:text="${notice.noticeYN == 'Y' ? '게시중' : '숨김'}">
+                                    Y
+                                </span>
+                            </td>
+
+                            <td th:text="${#temporals.format(notice.noticeCreateAt, 'yyyy-MM-dd')}">
+                                2026-01-09
+                            </td>
+
+                            <td>
+                                <button class="btn-mini" type="button"
+                                        th:onclick="openEditModal(this)"
+                                        th:data-id="${notice.noticeId}"
+                                        th:data-type="${notice.noticeType}"
+                                        th:data-title="${notice.noticeTitle}"
+                                        th:data-content="${notice.noticeContent}"
+                                        th:data-yn="${notice.noticeYN}">
+                                    수정
+                                </button>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+
+                    <div id="noticeModal" class="modal-overlay" style="display: none;">
+                        <div class="modal-window" style="width: 500px;">
+                            <div class="modal-header">
+                                <h3>공지사항 등록</h3>
+                                <button type="button" class="close-btn" onclick="closeNoticeModal()">×</button>
+                            </div>
+
+                            <form action="/admin/notices/add" method="post">
+                                <div class="modal-body">
+
+                                    <div class="info-group">
+                                        <label>공지 유형</label>
+                                        <select name="noticeType" class="input-style" required>
+                                            <option value="1">일반 공지</option>
+                                            <option value="2">이벤트/프로모션</option>
+                                            <option value="3">긴급 점검</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="info-group">
+                                        <label>제목</label>
+                                        <input type="text" name="noticeTitle" class="input-style"
+                                               placeholder="제목을 입력하세요" required>
+                                    </div>
+
+                                    <div class="info-group">
+                                        <label>내용</label>
+                                        <textarea name="noticeContent" class="textarea-style" rows="5"
+                                                  placeholder="내용을 입력하세요" required></textarea>
+                                    </div>
+
+                                    <div class="info-group">
+                                        <label>게시 여부</label>
+                                        <div style="display:flex; gap:20px; align-items:center; margin-top:5px;">
+                                            <label style="display:flex; align-items:center; cursor:pointer; margin:0;">
+                                                <input type="radio" name="noticeYN" value="Y" checked> <span
+                                                    style="margin-left:5px; color:#333;">게시 함(Y)</span>
+                                            </label>
+                                            <label style="display:flex; align-items:center; cursor:pointer; margin:0;">
+                                                <input type="radio" name="noticeYN" value="N"> <span
+                                                    style="margin-left:5px; color:#333;">숨김(N)</span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="modal-footer" style="justify-content: flex-end; gap:10px;">
+                                    <button type="button" class="btn-secondary" onclick="closeNoticeModal()">취소</button>
+                                    <button type="submit" class="btn-primary">등록하기</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </section>
+
+                <div id="editNoticeModal" class="modal-overlay" style="display: none;">
+                    <div class="modal-window" style="width: 500px;">
+                        <div class="modal-header">
+                            <h3>공지사항 수정</h3>
+                            <button type="button" class="close-btn" onclick="closeEditModal()">×</button>
+                        </div>
+
+                        <form action="/admin/notices/update" method="post" id="editForm">
+                            <input type="hidden" name="noticeId" id="editId">
+
+                            <div class="modal-body">
+                                <div class="info-group">
+                                    <label>공지 유형</label>
+                                    <select name="noticeType" id="editType" class="input-style" required>
+                                        <option value="1">일반 공지</option>
+                                        <option value="2">이벤트/프로모션</option>
+                                        <option value="3">긴급 점검</option>
+                                        <option value="4">기타</option>
+                                    </select>
+                                </div>
+
+                                <div class="info-group">
+                                    <label>제목</label>
+                                    <input type="text" name="noticeTitle" id="editTitle" class="input-style" required>
+                                </div>
+
+                                <div class="info-group">
+                                    <label>내용</label>
+                                    <textarea name="noticeContent" id="editContent" class="textarea-style" rows="5"
+                                              required></textarea>
+                                </div>
+
+                                <div class="info-group">
+                                    <label>게시 여부</label>
+                                    <div style="display:flex; gap:20px; align-items:center; margin-top:5px;">
+                                        <label style="display:flex; align-items:center; cursor:pointer; margin:0;">
+                                            <input type="radio" name="noticeYN" value="Y" id="editYn_Y">
+                                            <span style="margin-left:5px; color:#333;">게시 함(Y)</span>
+                                        </label>
+                                        <label style="display:flex; align-items:center; cursor:pointer; margin:0;">
+                                            <input type="radio" name="noticeYN" value="N" id="editYn_N">
+                                            <span style="margin-left:5px; color:#333;">숨김(N)</span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="modal-footer" style="justify-content: flex-end; gap:10px;">
+                                <button type="button" class="btn-secondary" onclick="closeEditModal()">취소</button>
+                                <button type="submit" class="btn-primary">수정 저장</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </main>
+            <footer th:replace="~{fragments/footer :: footer}"></footer>
+        </div>
+
+        <script th:src="@{/js/adminNotice.js}"></script>
+    </body>
+</html>
