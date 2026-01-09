@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.binary.rapid.news.mapper.NewsMapper">
+    <select id="showNews" resultType="newsDto" >
+        SELECT id,title,tag AS tags,link AS links,user_id,create_date,update_date,delete_date
+        FROM tb_news
+        <where>
+            <if test="tags != null and tags != 'all'">
+                AND tag = #{tags}
+            </if>
+        </where>
+        ORDER BY create_date DESC
+        LIMIT #{size} OFFSET #{offset}
+    </select>
+    <select id="countNews" resultType="int">
+        SELECT  COUNT(*)
+        FROM    tb_news
+        <where>
+            <if test="tags != null and tags != 'all'">
+               AND tag = #{tags}
+            </if>
+        </where>
+    </select>
+</mapper>
