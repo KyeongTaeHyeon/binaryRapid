@@ -103,6 +103,68 @@
         WHERE notice_id = #{noticeId}
     </update>
 
+    <!--  category  -->
+    <select id="selectCategoryGroups" resultType="com.binary.rapid.admin.dto.CategoryDto">
+        SELECT group_id
+             , major
+             , MAX(minor) as minor
+             , MIN(id)    as id
+        FROM tb_category
+        WHERE delete_date IS NULL
+        GROUP BY group_id, major
+        ORDER BY group_id ASC
+    </select>
+
+    <select id="selectCategoryListByGroup" resultType="com.binary.rapid.admin.dto.CategoryDto">
+        SELECT *
+        FROM tb_category
+        WHERE group_id = #{groupId}
+          AND delete_date IS NULL
+        ORDER BY view ASC, id ASC
+    </select>
+
+    <select id="countByPrefix" resultType="int">
+        SELECT COUNT(*)
+        FROM tb_category
+        WHERE id LIKE CONCAT(#{prefix}, '%')
+    </select>
+
+    <select id="selectMaxIdByPrefix" resultType="string">
+        SELECT id
+        FROM tb_category
+        WHERE id LIKE CONCAT(#{prefix}, '%')
+          AND id REGEXP CONCAT('^', #{prefix}, '[0-9]+$')
+        ORDER BY LENGTH(id) DESC, id DESC
+        LIMIT 1
+    </select>
+    
+    <select id="selectSampleIdByGroupId" resultType="string">
+        SELECT id
+        FROM tb_category
+        WHERE group_id = #{groupId}
+        LIMIT 1
+    </select>
+
+    <insert id="insertCategory">
+        INSERT INTO tb_category (id, group_id, major, minor, name, view, user_id, create_date)
+        VALUES (#{id}, #{groupId}, #{major}, #{minor}, #{name}, #{view}, #{userId}, NOW())
+    </insert>
+
+    <update id="updateCategory">
+        UPDATE tb_category
+        SET major       = #{major}
+          , minor       = #{minor}
+          , name        = #{name}
+          , view        = #{view}
+          , update_date = NOW()
+        WHERE id = #{id}
+    </update>
+
+    <update id="deleteCategory">
+        UPDATE tb_category
+        SET delete_date = NOW()
+        WHERE id = #{id}
+    </update>
 </mapper>
 
 

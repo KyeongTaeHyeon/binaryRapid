@@ -85,7 +85,7 @@ body {
     flex: 1;
     background: var(--white);
     border-radius: 12px;
-    padding: 40px;
+    padding: 20px;
     box-shadow: var(--shadow);
     min-height: 600px;
 }
@@ -425,4 +425,83 @@ body {
 .input-style:focus, .textarea-style:focus {
     outline: none;
     border-color: var(--primary-color);
+}
+
+/*
+    Category
+*/
+
+/* 카테고리 관리 2단 레이아웃 */
+.category-container {
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
+    min-height: 500px;
+}
+
+/* 좌측 패널 */
+.group-panel {
+    width: 280px;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+    overflow: hidden;
+    flex-shrink: 0;
+}
+
+/* 우측 패널 */
+.item-panel {
+    flex: 1;
+    background: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+
+    /* [추가된 부분] 높이 제한 및 스크롤 */
+    height: 600px; /* 고정 높이 (원하는 만큼 조절 가능, 예: 70vh) */
+    overflow-y: auto; /* 세로 스크롤 자동 생성 */
+    position: relative; /* 내부 요소 위치 기준 */
+}
+
+.panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px;
+    background: #f9f9f9;
+    border-bottom: 1px solid #eee;
+}
+
+.panel-header h3 {
+    margin: 0;
+    font-size: 16px;
+}
+
+/* 그룹 아이템 스타일 */
+.group-item {
+    padding: 12px 15px;
+    border-bottom: 1px solid #f0f0f0;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    transition: background 0.2s;
+}
+
+.group-item:hover {
+    background-color: #f0f8ff;
+}
+
+/* 선택된 그룹 강조 */
+.group-item.active {
+    background-color: #e6f7ff;
+    color: #1890ff;
+    border-right: 3px solid #1890ff;
+}
+
+.group-code {
+    font-size: 11px;
+    color: #999;
+    background: #f0f0f0;
+    padding: 2px 6px;
+    border-radius: 4px;
 }

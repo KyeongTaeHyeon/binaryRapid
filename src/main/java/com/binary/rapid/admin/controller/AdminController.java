@@ -2,6 +2,7 @@ package com.binary.rapid.admin.controller;
 
 import com.binary.rapid.admin.dto.AdminDto;
 import com.binary.rapid.admin.dto.AdminSearchCondition; // 위에서 만든 DTO
+import com.binary.rapid.admin.dto.CategoryDto;
 import com.binary.rapid.admin.dto.NoticeDto;
 import com.binary.rapid.admin.service.AdminService;
 import com.binary.rapid.category.form.CategoryForm;
@@ -108,5 +109,57 @@ public class AdminController {
         adminService.updateNotice(params);
 
         return "redirect:/admin/notices";
+    }
+    
+    /*
+    Category 
+    */
+    // --- 카테고리 컨트롤러 ---
+
+    // 1. 페이지 로딩 (좌측 그룹 리스트만 전달)
+    @GetMapping("/categories")
+    public String categoryList(Model model,
+                               @RequestParam(required = false) String groupId) { // [추가] 리다이렉트된 그룹ID 받기
+
+        model.addAttribute("groupList", adminService.getCategoryGroupList());
+
+        // [추가] 저장 후 돌아왔을 때, 이 값을 화면에 전달해서 JS가 자동 클릭하게 함
+        model.addAttribute("targetGroupId", groupId);
+
+        return "admin/categoryList";
+    }
+
+    // 2. [AJAX] 우측 상세 리스트 조회
+    @GetMapping("/categories/items")
+    @ResponseBody
+    public List<CategoryDto> getCategoryItems(@RequestParam String groupId) {
+        return adminService.getCategoryListByGroup(groupId);
+    }
+
+    // 3. [AJAX] Prefix 중복 체크
+    @GetMapping("/categories/check-prefix")
+    @ResponseBody
+    public ResponseEntity<Boolean> checkPrefix(@RequestParam String prefix) {
+        return ResponseEntity.ok(adminService.checkPrefixAvailable(prefix));
+    }
+
+    // 4. 저장 (생성, 추가, 수정)
+    @PostMapping("/categories/save")
+    public String saveCategory(CategoryDto dto,
+                               @RequestParam(required = false) String prefix,
+                               @RequestParam(required = false, defaultValue = "false") boolean isNewGroup) {
+
+        adminService.saveCategory(dto, prefix, isNewGroup);
+
+        return "redirect:/admin/categories?groupId=" + dto.getGroupId();
+    }
+
+    // 5. 삭제
+    @PostMapping("/categories/delete")
+    public String deleteCategory(@RequestParam String id, @RequestParam String groupId) {
+        adminService.deleteCategory(id);
+
+        // [중요] 삭제 후에도 마찬가지입니다.
+        return "redirect:/admin/categories?groupId=" + groupId;
     }
 }

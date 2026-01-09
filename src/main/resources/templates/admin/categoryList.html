@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+    <head>
+        <meta charset="UTF-8"/>
+        <title>카테고리 관리</title>
+        <link rel="stylesheet" th:href="@{/css/reset.css}"/>
+        <link rel="stylesheet" th:href="@{/css/common.css}"/>
+        <link rel="stylesheet" th:href="@{/css/admin.css}"/>
+    </head>
+    <body>
+        <div id="wrapper">
+            <header th:replace="~{fragments/header :: header}"></header>
+
+            <main id="main" class="admin-container">
+                <aside th:replace="~{fragments/sidebar :: sidebar(currentMenu='category')}"></aside>
+
+                <section id="managerRight">
+                    <h2 class="page-header">카테고리 관리</h2>
+
+                    <div class="category-container">
+                        <div class="group-panel">
+                            <div class="panel-header">
+                                <h3>분류(Group)</h3>
+                                <button class="btn-mini" onclick="openNewGroupModal()">+ 새 분류</button>
+                            </div>
+                            <div id="groupListArea">
+                                <div th:each="g : ${groupList}"
+                                     class="group-item"
+                                     th:data-groupid="${g.groupId}"
+                                     th:data-major="${g.major}"
+                                     th:data-minor="${g.minor}"
+                                     onclick="loadItems(this)">
+                                    <span th:text="${g.minor}" style="font-weight:bold;">소분류명</span>
+                                    <span class="group-code" th:text="${g.groupId}">CODE</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="item-panel">
+                            <div class="panel-header"
+                                 style="border-bottom:2px solid #f4f4f4; padding-bottom:15px; margin-bottom:15px;">
+                                <h3 id="currentGroupTitle">좌측에서 분류를 선택하세요</h3>
+                                <button id="addItemBtn" class="btn-primary" style="display:none;"
+                                        onclick="openAddItemModal()">+ 항목 추가
+                                </button>
+                            </div>
+
+                            <div class="table-scroll-area">
+                                <table class="list-table">
+                                    <thead>
+                                    <tr>
+                                        <th width="20%">소분류(Minor)</th>
+                                        <th width="45%">항목명(Name)</th>
+                                        <th width="10%">순서</th>
+                                        <th width="25%">관리</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody id="itemListBody">
+                                    <tr>
+                                        <td colspan="4" style="text-align:center; padding:30px; color:#999;">분류를
+                                            선택해주세요.
+                                        </td>
+                                    </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <div id="newGroupModal" class="modal-overlay" style="display: none;">
+                    <div class="modal-window">
+                        <div class="modal-header">
+                            <h3>새 분류(Group) 만들기</h3>
+                            <button class="close-btn" onclick="closeModal('newGroupModal')">×</button>
+                        </div>
+                        <form action="/admin/categories/save" method="post" onsubmit="return validateNewGroup()">
+                            <input type="hidden" name="isNewGroup" value="true">
+
+                            <div class="modal-body">
+                                <div class="info-group">
+                                    <label>ID 코드 (Prefix) <span
+                                            style="color:red; font-size:11px;">* 영문 대문자 1자</span></label>
+                                    <div style="display:flex; gap:10px; align-items:center;">
+                                        <input type="text" name="prefix" class="input-style"
+                                               placeholder="A" maxlength="1" required
+                                               style="text-transform: uppercase; width: 80px; text-align:center;"
+                                               oninput="handlePrefixInput(this)">
+                                        <span id="prefixMsg" style="font-size:12px;"></span>
+                                    </div>
+                                </div>
+                                <div class="info-group">
+                                    <label>그룹 코드 (Group ID)</label>
+                                    <input type="text" name="groupId" class="input-style" placeholder="예: region"
+                                           required>
+                                </div>
+                                <div class="info-group">
+                                    <label>대분류 명 (Major)</label>
+                                    <input type="text" name="major" class="input-style" placeholder="예: 지역" required>
+                                </div>
+                                <hr style="margin:15px 0; border:0; border-top:1px dashed #ddd;">
+                                <p style="font-size:12px; color:#666; margin-bottom:10px;">※ 그룹 생성 시 첫 번째 항목을 함께 등록해야
+                                    합니다.</p>
+                                <div class="info-group">
+                                    <label>첫 항목 명 (Name)</label>
+                                    <input type="text" name="name" class="input-style" required>
+                                </div>
+                                <div class="info-group">
+                                    <label>소분류 (Minor)</label>
+                                    <input type="text" name="minor" class="input-style" required>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="submit" class="btn-primary" id="btnCreateGroup" disabled>생성하기</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <div id="itemModal" class="modal-overlay" style="display: none;">
+                    <div class="modal-window">
+                        <div class="modal-header">
+                            <h3 id="itemModalTitle">항목 추가</h3>
+                            <button class="close-btn" onclick="closeModal('itemModal')">×</button>
+                        </div>
+                        <form action="/admin/categories/save" method="post">
+                            <input type="hidden" name="id" id="itemId">
+                            <input type="hidden" name="groupId" id="itemGroupId">
+                            <input type="hidden" name="major" id="itemMajor">
+                            <input type="hidden" name="minor" id="itemMinor">
+                            <input type="hidden" name="view" id="itemView">
+
+                            <div class="modal-body">
+                                <div class="info-group">
+                                    <label>항목 명 (Name)</label>
+                                    <input type="text" name="name" id="itemName" class="input-style" placeholder="항목 이름"
+                                           required>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="submit" class="btn-primary">저장하기</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <input type="hidden" id="targetGroupId" th:value="${targetGroupId}">
+
+                <form id="deleteForm" action="/admin/categories/delete" method="post">
+                    <input type="hidden" name="id" id="deleteId">
+                    <input type="hidden" name="groupId" id="deleteGroupId">
+                </form>
+
+            </main>
+        </div>
+        <script th:src="@{/js/adminCategory.js}"></script>
+    </body>
+</html>
