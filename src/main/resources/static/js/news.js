@@ -7,28 +7,31 @@ let currentPage = 1; // 현재 페이지 번호 (초기값: 1)
 const itemsPerPage = 5; // 한 페이지에 표시할 뉴스 항목 수
 
 
-document.addEventListener('DOMContentLoaded', () => {
-    setupFilterEvents(); // 1. 버튼들에 클릭 이벤트 연결
-    fetchNews();         // 2. 첫 페이지 데이터 로드
+
+document.addEventListener('DOMContentLoaded', async () => {
+    setupFilterEvents();
+    try {
+        await fetchNews();
+    } catch (error) {
+        console.error("뉴스 로드 실패:", error);
+    }
 });
 const fetchNews = () => {
     const url = `/api/news?page=${currentPage}&size=${itemsPerPage}&tags=${currentFilter}`;
 
     LoadData(url).then((data) => {
-        // 백엔드에서 Map으로 보낸 데이터를 받습니다.
         newsList = data.newsList;
         const totalItems = data.totalItems;
 
         showNewList(newsList); // 뉴스 목록 출력
         renderPaginationButtons(totalItems); // 페이징 버튼 생성
-
     });
 };
 
 
 
 // ----------------- 함수: 뉴스 목록 렌더링 -----------------
-let showNewList = (dataToShow) => {
+let showNewList = (data) => {
     /** @type {HTMLTemplateElement} */
     const newsTemplate = document.getElementById('newsTemplate'); // 템플릿 요소 가져오기
     const newsContainer = document.getElementById('postNumber'); // 뉴스가 표시될 컨테이너
@@ -41,7 +44,7 @@ let showNewList = (dataToShow) => {
     // const paginatedNews = filteredNews.slice(startIndex, endIndex);
 
     // 필터링 및 페이지네이션된 뉴스를 HTML로 변환하여 컨테이너에 추가
-    dataToShow.forEach((news, index) => {
+    data.forEach((news, index) => {
         // newsTemplate의 내용을 복제하여 사용
         const newsItem = newsTemplate.content.firstElementChild.cloneNode(true);
         // 뉴스 링크 설정 (links 속성이 없으면 기본값으로 '../index.html')

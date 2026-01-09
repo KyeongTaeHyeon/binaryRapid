@@ -1,6 +1,7 @@
 package com.binary.rapid.news.controller;
 
 import com.binary.rapid.news.dto.NewsDto;
+import com.binary.rapid.news.dto.NewsRespDto;
 import com.binary.rapid.news.service.NewsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -18,8 +19,7 @@ public class NewsController {
 
 
 @GetMapping("/api/news")
-public Map<String, Object> getNews( // List 대신 Map으로 반환 타입 변경
-                                    @RequestParam int page,
+public NewsRespDto getNews(         @RequestParam int page,
                                     @RequestParam int size,
                                     @RequestParam String tags
 ){
@@ -29,11 +29,7 @@ public Map<String, Object> getNews( // List 대신 Map으로 반환 타입 변�
     List<NewsDto> list = newsService.showNews(tags, size, offset);
     int totalItems = newsService.countNews(tags);
 
-    Map<String, Object> response = new HashMap<>(); // ListDto가 아닌 HashMap 사용
-    response.put("newsList", list);
-    response.put("totalItems", totalItems);
-
-    return response; // 최종적으로 맵 하나만 반환
+    return new NewsRespDto(list,totalItems);
 }
 
 }
