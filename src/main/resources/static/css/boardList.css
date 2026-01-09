@@ -357,3 +357,121 @@
 .deleteBtn {
   border: 1px solid #999;
 }
+.post .name a {
+  color: #000 !important; /* 게시글 제목 검정색 */
+  text-decoration: none;
+}
+
+.post .user, .post .userTime {
+  color: #333 !important; /* 작성자 및 작성시간 진한 회색 */
+}
+
+/* 2. 상세 페이지 (boardList2.html) */
+#detailTitle {
+  color: #000 !important; /* 상세페이지 제목 검정색 */
+}
+
+#detailWriter, #detailDate {
+  color: #333 !important; /* 상세페이지 작성자/날짜 */
+}
+
+#detailContent {
+  color: #000 !important; /* 본문 텍스트 검정색 */
+}
+
+/* 3. 댓글 영역 (상세페이지 하단) */
+.comment-text {
+  color: #000 !important; /* 댓글 내용 검정색 */
+}
+
+.comment-author {
+  color: #000 !important; /* 댓글 작성자 검정색 */
+  font-weight: bold;
+}
+
+.comment-divider {
+  color: #000 !important; /* ' : ' 기호 검정색 */
+}
+
+/* 4. 수정/삭제 버튼 색상 (요청사항 반영) */
+.editBtn {
+  color: #5ac3f5 !important; /* 수정: 파란색 */
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.deleteBtn {
+  color: #ff5e5e !important; /* 삭제: 빨간색 */
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+/* 5. 글쓰기 페이지 입력창 텍스트 (boardList4) */
+#postTitle, #postContent {
+  color: #000 !important;
+}
+.comment-item {
+  display: flex;
+  justify-content: space-between; /* 양 끝으로 밀기 */
+  align-items: center;
+  padding: 15px 10px;
+  border-bottom: 1px solid #eee;
+}
+
+/* 왼쪽 영역: 작성자 : 내용 */
+.comment-left {
+  display: flex;
+  gap: 8px;
+  color: #000 !important; /* 댓글 내용 검정색 */
+  font-size: 15px;
+}
+
+.comment-author {
+  font-weight: bold;
+}
+
+/* 오른쪽 영역: 날짜 + 버튼들 */
+.comment-right {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.comment-date {
+  color: #888;
+  font-size: 13px;
+}
+
+/* 버튼 그룹 및 색상 */
+.comment-btns {
+  display: flex;
+  gap: 10px;
+}
+
+/* 버튼 공통 스타일 (테두리 없앰) */
+.comment-btns button {
+  background: none;
+  border: none;
+  font-size: 14px;
+  font-weight: bold;
+  cursor: pointer;
+  padding: 0;
+}
+
+/* 수정 버튼: 파란색 */
+.editBtn {
+  color: #5ac3f5 !important;
+}
+
+/* 삭제 버튼: 빨간색 */
+.deleteBtn {
+  color: #ff5e5e !important;
+}
+
+.editBtn:hover, .deleteBtn:hover {
+  text-decoration: underline;
+}
