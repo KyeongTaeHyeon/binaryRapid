@@ -1,210 +1,211 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>RaFeed</title>
-    <!-- 공통사용 -->
-    <link rel="stylesheet" th:href="@{/css/reset.css}" />
-    <link rel="stylesheet" th:href="@{/css/common.css}" />
-    <link
-      rel="stylesheet"
-      href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css"
-    />
-    <!-- 각화면 css 생성하여 사용 -->
-    <link rel="stylesheet" th:href="@{/css/main.css}" />
-  </head>
+    <head>
+        <meta charset="UTF-8"/>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+        <title>RaFeed</title>
+        <!-- 공통사용 -->
+        <link rel="stylesheet" th:href="@{/css/reset.css}"/>
+        <link rel="stylesheet" th:href="@{/css/common.css}"/>
+        <link
+                rel="stylesheet"
+                href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css"
+        />
+        <!-- 각화면 css 생성하여 사용 -->
+        <link rel="stylesheet" th:href="@{/css/main.css}"/>
+    </head>
 
-  <body>
-    <div id="wrapper">
-      <!-- header(공통사용) -->
-      <header id="header" th:replace="~{fragments/header :: header}"></header>
-      <!-- 작업영역 -->
-      <main id="main">
-        <div id="modal"></div>
-        <div id="container">
-          <!-- 히어로 영역 : 최신 유행 라멘  -->
-          <div class="mainHero">
-            <div class="swiper mainSlides">
-              <div class="swiper-wrapper" id="heroSlideList"></div>
-              <!-- 페이지네이션/네비게이션 버튼 추가 가능 -->
-              <div class="swiper-pagination"></div>
-              <div class="swiper-button-prev"></div>
-              <div class="swiper-button-next"></div>
-            </div>
-          </div>
-          <!-- 라멘이미지영역(정보탭 : 육수) -->
-          <section class="section1"></section>
-          <!-- 라멘의 기타요소 영역(정보탭 : 고명, 면) -->
-          <section class="section2"></section>
-          <!-- 게시판 이동 영역 -->
-        </div>
-      </main>
-      <!-- footer영역(공통사용) -->
-      <footer id="footer" th:replace="~{fragments/footer :: footer}"></footer>
-    </div>
-    <!-- 화면 표현 영역 -->
-    <template id="heroSlideContent">
-      <div>
-        <img th:src="@{/img/heroieke1920x1080.jpg}" alt="이에케라멘" />
-      </div>
-      <div class="slideText">
-        <div class="slideTitle"></div>
-        <div class="modal"></div>
-      </div>
-    </template>
-    <template id="Boxtype01">
-      <div class="contentsBox 01">
-        <div class="contentsInfo">
-          <p class="ramenTitle"></p>
-          <p class="titleLine"></p>
-          <p class="subTitle"></p>
-          <p class="ramenText"></p>
-          <div class="btnLinks">
-            <div class="btnPopup">
-              <a class="modal" href="">
-                <div class="btnIcon">
-                  <p class="iconParts"></p>
+    <body>
+        <div id="wrapper">
+            <!-- header(공통사용) -->
+            <header id="header" th:replace="~{fragments/header :: header}"></header>
+            <!-- 작업영역 -->
+            <main id="main">
+                <div id="modal"></div>
+                <div id="container">
+                    <!-- 히어로 영역 : 최신 유행 라멘  -->
+                    <div class="mainHero">
+                        <div class="swiper mainSlides">
+                            <div class="swiper-wrapper" id="heroSlideList"></div>
+                            <!-- 페이지네이션/네비게이션 버튼 추가 가능 -->
+                            <div class="swiper-pagination"></div>
+                            <div class="swiper-button-prev"></div>
+                            <div class="swiper-button-next"></div>
+                        </div>
+                    </div>
+                    <!-- 라멘이미지영역(정보탭 : 육수) -->
+                    <section class="section1"></section>
+                    <!-- 라멘의 기타요소 영역(정보탭 : 고명, 면) -->
+                    <section class="section2"></section>
+                    <!-- 게시판 이동 영역 -->
                 </div>
-                <span class="btnText">라멘 데이터</span>
-              </a>
-            </div>
-            <div class="btnShop">
-              <a href="" target="_blank">
-                <p>추천 맛집</p>
-              </a>
-            </div>
-          </div>
+            </main>
+            <!-- footer영역(공통사용) -->
+            <footer id="footer" th:replace="~{fragments/footer :: footer}"></footer>
         </div>
-        <div class="contentsImg">
-          <p class="shopIcon">
-            <img th:src="@{/img/ramen01.png}" alt="시오라멘" />
-          </p>
-          <div class="ramen-price">
-            <span class="price"></span>
-          </div>
-        </div>
-      </div>
-    </template>
-    <template id="Boxtype02">
-      <div class="feature 01">
-        <div class="etcInner">
-          <div class="etcLeft">
-            <img th:src="@{/img/sect3_oil.jpg}" />
-          </div>
-          <div class="etcRight">
-            <div class="etcText">
-              <h2 class="etcTitle">
-                <span class="features"
-                  >FEATURES<span class="featureNum"></span>
-                </span>
-                <br />
-                <span class="subTitle"></span>
-              </h2>
-              <p class="etcInfo"></p>
+        <!-- 화면 표현 영역 -->
+        <template id="heroSlideContent">
+            <div>
+                <img th:src="@{/img/heroieke1920x1080.jpg}" alt="이에케라멘"/>
             </div>
-          </div>
-        </div>
-      </div>
-    </template>
-    <!-- 팝업영역 -->
-    <template id="ramenPopup">
-      <div class="modalWrap">
-        <div class="tempWrap">
-          <div class="realModalWrap">
-            <button class="closeBtn"></button>
-            <div class="tempTitle">
-              <div class="titleText">
-                <div class="tempRamenName"></div>
-                <h2 class="tempRamenData">라멘 데이터</h2>
-              </div>
-              <div id="logo">
-                <img th:src="@{/img/raFeed_Logo-Photoroom.png}" />
-              </div>
+            <div class="slideText">
+                <div class="slideTitle"></div>
+                <div class="modal"></div>
             </div>
-            <div class="tempText">
-              <div class="tempList">
-                <div class="left">스프 베이스</div>
-                <div class="rightbox"></div>
-              </div>
-              <div class="tempList richness">
-                <div class="left">스프 농도</div>
-                <div class="right">
-                  <div class="leftText">연 함</div>
-                  <div class="tempMeasure">
-                    <div class="tempLine">
-                      <span class="hide">직선</span>
+        </template>
+        <template id="Boxtype01">
+            <div class="contentsBox 01">
+                <div class="contentsInfo">
+                    <p class="ramenTitle"></p>
+                    <p class="titleLine"></p>
+                    <p class="subTitle"></p>
+                    <p class="ramenText"></p>
+                    <div class="btnLinks">
+                        <div class="btnPopup">
+                            <a class="modal" href="">
+                                <div class="btnIcon">
+                                    <p class="iconParts"></p>
+                                </div>
+                                <span class="btnText">라멘 데이터</span>
+                            </a>
+                        </div>
+                        <div class="btnShop">
+                            <a href="" target="_self">
+                                <p>추천 맛집</p>
+                            </a>
+                        </div>
                     </div>
-                    <div class="tempCircle">
-                      <div></div>
-                      <div></div>
-                      <div class="active"></div>
-                      <div></div>
-                      <div></div>
-                    </div>
-                  </div>
-                  <div class="rightText">진 함</div>
                 </div>
-              </div>
-              <div class="tempList rich">
-                <div class="left">기름진 정도</div>
-                <div class="right">
-                  <div class="leftText">담백함</div>
-                  <div class="tempMeasure">
-                    <div class="tempLine">
-                      <span class="hide">직선</span>
+                <div class="contentsImg">
+                    <p class="shopIcon">
+                        <img th:src="@{/img/ramen01.png}" alt="시오라멘"/>
+                    </p>
+                    <div class="ramen-price">
+                        <span class="price"></span>
                     </div>
-                    <div class="tempCircle">
-                      <div class="active"></div>
-                      <div></div>
-                      <div></div>
-                    </div>
-                  </div>
-                  <div class="rightText">진 함</div>
                 </div>
-              </div>
-              <div class="tempList thickness">
-                <div class="left">면의 굵기</div>
-                <div class="right">
-                  <div class="leftText">가는면</div>
-                  <div class="tempMeasure">
-                    <div class="tempLine">
-                      <span class="hide">직선</span>
-                    </div>
-                    <div class="tempCircle">
-                      <div></div>
-                      <div></div>
-                      <div class="active"></div>
-                      <div></div>
-                      <div></div>
-                    </div>
-                  </div>
-                  <div class="rightText">굵은면</div>
-                </div>
-              </div>
             </div>
-          </div>
-        </div>
-      </div>
-    </template>
-    <!-- 공통사용 -->
-    <script th:src="@{/js/common.js}"></script>
-    <!-- 각화면 js생성하여 사용 -->
-    <script type="text/javascript">
-      function googleTranslateElementInit() {
-        new google.translate.TranslateElement(
-          {
-            pageLanguage: 'ko',
-            includedLanguages: 'ko,en,ja,zh-CN',
-          },
-          'google_translate_element'
-        );
-      }
-    </script>
-    <script src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
-    <script type="module" th:src="@{/js/main.js}"></script>
-  </body>
+        </template>
+        <template id="Boxtype02">
+            <div class="feature 01">
+                <div class="etcInner">
+                    <div class="etcLeft">
+                        <img th:src="@{/img/sect3_oil.jpg}"/>
+                    </div>
+                    <div class="etcRight">
+                        <div class="etcText">
+                            <h2 class="etcTitle">
+                                <span class="features">
+                                    FEATURES
+                                    <span class="featureNum"></span>
+                                </span>
+                                <br/>
+                                <span class="subTitle"></span>
+                            </h2>
+                            <p class="etcInfo"></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </template>
+        <!-- 팝업영역 -->
+        <template id="ramenPopup">
+            <div class="modalWrap">
+                <div class="tempWrap">
+                    <div class="realModalWrap">
+                        <button class="closeBtn"></button>
+                        <div class="tempTitle">
+                            <div class="titleText">
+                                <div class="tempRamenName"></div>
+                                <h2 class="tempRamenData">라멘 데이터</h2>
+                            </div>
+                            <div id="logo">
+                                <img th:src="@{/img/raFeed_Logo-Photoroom.png}"/>
+                            </div>
+                        </div>
+                        <div class="tempText">
+                            <div class="tempList">
+                                <div class="left">스프 베이스</div>
+                                <div class="rightbox"></div>
+                            </div>
+                            <div class="tempList richness">
+                                <div class="left">스프 농도</div>
+                                <div class="right">
+                                    <div class="leftText">연 함</div>
+                                    <div class="tempMeasure">
+                                        <div class="tempLine">
+                                            <span class="hide">직선</span>
+                                        </div>
+                                        <div class="tempCircle">
+                                            <div></div>
+                                            <div></div>
+                                            <div class="active"></div>
+                                            <div></div>
+                                            <div></div>
+                                        </div>
+                                    </div>
+                                    <div class="rightText">진 함</div>
+                                </div>
+                            </div>
+                            <div class="tempList rich">
+                                <div class="left">기름진 정도</div>
+                                <div class="right">
+                                    <div class="leftText">담백함</div>
+                                    <div class="tempMeasure">
+                                        <div class="tempLine">
+                                            <span class="hide">직선</span>
+                                        </div>
+                                        <div class="tempCircle">
+                                            <div class="active"></div>
+                                            <div></div>
+                                            <div></div>
+                                        </div>
+                                    </div>
+                                    <div class="rightText">진 함</div>
+                                </div>
+                            </div>
+                            <div class="tempList thickness">
+                                <div class="left">면의 굵기</div>
+                                <div class="right">
+                                    <div class="leftText">가는면</div>
+                                    <div class="tempMeasure">
+                                        <div class="tempLine">
+                                            <span class="hide">직선</span>
+                                        </div>
+                                        <div class="tempCircle">
+                                            <div></div>
+                                            <div></div>
+                                            <div class="active"></div>
+                                            <div></div>
+                                            <div></div>
+                                        </div>
+                                    </div>
+                                    <div class="rightText">굵은면</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </template>
+        <!-- 공통사용 -->
+        <script th:src="@{/js/common.js}"></script>
+        <!-- 각화면 js생성하여 사용 -->
+        <script type="text/javascript">
+            function googleTranslateElementInit() {
+                new google.translate.TranslateElement(
+                    {
+                        pageLanguage: 'ko',
+                        includedLanguages: 'ko,en,ja,zh-CN',
+                    },
+                    'google_translate_element'
+                );
+            }
+        </script>
+        <script src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+        <script type="module" th:src="@{/js/main.js}"></script>
+    </body>
 </html>

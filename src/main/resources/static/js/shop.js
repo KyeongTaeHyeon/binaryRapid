@@ -14,6 +14,8 @@ let shopDataBuffer = [];    // 데이터 저장소
 // [1] 초기화
 // ============================================================
 document.addEventListener('DOMContentLoaded', () => {
+    let initialFilterApplied = false; // 최초 진입시 ramenId로 필터 적용 여부
+
     // 셀렉트 박스 초기값 동기화
     const sizeSelect = document.getElementById('pageSizeSelect');
     if (sizeSelect) viewSize = parseInt(sizeSelect.value);
@@ -48,24 +50,97 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // 필터 항목 클릭
-    document.querySelectorAll('.filterContents li').forEach(item => {
-        item.addEventListener('click', function () {
-            handleFilterClick(this);
-        });
+    // 필터 항목 클릭: 이벤트 위임으로 처리 (동적 생성/내부 클릭 대응)
+    // 문서 레벨 이벤트 위임: 언제든지 filter li 클릭을 잡도록 함
+    document.addEventListener('click', function (event) {
+        const li = event.target.closest('.filterContents li');
+        if (!li) return; // filter 항목이 아님
+        // li가 실제로 필터 영역 내부인지 확인
+        if (!document.contains(li)) return;
+        handleFilterClick(li);
     });
 
-    // 초기화 버튼
-    const clearBtn = document.querySelector('.btn-clear-all');
-    if (clearBtn) {
-        clearBtn.addEventListener('click', () => {
-            document.querySelectorAll('.filterContents li').forEach(li => li.classList.remove('active'));
-            resetAndFetch();
-        });
+    // 전체 삭제 버튼: 문서 레벨 위임 (동적 버튼에도 동작)
+    document.addEventListener('click', (e) => {
+        const clearBtn = e.target.closest('.btn-clear-all');
+        if (!clearBtn) return;
+        e.preventDefault();
+        e.stopPropagation();
+
+        // 모든 필터 비활성화
+        document.querySelectorAll('.filterContents li').forEach(li => li.classList.remove('active'));
+        // 전체 버튼 상태도 정리
+        document.querySelectorAll('.filterContents .filterAll').forEach(btn => btn.classList.remove('active'));
+
+        updateSelectorTags();
+        resetAndFetch();
+    });
+
+    // ramenId가 있으면 필터 UI/로직에 적용
+    try {
+        const urlParams = new URLSearchParams(window.location.search);
+        const ramenIdRaw = urlParams.get('ramenId');
+        const ramenId = ramenIdRaw ? ramenIdRaw.trim().replace(/ /g, '') : null;
+
+        if (ramenId) {
+            console.log('ramenId: ' + ramenId);
+            // 가능한 매칭 후보들: 원본(ramenId), 변환된(G코드)
+            const candidates = [ramenId, ramenId.replace(/^RM/, 'G')];
+            let matched = null;
+            for (const cand of candidates) {
+                const el = document.querySelector(`.filterContents li[data-value="${cand}"]`);
+                if (el) {
+                    matched = el;
+                    break;
+                }
+            }
+
+            if (matched) {
+                // 직접 class 추가하지 않고 handleFilterClick 호출로 일관된 동작 보장
+                if (!matched.classList.contains('active')) {
+                    handleFilterClick(matched);
+                }
+                initialFilterApplied = true;
+
+                // URL에서 ramenId 제거 (한 번 적용했으므로 주소창만 정리)
+                try {
+                    const url = new URL(window.location.href);
+                    url.searchParams.delete('ramenId');
+                    window.history.replaceState({}, document.title, url.pathname + url.search);
+                } catch (e) {
+                    // ignore history errors
+                }
+            } else {
+                // matched가 아직 없으면 DOM이 늦게 렌더링된 것일 수 있으므로 관찰자 등록
+                const observerTarget = document.querySelector('.filterContents');
+                if (observerTarget) {
+                    const mo = new MutationObserver((mutations, obs) => {
+                        for (const cand of candidates) {
+                            const el = document.querySelector(`.filterContents li[data-value="${cand}"]`);
+                            if (el) {
+                                if (!el.classList.contains('active')) handleFilterClick(el);
+                                initialFilterApplied = true;
+                                try {
+                                    const url = new URL(window.location.href);
+                                    url.searchParams.delete('ramenId');
+                                    window.history.replaceState({}, document.title, url.pathname + url.search);
+                                } catch (e) {
+                                }
+                                obs.disconnect();
+                                return;
+                            }
+                        }
+                    });
+                    mo.observe(document.body, {childList: true, subtree: true});
+                }
+            }
+        }
+    } catch (e) {
+        console.warn('Failed to sync ramenId to filters', e);
     }
 
-    // ★ 실행: 페이지 로드 즉시 데이터 요청
-    resetAndFetch();
+    // ★ 실행: 페이지 로드 즉시 데이터 요청 (ramenId로 이미 fetch했으면 중복 방지)
+    if (!initialFilterApplied) resetAndFetch();
 });
 
 // ============================================================
@@ -224,12 +299,6 @@ function renderView() {
     });
 
     renderPagination();
-
-    // 페이지 이동 시에만 스크롤 (첫 로딩 제외)
-    if (currentBufferPage !== -1) {
-        const wrapper = document.getElementById('contentWrapper');
-        if (wrapper) wrapper.scrollIntoView({behavior: 'smooth'});
-    }
 }
 
 // ============================================================

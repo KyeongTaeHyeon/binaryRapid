@@ -1,6 +1,5 @@
 package com.binary.rapid.user.mapper;
 
-import com.binary.rapid.Board.dto.BoardDto;
 import com.binary.rapid.user.dto.UserDto;
 import com.binary.rapid.user.dto.UserResponseDto;
 import com.binary.rapid.user.dto.myBoardDto;
@@ -10,11 +9,11 @@ import java.util.List;
 
 @Mapper
 public interface UserMapper {
-    
+
     int insertUser(UserDto user);
 
     int duplicateUserId(String id);
-    
+
     UserResponseDto selectUserId(String id);
 
     List<myBoardDto> selectBoardsByUserId(int id);
