@@ -1,14 +1,14 @@
 package com.binary.rapid.admin.service;
 
-import com.binary.rapid.admin.dto.AdminDto;
-import com.binary.rapid.admin.dto.CategoryDto;
-import com.binary.rapid.admin.dto.NoticeDto;
+import com.binary.rapid.admin.dto.*;
 import com.binary.rapid.admin.mapper.AdminMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -118,5 +118,47 @@ public class AdminService {
 
     public void deleteCategory(String id) {
         adminMapper.deleteCategory(id);
+    }
+
+    /*
+    Shop 
+    */
+    public Map<String, Object> getShopList(String status, int page) {
+        if (status == null || status.isEmpty()) {
+            status = "pending";
+        }
+
+        // 1. 전체 개수 조회
+        int totalCount = adminMapper.countShopList(status);
+
+        // 2. 페이지 정보 계산 (Pagination 클래스 활용)
+        Pagination pagination = new Pagination(page, totalCount);
+
+        // 3. 리스트 조회 (계산된 offset 사용)
+        List<AdminShopDto> list = adminMapper.selectShopList(status, pagination.getSize(), pagination.getOffset());
+
+        // 4. 결과 묶기
+        Map<String, Object> result = new HashMap<>();
+        result.put("list", list);
+        result.put("pagination", pagination);
+
+        return result;
+    }
+
+    // 승인/거절/보류 처리 로직
+    public void processShopApproval(String id, String action) {
+        String dbStatus = "";
+
+        if ("APPROVE".equals(action)) {
+            dbStatus = "Y";
+        } else if ("REJECT".equals(action)) {
+            dbStatus = "N";
+        } else if ("HOLD".equals(action)) { // [추가] 보류 처리
+            dbStatus = "P";
+        } else {
+            throw new IllegalArgumentException("잘못된 요청입니다.");
+        }
+
+        adminMapper.updateShopStatus(id, dbStatus);
     }
 }

@@ -1,6 +1,7 @@
 package com.binary.rapid.admin.mapper;
 
 import com.binary.rapid.admin.dto.AdminDto;
+import com.binary.rapid.admin.dto.AdminShopDto;
 import com.binary.rapid.admin.dto.CategoryDto;
 import com.binary.rapid.admin.dto.NoticeDto;
 import org.apache.ibatis.annotations.Mapper;
@@ -55,4 +56,17 @@ public interface AdminMapper {
     void updateCategory(CategoryDto dto);
 
     void deleteCategory(@Param("id") String id);
+
+    /*
+    Shop 
+    */
+    // [수정] 리스트 조회 (limit, offset 추가)
+    List<AdminShopDto> selectShopList(@Param("status") String status,
+                                      @Param("limit") int limit,
+                                      @Param("offset") int offset);
+
+    // [추가] 전체 개수 조회
+    int countShopList(@Param("status") String status);
+
+    void updateShopStatus(@Param("id") String id, @Param("status") String status);
 }

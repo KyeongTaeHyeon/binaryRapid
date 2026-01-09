@@ -1,9 +1,6 @@
 package com.binary.rapid.admin.controller;
 
-import com.binary.rapid.admin.dto.AdminDto;
-import com.binary.rapid.admin.dto.AdminSearchCondition; // 위에서 만든 DTO
-import com.binary.rapid.admin.dto.CategoryDto;
-import com.binary.rapid.admin.dto.NoticeDto;
+import com.binary.rapid.admin.dto.*;
 import com.binary.rapid.admin.service.AdminService;
 import com.binary.rapid.category.form.CategoryForm;
 import com.binary.rapid.category.service.CategoryService;
@@ -161,5 +158,37 @@ public class AdminController {
 
         // [중요] 삭제 후에도 마찬가지입니다.
         return "redirect:/admin/categories?groupId=" + groupId;
+    }
+
+    // ======================= [4. 식당 인가 관리] =======================
+
+    @GetMapping("/shops")
+    public String shopList(Model model,
+                           @RequestParam(required = false, defaultValue = "pending") String tab,
+                           @RequestParam(required = false, defaultValue = "1") int page) { // [추가] page 받기
+
+        // 서비스 호출 (Map으로 리턴됨)
+        Map<String, Object> result = adminService.getShopList(tab, page);
+
+        model.addAttribute("shopList", result.get("list"));
+        model.addAttribute("pagination", result.get("pagination")); // [추가] 페이지 정보
+        model.addAttribute("currentTab", tab);
+
+        return "admin/shopList";
+    }
+
+    @PostMapping("/shops/status")
+    @ResponseBody
+    public ResponseEntity<String> updateShopStatus(@RequestBody Map<String, String> body) {
+        String id = body.get("id");
+        String action = body.get("action");
+
+        try {
+            adminService.processShopApproval(id, action);
+            return ResponseEntity.ok("success");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.badRequest().body("fail");
+        }
     }
 }

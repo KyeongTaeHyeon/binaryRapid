@@ -165,6 +165,42 @@
         SET delete_date = NOW()
         WHERE id = #{id}
     </update>
+
+    <!--  Shop  -->
+    <select id="selectShopList" resultType="com.binary.rapid.admin.dto.AdminShopDto">
+        SELECT id, name, address, content, req_type AS reqType, req_user_id AS reqUserId, create_date AS createDate
+        FROM tb_shop
+        WHERE delete_date IS NULL
+        
+        <if test="status == 'pending'">
+            AND (req_type IS NULL OR req_type = '')
+        </if>
+        
+        <if test="status == 'processed'">
+            AND req_type IN ('Y', 'N', 'P') 
+        </if>
+        
+        ORDER BY create_date DESC
+        LIMIT #{limit} OFFSET #{offset}
+    </select>
+    
+    <select id="countShopList" resultType="int">
+        SELECT COUNT(*) FROM tb_shop WHERE delete_date IS NULL
+        <if test="status == 'pending'">
+            AND (req_type IS NULL OR req_type = '')
+        </if>
+        <if test="status == 'processed'">
+            AND req_type IN ('Y', 'N', 'P')
+        </if>
+    </select>
+
+    <update id="updateShopStatus">
+        UPDATE tb_shop
+        SET req_type    = #{status}
+          , update_date = NOW()
+        WHERE id = #{id}
+    </update>
+    
 </mapper>
 
 
