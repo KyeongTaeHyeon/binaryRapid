@@ -195,7 +195,7 @@ body {
 }
 
 .list-table tr:hover td {
-    background: #fcfcfc;
+    background: var(--primary-color);
 }
 
 /* 뱃지 & 버튼 */
@@ -234,4 +234,160 @@ body {
     color: #e74c3c;
     border-color: #fadbd8;
     background: #fdedec;
+}
+
+/* 모달 배경 (어둡게) */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* 모달 창 본체 */
+.modal-window {
+    background: white;
+    width: 400px;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
+}
+
+.modal-header h3 {
+    margin: 0;
+    font-size: 18px;
+    color: #333;
+}
+
+.close-btn {
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+}
+
+/* 입력 필드 스타일 */
+.info-group {
+    margin-bottom: 15px;
+}
+
+.info-row {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.info-half {
+    flex: 1;
+}
+
+.info-group label, .info-half label {
+    display: block;
+    font-size: 12px;
+    color: #888;
+    margin-bottom: 5px;
+}
+
+.readonly-input {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ddd;
+    background: #f9f9f9;
+    color: #555;
+    border-radius: 4px;
+    box-sizing: border-box;
+}
+
+/* 푸터 버튼 배치 */
+.modal-footer {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+    border-top: 1px solid #eee;
+    padding-top: 15px;
+}
+
+/* 버튼 색상 */
+.btn-danger {
+    background-color: #ff4d4f;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.btn-danger:hover {
+    background-color: #ff7875;
+}
+
+.btn-success {
+    background-color: #52c41a;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.btn-success:hover {
+    background-color: #73d13d;
+}
+
+.btn-secondary {
+    background-color: #f0f0f0;
+    color: #333;
+    border: 1px solid #ddd;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.btn-secondary:hover {
+    background-color: #e6e6e6;
+}
+
+/* [admin.css] 하단에 추가 */
+
+/* 정지된 유저 행 스타일 (배경색 변경 및 텍스트 흐리게) */
+.suspended-row {
+    background-color: #fff1f0 !important; /* 아주 연한 빨간색 */
+}
+
+.suspended-row td {
+    color: #999 !important; /* 글자색 회색 처리 */
+}
+
+.suspended-row td a,
+.suspended-row td span.badge {
+    opacity: 0.7; /* 뱃지들도 흐리게 */
+}
+
+/* 닉네임 옆에 붙을 정지 뱃지 */
+.status-label-suspend {
+    display: inline-block;
+    font-size: 11px;
+    color: #ff4d4f;
+    border: 1px solid #ff4d4f;
+    background-color: #fff;
+    padding: 2px 5px;
+    border-radius: 4px;
+    margin-left: 6px;
+    font-weight: normal;
+    vertical-align: middle;
 }

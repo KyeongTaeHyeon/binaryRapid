@@ -2,7 +2,7 @@
     PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.binary.rapid.admin.mapper.AdminMapper">
-    <select id="selectUserList" resultType="adminDto">
+    <select id="selectUserList" resultType="com.binary.rapid.admin.dto.AdminDto">
         SELECT user_id      AS userId
              , id           AS id
              , password     AS password
@@ -16,8 +16,7 @@
              , update_date  AS updateDate
              , delete_date  AS deleteDate
         FROM tb_user
-        WHERE delete_date IS NULL
-        
+        WHERE 1=1
         <if test="category != null and category != ''">
             AND taste = #{category}
         </if>
@@ -36,6 +35,18 @@
         
         ORDER BY create_date DESC
     </select>
+    
+    <update id="updateUserStatusToSuspend">
+        UPDATE tb_user
+        SET delete_date = NOW()
+        WHERE user_id = #{userId}
+    </update>
+    
+    <update id="updateUserStatusToRestore">
+        UPDATE tb_user
+        SET delete_date = NULL
+        WHERE user_id = #{userId}
+    </update>
 
 </mapper>
 

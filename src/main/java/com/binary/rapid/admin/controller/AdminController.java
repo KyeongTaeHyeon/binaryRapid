@@ -6,11 +6,10 @@ import com.binary.rapid.admin.service.AdminService;
 import com.binary.rapid.category.form.CategoryForm;
 import com.binary.rapid.category.service.CategoryService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
@@ -43,5 +42,22 @@ public class AdminController {
         model.addAttribute("tasteList", categoryMap.get("category"));
 
         return "admin/userList"; // templates/admin/userList.html
+    }
+
+    @PostMapping("/users/{userId}/status")
+    @ResponseBody // HTML이 아니라 데이터(JSON/Text)만 반환
+    public ResponseEntity<String> updateUserStatus(
+            @PathVariable int userId,
+            @RequestBody Map<String, String> body // 간단한 데이터라 Map으로 받음
+    ) {
+        String action = body.get("action");
+
+        try {
+            adminService.changeUserStatus(userId, action);
+            return ResponseEntity.ok("success");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.badRequest().body("fail");
+        }
     }
 }

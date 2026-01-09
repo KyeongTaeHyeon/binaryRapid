@@ -14,4 +14,9 @@ public interface AdminMapper {
             @Param("startDate") String startDate,
             @Param("endDate") String endDate
     );
+
+    // [AdminMapper.java]
+    void updateUserStatusToSuspend(int userId); // 정지
+
+    void updateUserStatusToRestore(int userId); // 복구
 }
