@@ -1,241 +1,251 @@
 @charset "UTF-8";
 
-/*
-  마이페이지(작성글/찜/신청관리) 공통 레이아웃용 CSS
-  - 색상 톤: 차분한 블루 & 그레이 조합으로 변경
-  - 디자인: 모던하고 깔끔한 스타일 적용
-*/
-
 :root {
-    --primary-color: #4a90e2; /* 메인 컬러 (소프트 블루) */
-    --primary-light: #eaf4ff; /* 연한 배경색 (활성화 메뉴 등) */
-    --text-color: #333; /* 기본 텍스트 색상 */
-    --text-sub: #666; /* 서브 텍스트 색상 */
-    --border-color: #e0e0e0; /* 테두리 색상 */
-    --bg-gray: #f9f9f9; /* 배경 회색 */
+    /* 더 깊고 신뢰감을 주는 프로페셔널 블루 */
+    --primary-color: #3b82f6;
+    --primary-dark: #2563eb;
+    --primary-bg: #eff6ff;
+
+    /* 눈이 편안한 그레이 스케일 */
+    --text-main: #1f2937;
+    --text-sub: #6b7280;
+    --border-line: #e5e7eb;
+    --bg-base: #f3f4f6;
+    --bg-white: #ffffff;
+
+    /* 고급스러운 그림자 (이게 핵심입니다) */
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+body {
+    background-color: var(--bg-base); /* 전체 배경을 은은한 회색으로 */
 }
 
 #main {
     width: 100%;
     max-width: 1440px;
-    margin: 0 auto;
-    padding: 40px 20px 60px;
+    margin: 40px auto;
+    padding: 0 20px;
     box-sizing: border-box;
-    font-family: 'Noto Sans KR', sans-serif; /* 폰트 예시 (필요시 common.css에서 상속) */
 }
 
 #main > h2 {
-    font-size: 28px;
-    color: var(--text-color);
-    margin-bottom: 30px;
-    font-weight: 700;
-    letter-spacing: -0.5px;
+    font-size: 26px;
+    color: var(--text-main);
+    margin-bottom: 25px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
 }
 
 #inner {
     display: flex;
-    gap: 30px;
+    gap: 25px;
     align-items: flex-start;
 }
 
-/* --- 사이드바 (왼쪽) --- */
+/* --- [1] 왼쪽 사이드바: 카드형 디자인 --- */
 #managerLeft {
     width: 260px;
     flex-shrink: 0;
 }
 
 #managerLeftInner {
-    background: #fff;
-    border: 1px solid var(--border-color);
-    border-radius: 12px;
+    background: var(--bg-white);
+    border: none;
+    border-radius: 16px; /* 둥글게 */
     overflow: hidden;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05); /* 부드러운 그림자 추가 */
+    box-shadow: var(--shadow-md); /* 공중에 떠있는 느낌 */
 }
 
 #managerLeftInner > span {
     display: block;
-    background: var(--primary-color);
+    background: linear-gradient(135deg, var(--primary-color), var(--primary-dark)); /* 그라데이션 */
     color: #fff;
-    padding: 24px 20px;
+    padding: 30px 24px;
     font-size: 18px;
-    font-weight: 600;
+    font-weight: 700;
 }
 
 #managerLeftInner ul {
-    padding: 10px 0;
+    padding: 12px;
     list-style: none;
+}
+
+#managerLeftInner li {
+    margin-bottom: 4px;
 }
 
 #managerLeftInner li a {
     display: block;
-    padding: 16px 20px;
+    padding: 14px 20px;
     color: var(--text-sub);
     text-decoration: none;
     font-size: 15px;
-    transition: all 0.2s ease; /* 부드러운 전환 효과 */
-    border-left: 4px solid transparent; /* 활성화 표시용 테두리 공간 확보 */
+    font-weight: 500;
+    border-radius: 10px; /* 메뉴 버튼도 둥글게 */
+    transition: all 0.2s ease;
 }
 
-#managerLeftInner li.on a,
 #managerLeftInner li a:hover {
-    background: var(--primary-light);
-    color: var(--primary-color);
-    font-weight: 600;
-    border-left-color: var(--primary-color); /* 왼쪽 파란 줄 표시 */
+    background-color: var(--bg-base);
+    color: var(--text-main);
 }
 
-/* --- 컨텐츠 영역 (오른쪽) --- */
+/* 활성화 된 메뉴: 꽉 찬 스타일 */
+#managerLeftInner li.on a {
+    background-color: var(--primary-bg);
+    color: var(--primary-dark);
+    font-weight: 700;
+}
+
+/* --- [2] 오른쪽 컨텐츠: 깔끔한 패널 --- */
 #managerRight {
     flex: 1;
-    background: #fff;
-    border: 1px solid var(--border-color);
-    border-radius: 12px;
-    padding: 30px;
+    background: var(--bg-white);
+    border: none;
+    border-radius: 16px;
+    padding: 35px;
     box-sizing: border-box;
-    min-height: 600px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    min-height: 650px;
+    box-shadow: var(--shadow-md);
 }
 
-/* --- 검색 영역 --- */
+/* --- [3] 검색 영역: 모던한 인풋창 --- */
 #managerSearch {
     display: flex;
     flex-wrap: wrap;
-    gap: 15px;
+    gap: 12px;
     align-items: center;
-    margin-bottom: 25px;
-    padding-bottom: 25px;
-    border-bottom: 1px solid #eee; /* 구분선 추가 */
-}
-
-.searchWrapper {
-    /* flex: 1;  필요에 따라 주석 해제 (지금은 내용물 크기에 맞춤) */
-    /* min-width: 200px; */
-}
-
-.managerSearchWrap {
-    display: flex;
-    gap: 8px;
-    align-items: center;
+    margin-bottom: 30px;
+    padding: 20px;
+    background-color: #f8fafc; /* 검색영역만 살짝 다른 배경 */
+    border-radius: 12px;
+    border: 1px solid var(--border-line);
 }
 
 .managerSearchWrap select,
 .managerSearchWrap input {
-    height: 42px;
-    border: 1px solid var(--border-color);
-    border-radius: 6px;
-    padding: 0 12px;
-    box-sizing: border-box;
+    height: 44px;
+    border: 1px solid var(--border-line);
+    border-radius: 8px;
+    padding: 0 16px;
     font-size: 14px;
-    color: var(--text-color);
-    transition: border-color 0.2s;
+    color: var(--text-main);
+    background-color: #fff;
+    transition: all 0.2s;
 }
 
 .managerSearchWrap select:focus,
 .managerSearchWrap input:focus {
     outline: none;
-    border-color: var(--primary-color); /* 포커스 시 파란 테두리 */
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15); /* 포커스 링 효과 */
 }
 
-/* 검색 버튼 스타일 개선 */
+/* 검색 버튼 */
 .managerSearchWrap button {
-    width: 42px;
-    height: 42px;
-    background: var(--primary-color);
+    width: 44px;
+    height: 44px;
+    background-color: var(--primary-color);
     border: none;
-    border-radius: 6px;
+    border-radius: 8px;
     cursor: pointer;
-    display: flex; /* 아이콘 중앙 정렬 */
+    display: flex;
     align-items: center;
     justify-content: center;
-    transition: background 0.2s;
+    transition: transform 0.1s, background-color 0.2s;
 }
 
 .managerSearchWrap button:hover {
-    background: #357abd; /* 호버 시 약간 진하게 */
+    background-color: var(--primary-dark);
+}
+
+.managerSearchWrap button:active {
+    transform: scale(0.95); /* 클릭 시 살짝 눌리는 효과 */
 }
 
 .managerSearchWrap button img {
-    width: 20px; /* 아이콘 크기 적절히 조절 */
-    height: auto;
-    filter: brightness(0) invert(1); /* 이미지가 흰색이 아닐 경우 흰색으로 변경 */
+    width: 20px;
+    filter: brightness(0) invert(1);
 }
 
-/* 날짜 검색 제출 버튼 (텍스트 버튼일 경우) */
+/* 날짜 검색 버튼 (텍스트) */
 #managerSearchDate button[type="submit"] {
     width: auto;
-    padding: 0 15px;
-    color: #fff;
+    padding: 0 20px;
+    font-weight: 600;
+    color: white;
     font-size: 14px;
-    font-weight: 500;
 }
 
-/* --- 테이블 스타일 --- */
+/* --- [4] 테이블: 시원시원하고 가독성 좋게 --- */
 table {
     width: 100%;
-    border-collapse: collapse;
+    border-collapse: separate; /* 테두리 분리 */
+    border-spacing: 0;
     margin-top: 10px;
-    table-layout: fixed; /* 컬럼 너비 고정 (필요시) */
 }
 
 table thead th {
-    background: var(--bg-gray);
-    padding: 16px;
-    border-top: 1px solid var(--border-color); /* 상단 선 얇게 */
-    border-bottom: 1px solid var(--border-color);
-    font-weight: 600;
-    color: var(--text-color);
+    background-color: #fff;
+    padding: 18px;
+    border-bottom: 2px solid var(--border-line);
+    font-weight: 700;
+    color: var(--text-main);
     font-size: 15px;
+    text-align: center;
 }
 
 table tbody td {
-    padding: 16px;
-    border-bottom: 1px solid #eee;
+    padding: 20px 15px;
+    border-bottom: 1px solid var(--border-line);
     text-align: center;
     color: var(--text-sub);
     font-size: 14px;
+    background-color: #fff;
+    transition: background-color 0.2s;
 }
 
-/* 테이블 줄무늬 효과 (짝수 행 배경색 변경) */
-table tbody tr:nth-child(even) {
-    background-color: #fcfcfc;
+/* 마우스 올렸을 때 행 강조 */
+table tbody tr:hover td {
+    background-color: #f8fafc;
+    color: var(--primary-dark);
 }
 
-table tbody tr:hover {
-    background-color: var(--primary-light); /* 마우스 오버 시 연한 파란색 */
-}
-
-/* --- 하단 네비게이션 (페이지네이션 & 개수 선택) --- */
+/* --- [5] 페이지네이션 & 하단 --- */
 #contentNav {
+    margin-top: 40px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    gap: 10px;
-    margin-top: 30px;
+    border-top: 1px solid var(--border-line);
+    padding-top: 20px;
 }
 
 .pagination {
     display: flex;
-    align-items: center;
-    gap: 6px;
+    gap: 8px;
 }
 
 .page-list {
     display: flex;
-    gap: 6px;
+    gap: 8px;
     list-style: none;
     padding: 0;
     margin: 0;
 }
 
 .page-btn {
-    min-width: 32px;
-    height: 32px;
-    border-radius: 4px; /* 살짝 둥글게 */
-    border: 1px solid var(--border-color);
+    min-width: 36px;
+    height: 36px;
+    border: 1px solid var(--border-line);
+    border-radius: 8px;
     background: #fff;
     color: var(--text-sub);
+    font-weight: 500;
     cursor: pointer;
-    font-size: 14px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -245,28 +255,21 @@ table tbody tr:hover {
 .page-btn:hover {
     border-color: var(--primary-color);
     color: var(--primary-color);
-    background: #fff;
 }
 
-/* 활성화된 페이지 버튼 (JS에서 클래스 추가 필요, 예: .active) */
 .page-btn.active {
-    background: var(--primary-color);
+    background-color: var(--primary-color);
     color: #fff;
     border-color: var(--primary-color);
-    font-weight: bold;
+    box-shadow: 0 2px 4px rgba(37, 99, 235, 0.3); /* 활성 버튼 그림자 */
 }
 
-/* 페이지당 개수 선택 셀렉트 박스 */
+/* n개씩 보기 셀렉트 */
 .select_box select {
     height: 36px;
-    border: 1px solid var(--border-color);
-    border-radius: 4px;
-    padding: 0 10px;
-    font-size: 13px;
+    border: 1px solid var(--border-line);
+    border-radius: 8px;
+    padding: 0 12px;
     color: var(--text-sub);
     cursor: pointer;
-}
-
-.select_box select:hover {
-    border-color: #bbb;
 }
