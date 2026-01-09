@@ -1,20 +1,20 @@
 // ============================================================
 // [설정] 덩어리 로딩 (Chunk Loading)
 // ============================================================
-let fetchSize = 120; // 서버에서 120개씩 가져옴
-let viewSize = 8;    // 화면에는 8개씩 보여줌
+let fetchSize = 120;
+let viewSize = 8;
 
-let totalElements = 0;      // 전체 데이터 개수
-let currentDisplayPage = 0; // 현재 보고 있는 페이지
-let currentBufferPage = -1; // 메모리에 저장된 덩어리 번호
+let totalElements = 0;
+let currentDisplayPage = 0;
+let currentBufferPage = -1;
 
-let shopDataBuffer = [];    // 데이터 저장소
+let shopDataBuffer = [];
 
 // ============================================================
 // [1] 초기화
 // ============================================================
 document.addEventListener('DOMContentLoaded', () => {
-    let initialFilterApplied = false; // 최초 진입시 ramenId로 필터 적용 여부
+    let initialFilterApplied = false;
 
     // 셀렉트 박스 초기값 동기화
     const sizeSelect = document.getElementById('pageSizeSelect');
@@ -25,6 +25,10 @@ document.addEventListener('DOMContentLoaded', () => {
         header.addEventListener('click', function () {
             const groupWrap = this.nextElementSibling;
             if (!groupWrap) return;
+
+            // 애니메이션 중복 실행 방지
+            if (gsap.isTweening(groupWrap)) return;
+
             const isActive = groupWrap.classList.contains('active');
             if (isActive) {
                 gsap.to(groupWrap, {
@@ -50,97 +54,70 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // 필터 항목 클릭: 이벤트 위임으로 처리 (동적 생성/내부 클릭 대응)
-    // 문서 레벨 이벤트 위임: 언제든지 filter li 클릭을 잡도록 함
+    // 필터 항목 클릭 위임
     document.addEventListener('click', function (event) {
         const li = event.target.closest('.filterContents li');
-        if (!li) return; // filter 항목이 아님
-        // li가 실제로 필터 영역 내부인지 확인
-        if (!document.contains(li)) return;
+        if (!li || !document.contains(li)) return;
         handleFilterClick(li);
     });
 
-    // 전체 삭제 버튼: 문서 레벨 위임 (동적 버튼에도 동작)
+    // 전체 삭제 버튼 위임
     document.addEventListener('click', (e) => {
         const clearBtn = e.target.closest('.btn-clear-all');
         if (!clearBtn) return;
         e.preventDefault();
-        e.stopPropagation();
 
-        // 모든 필터 비활성화
-        document.querySelectorAll('.filterContents li').forEach(li => li.classList.remove('active'));
-        // 전체 버튼 상태도 정리
-        document.querySelectorAll('.filterContents .filterAll').forEach(btn => btn.classList.remove('active'));
+        document.querySelectorAll('.filterContents').forEach(ul => {
+            ul.querySelectorAll('li').forEach(li => li.classList.remove('active'));
+        });
 
         updateSelectorTags();
         resetAndFetch();
     });
 
-    // ramenId가 있으면 필터 UI/로직에 적용
+    // [개선됨] ramenId 필터 적용 로직 (MutationObserver 제거 -> Thymeleaf는 즉시 로딩됨)
     try {
         const urlParams = new URLSearchParams(window.location.search);
         const ramenIdRaw = urlParams.get('ramenId');
-        const ramenId = ramenIdRaw ? ramenIdRaw.trim().replace(/ /g, '') : null;
 
-        if (ramenId) {
-            console.log('ramenId: ' + ramenId);
-            // 가능한 매칭 후보들: 원본(ramenId), 변환된(G코드)
+        if (ramenIdRaw) {
+            const ramenId = ramenIdRaw.trim().replace(/ /g, '');
+            console.log('Applying filter for:', ramenId);
+
+            // G코드 변환 고려 (예: RM001 -> G001)
             const candidates = [ramenId, ramenId.replace(/^RM/, 'G')];
             let matched = null;
+
             for (const cand of candidates) {
-                const el = document.querySelector(`.filterContents li[data-value="${cand}"]`);
-                if (el) {
-                    matched = el;
-                    break;
-                }
+                // 정확히 일치하는 data-value를 가진 li 찾기
+                matched = document.querySelector(`.filterContents li[data-value="${cand}"]`);
+                if (matched) break;
             }
 
             if (matched) {
-                // 직접 class 추가하지 않고 handleFilterClick 호출로 일관된 동작 보장
-                if (!matched.classList.contains('active')) {
-                    handleFilterClick(matched);
+                // 부모 영역의 '전체' 버튼 비활성화 먼저 수행
+                const parent = matched.closest('.filterContents');
+                if (parent) {
+                    const allBtn = parent.querySelector('.filterAll');
+                    if (allBtn) allBtn.classList.remove('active');
                 }
-                initialFilterApplied = true;
 
-                // URL에서 ramenId 제거 (한 번 적용했으므로 주소창만 정리)
-                try {
-                    const url = new URL(window.location.href);
-                    url.searchParams.delete('ramenId');
-                    window.history.replaceState({}, document.title, url.pathname + url.search);
-                } catch (e) {
-                    // ignore history errors
-                }
-            } else {
-                // matched가 아직 없으면 DOM이 늦게 렌더링된 것일 수 있으므로 관찰자 등록
-                const observerTarget = document.querySelector('.filterContents');
-                if (observerTarget) {
-                    const mo = new MutationObserver((mutations, obs) => {
-                        for (const cand of candidates) {
-                            const el = document.querySelector(`.filterContents li[data-value="${cand}"]`);
-                            if (el) {
-                                if (!el.classList.contains('active')) handleFilterClick(el);
-                                initialFilterApplied = true;
-                                try {
-                                    const url = new URL(window.location.href);
-                                    url.searchParams.delete('ramenId');
-                                    window.history.replaceState({}, document.title, url.pathname + url.search);
-                                } catch (e) {
-                                }
-                                obs.disconnect();
-                                return;
-                            }
-                        }
-                    });
-                    mo.observe(document.body, {childList: true, subtree: true});
-                }
+                matched.classList.add('active');
+                initialFilterApplied = true;
+                updateSelectorTags();
+
+                // URL 정리
+                const url = new URL(window.location.href);
+                url.searchParams.delete('ramenId');
+                window.history.replaceState({}, document.title, url.pathname + url.search);
             }
         }
     } catch (e) {
-        console.warn('Failed to sync ramenId to filters', e);
+        console.warn('Filter sync error:', e);
     }
 
-    // ★ 실행: 페이지 로드 즉시 데이터 요청 (ramenId로 이미 fetch했으면 중복 방지)
-    if (!initialFilterApplied) resetAndFetch();
+    // 초기 데이터 로드 (필터 적용이 없었더라도 기본 데이터 로드)
+    resetAndFetch();
 });
 
 // ============================================================
@@ -153,20 +130,36 @@ function handleFilterClick(element) {
     const items = parent.querySelectorAll('li:not(.filterAll)');
 
     if (value === 'all') {
+        // '전체' 클릭 시: 이미 active라도 끄지 않음 (최소 1개 유지 UX)
+        // 다른 모든 개별 항목 해제 및 전체 활성화
         const isActive = element.classList.contains('active');
-        if (!isActive) {
-            element.classList.add('active');
-            items.forEach(li => li.classList.add('active'));
-        } else {
+
+        if (isActive) {
+            // 이미 켜져 있다면 -> 끄면서 하위 항목 모두 해제
             element.classList.remove('active');
             items.forEach(li => li.classList.remove('active'));
+        } else {
+            // 꺼져 있다면 -> 켜면서 하위 항목 모두 선택
+            element.classList.add('active');
+            items.forEach(li => li.classList.add('active'));
         }
     } else {
+        // 개별 항목 클릭 시
         element.classList.toggle('active');
+
+        // 현재 활성화된 개별 항목 개수 확인
         const activeCount = parent.querySelectorAll('li.active:not(.filterAll)').length;
-        if (activeCount === items.length && allBtn) allBtn.classList.add('active');
-        else if (allBtn) allBtn.classList.remove('active');
+        const totalCount = items.length;
+
+        if (activeCount === totalCount) {
+            // 모든 항목이 선택되었다면 -> '전체' 버튼도 활성화
+            if (allBtn) allBtn.classList.add('active');
+        } else {
+            // 하나라도 선택이 해제되면 -> '전체' 버튼 비활성화
+            if (allBtn) allBtn.classList.remove('active');
+        }
     }
+
     updateSelectorTags();
     resetAndFetch();
 }
@@ -175,18 +168,18 @@ function handleFilterClick(element) {
 window.toggleFilter = function (btn) {
     const list = btn.closest('.filterList').querySelector('.filterContents');
     list.classList.toggle('collapsed');
+    // 텍스트 변경 로직 단순화
     btn.innerHTML = list.classList.contains('collapsed') ? '...' : '접기 <br> ▲';
 };
 
 window.removeSpecificTag = function (val) {
-    const target = document.querySelector(`.filterContents li[data-value="${val}"]`);
-    if (target) {
+    // 해당 value를 가진 모든 active 항목 해제 (여러 그룹에 같은 value가 있을 경우 대비)
+    const targets = document.querySelectorAll(`.filterContents li[data-value="${val}"].active`);
+
+    targets.forEach(target => {
         target.classList.remove('active');
-        // 전체버튼 처리
-        const parent = target.closest('.filterContents');
-        const allBtn = parent.querySelector('.filterAll');
-        if (allBtn) allBtn.classList.remove('active');
-    }
+    });
+
     updateSelectorTags();
     resetAndFetch();
 };
@@ -195,20 +188,32 @@ function updateSelectorTags() {
     const list = document.querySelector('.selectorContents');
     const clearBtn = document.querySelector('.btn-clear-all');
     if (!list) return;
+
     list.innerHTML = '';
     const actives = document.querySelectorAll('.filterContents li.active:not(.filterAll)');
+
     if (clearBtn) clearBtn.style.display = actives.length > 0 ? 'block' : 'none';
 
+    // 중복 태그 방지용 Set
+    const addedValues = new Set();
+
     actives.forEach(li => {
-        const tag = document.createElement('li');
-        tag.className = 'selectedTag';
-        tag.innerHTML = `${li.innerText} <span class="removeTag" style="cursor:pointer; margin-left:8px; color:#ff4d4f;" onclick="removeSpecificTag('${li.getAttribute('data-value')}')">×</span>`;
-        list.appendChild(tag);
+        const val = li.getAttribute('data-value');
+        const text = li.innerText;
+
+        // 시각적으로 중복된 태그는 하나만 표시
+        if (!addedValues.has(val)) {
+            addedValues.add(val);
+            const tag = document.createElement('li');
+            tag.className = 'selectedTag';
+            tag.innerHTML = `${text} <span class="removeTag" style="cursor:pointer; margin-left:8px; color:#ff4d4f;" onclick="removeSpecificTag('${val}')">×</span>`;
+            list.appendChild(tag);
+        }
     });
 }
 
 // ============================================================
-// [3] 데이터 로딩 (핵심 로직)
+// [3] 데이터 로딩 (Chunk Loading)
 // ============================================================
 function resetAndFetch() {
     currentDisplayPage = 0;
@@ -221,19 +226,23 @@ async function loadDataForCurrentPage() {
     const startIndex = currentDisplayPage * viewSize;
     const neededBufferPage = Math.floor(startIndex / fetchSize);
 
-    // 버퍼에 없으면 서버 요청
+    // 버퍼 페이지가 변경되었을 때만 서버 요청
     if (neededBufferPage !== currentBufferPage) {
         await fetchChunkFromServer(neededBufferPage);
+    } else {
+        // 이미 버퍼에 데이터가 있으면 바로 렌더링
+        renderView();
     }
-    renderView();
 }
 
 async function fetchChunkFromServer(pageToFetch) {
     const params = new URLSearchParams();
+
+    // [중요] data-title이 실제 서버 파라미터 이름(예: region, category)과 일치해야 함
     document.querySelectorAll('.filterContents li.active:not(.filterAll)').forEach(li => {
         params.append(li.getAttribute('data-title'), li.getAttribute('data-value'));
     });
-    // 120개 요청
+
     params.append('page', pageToFetch);
     params.append('size', fetchSize);
 
@@ -242,21 +251,21 @@ async function fetchChunkFromServer(pageToFetch) {
         if (res.ok) {
             const data = await res.json();
 
-            // 데이터 확보
             shopDataBuffer = data.content || [];
 
-            // ★ 전체 개수 안전하게 확보 (숫자 안 나오는 버그 수정)
             if (data.totalElements !== undefined) {
                 totalElements = Number(data.totalElements);
             } else {
-                // 서버가 totalElements를 안 주면 그냥 가져온 개수로 설정
                 totalElements = shopDataBuffer.length;
             }
 
             currentBufferPage = pageToFetch;
+            renderView(); // 데이터 수신 후 렌더링
+        } else {
+            console.error("Server responded with status:", res.status);
         }
     } catch (e) {
-        console.error("Error:", e);
+        console.error("Fetch Error:", e);
     }
 }
 
@@ -264,29 +273,33 @@ function renderView() {
     const contentList = document.getElementById('contentList');
     contentList.innerHTML = '';
 
-    if (!shopDataBuffer || shopDataBuffer.length === 0) {
+    // 데이터 없음 처리
+    if (totalElements === 0 || !shopDataBuffer || shopDataBuffer.length === 0) {
         contentList.innerHTML = '<div style="text-align: center; padding: 50px;">검색 결과가 없습니다.</div>';
         document.getElementById('contentNav').innerHTML = '';
         return;
     }
 
+    // 버퍼 내에서의 상대 인덱스 계산
     const absoluteIndex = currentDisplayPage * viewSize;
     const bufferStartIndex = absoluteIndex % fetchSize;
     const bufferEndIndex = bufferStartIndex + viewSize;
 
-    // 배열 범위 초과 방지
-    const safeEnd = Math.min(bufferEndIndex, shopDataBuffer.length);
-    const itemsToShow = shopDataBuffer.slice(bufferStartIndex, safeEnd);
+    const itemsToShow = shopDataBuffer.slice(bufferStartIndex, bufferEndIndex);
 
     itemsToShow.forEach(shop => {
         let catHtml = '';
         if (shop.categories) {
             shop.categories.forEach(c => catHtml += `<li><span class="badge">${c.categoryName}</span></li>`);
         }
+
+        // 이미지 null 처리 추가
+        const imgDisplay = shop.imgUrl ? `<img src="${shop.imgUrl}" alt="${shop.shopName}"/>` : `<div class="no-image">No Image</div>`;
+
         const html = `
             <div class="contentItem">
                 <a href="/shop/${shop.shopId}">
-                    <div class="contentImage"><img src="${shop.imgUrl}" alt="${shop.shopName}"/></div>
+                    <div class="contentImage">${imgDisplay}</div>
                     <div class="contentsInfo">
                         <div class="contentTitle">${shop.shopName}</div>
                         <div class="contentCategory"><ul class="categoryList">${catHtml}</ul></div>
@@ -306,13 +319,15 @@ function renderView() {
 // ============================================================
 window.changePageSize = function (val) {
     viewSize = parseInt(val);
-    currentDisplayPage = 0;
-    loadDataForCurrentPage();
+    resetAndFetch(); // 페이지 사이즈 변경 시 처음부터 다시 로드 권장
 };
 
 window.changePage = function (pageNum) {
     if (pageNum < 0) return;
+
+    // 전체 페이지 수 계산
     const maxPage = Math.ceil(totalElements / viewSize) - 1;
+
     if (pageNum > maxPage) return;
 
     currentDisplayPage = pageNum;
@@ -321,7 +336,6 @@ window.changePage = function (pageNum) {
 
 function renderPagination() {
     const nav = document.getElementById('contentNav');
-    // 안전장치: 전체 개수가 0이면 숨김
     if (!totalElements || totalElements <= 0) {
         nav.innerHTML = '';
         return;
@@ -334,11 +348,10 @@ function renderPagination() {
 
     let html = '<div class="pagination-container"><nav class="pagination">';
 
-    // 이전
+    // 이전 버튼
     html += `<button class="pageBtn prev" ${currentDisplayPage === 0 ? 'disabled' : ''} 
              onclick="changePage(${currentDisplayPage - 1})">&lt;</button>`;
 
-    // 숫자 (확실하게 루프 돌도록 수정)
     html += '<ul class="pageList">';
     for (let i = startPage; i <= endPage; i++) {
         const active = (i === currentDisplayPage) ? 'active' : '';
@@ -346,13 +359,13 @@ function renderPagination() {
     }
     html += '</ul>';
 
-    // 다음
+    // 다음 버튼
     html += `<button class="pageBtn next" ${currentDisplayPage >= totalPages - 1 ? 'disabled' : ''} 
              onclick="changePage(${currentDisplayPage + 1})">&gt;</button>`;
 
     html += '</nav>';
 
-    // 셀렉트 박스
+    // 보기 개수 셀렉트 박스
     const opts = [8, 16, 24, 32, 40];
     let optHtml = '';
     opts.forEach(o => {
