@@ -1,8 +1,8 @@
-package com.binary.rapid.Board.mapper;
+package com.binary.rapid.board.mapper;
 
-import com.binary.rapid.Board.dto.BoardCommentDto;
-import com.binary.rapid.Board.dto.BoardDto;
-import com.binary.rapid.Board.dto.BoardFileDto;
+import com.binary.rapid.board.dto.BoardCommentDto;
+import com.binary.rapid.board.dto.BoardDto;
+import com.binary.rapid.board.dto.BoardFileDto;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 

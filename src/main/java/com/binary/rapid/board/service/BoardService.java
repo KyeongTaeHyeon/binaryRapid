@@ -1,9 +1,9 @@
-package com.binary.rapid.Board.service;
+package com.binary.rapid.board.service;
 
-import com.binary.rapid.Board.dto.BoardCommentDto;
-import com.binary.rapid.Board.dto.BoardDto;
-import com.binary.rapid.Board.dto.BoardFileDto;
-import com.binary.rapid.Board.mapper.BoardMapper;
+import com.binary.rapid.board.dto.BoardCommentDto;
+import com.binary.rapid.board.dto.BoardDto;
+import com.binary.rapid.board.dto.BoardFileDto;
+import com.binary.rapid.board.mapper.BoardMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -44,7 +44,6 @@ public class BoardService {
     }
 
     // 5. 게시글 수정
-    @Transactional(rollbackFor = Exception.class)
     public void updateBoard(BoardDto boardDto) {
         boardMapper.updateBoard(boardDto);
     }

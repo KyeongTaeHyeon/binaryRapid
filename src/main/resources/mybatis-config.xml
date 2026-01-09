@@ -9,7 +9,7 @@
     </settings>
 
     <typeAliases>
-        <typeAlias alias="boardCommentDto" type="com.binary.rapid.Board.dto.BoardCommentDto"/>
+        <typeAlias alias="boardCommentDto" type="com.binary.rapid.board.dto.BoardCommentDto"/>
         <typeAlias alias="infoDto" type="com.binary.rapid.ramen.dto.RamenInfoDto"/>
         <typeAlias alias="popupDto" type="com.binary.rapid.ramen.dto.RamenPopupDto"/>
         <typeAlias alias="heroDto" type="com.binary.rapid.ramen.dto.RamenHeroDto"/>

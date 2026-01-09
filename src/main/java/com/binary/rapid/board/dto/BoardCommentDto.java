@@ -1,9 +1,7 @@
-package com.binary.rapid.Board.dto;
+package com.binary.rapid.board.dto;
 
 import lombok.Getter;
 import lombok.Setter;
-
-import java.time.LocalDateTime;
 
 @Getter
 @Setter

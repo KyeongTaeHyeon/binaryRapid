@@ -1,4 +1,4 @@
-package com.binary.rapid.Board.controller;
+package com.binary.rapid.board.controller;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;

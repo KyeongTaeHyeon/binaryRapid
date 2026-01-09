@@ -1,8 +1,8 @@
-package com.binary.rapid.Board.controller;
+package com.binary.rapid.board.controller;
 
-import com.binary.rapid.Board.dto.BoardCommentDto;
-import com.binary.rapid.Board.dto.BoardDto;
-import com.binary.rapid.Board.service.BoardService;
+import com.binary.rapid.board.dto.BoardCommentDto;
+import com.binary.rapid.board.dto.BoardDto;
+import com.binary.rapid.board.service.BoardService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -40,15 +40,22 @@ public class BoardController {
     }
 
     @PostMapping("/write")
-    public ResponseEntity<Integer> saveBoard(@RequestBody BoardDto boardDto) {
+    public ResponseEntity<Integer> saveBoard(BoardDto boardDto) { // @RequestBody를 삭제했습니다.
+        // 여기서 값이 잘 들어오는지 로그로 확인해 보세요.
+        System.out.println("받은 제목: " + boardDto.getTitle());
+        System.out.println("받은 내용: " + boardDto.getContents());
+
         int boardId = boardService.saveBoard(boardDto);
         return ResponseEntity.status(HttpStatus.CREATED).body(boardId);
     }
 
     @PostMapping("/update")
     public ResponseEntity<String> updateBoard(@RequestBody BoardDto boardDto) {
+        // 로그를 찍어 값이 잘 들어오는지 확인하세요
+        System.out.println("수정 요청 데이터: " + boardDto.toString());
+
         boardService.updateBoard(boardDto);
-        return ResponseEntity.ok("수정 완료");
+        return ResponseEntity.ok("success");
     }
 
     // --- 파일 관련 ---
