@@ -21,5 +21,6 @@
         <typeAlias alias="UserResponseDto" type="com.binary.rapid.user.dto.UserResponseDto"/>
         <typeAlias alias="shopSearchForm" type="com.binary.rapid.shop.form.ShopSearchForm"/>
         <typeAlias alias="categoryForm" type="com.binary.rapid.category.form.CategoryForm"/>
+        <typeAlias alias="loginJwtDto" type="com.binary.rapid.user.dto.SelectUserResponseForJwtDto"/>
     </typeAliases>
 </configuration>

@@ -37,10 +37,19 @@
     <!-- 아이디로 유저 조회 -->
     <select id="selectUserId"
             parameterType="string"
-            resultType="UserResponseDto">
+            resultType="loginJwtDto">
         SELECT *
         FROM tb_user
         WHERE id = #{id}
+    </select>
+
+    <!-- 아이디로 유저 조회 -->
+    <select id="selectUserToUserResponseDto"
+            parameterType="string"
+            resultType="UserResponseDto">
+        SELECT *
+        FROM tb_user
+        WHERE id = #{email}
     </select>
 
     <!-- 유저 id로 게시글 리스트 전체 조회 -->

@@ -1,5 +1,6 @@
 package com.binary.rapid.user.service;
 
+import com.binary.rapid.user.dto.SelectUserResponseForJwtDto;
 import com.binary.rapid.user.dto.UserDto;
 import com.binary.rapid.user.dto.UserResponseDto;
 import com.binary.rapid.user.dto.myBoardDto;
@@ -68,9 +69,9 @@ public class UserService {
 
     }
 
-    public UserResponseDto userLocalsignin(UserLoginForm form) {
+    public SelectUserResponseForJwtDto userLocalsignin(UserLoginForm form) {
 
-        UserResponseDto selectUser = userMapper.selectUserId(form.getId());
+        SelectUserResponseForJwtDto selectUser = userMapper.selectUserId(form.getId());
 
 
         if (selectUser == null) {
@@ -138,13 +139,19 @@ public class UserService {
 
     @Transactional
     public UserResponseDto updateMyInfo(UserResponseDto loggerUser) {
-
-        if (loggerUser == null) {
-            throw new LoginRequiredException();
-        }
         
+        if (loggerUser == null || loggerUser.getId() == null) {
+            throw new IllegalArgumentException("현재 로그인된 유저 정보 혹은 ID가 없습니다.");
+        }
+
         userMapper.updateMyInfo(loggerUser);
 
-        return userMapper.selectUserId(loggerUser.getId());
+        UserResponseDto updatedUser = userMapper.selectUserToUserResponseDto(loggerUser.getId());
+
+        if (updatedUser == null) {
+            throw new UserNotFoundException(); 
+        }
+
+        return updatedUser;
     }
 }
