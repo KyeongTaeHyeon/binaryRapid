@@ -29,4 +29,6 @@ public interface BoardMapper {
 
 
     void deleteCommentsByBoardId(int id);
+    //카테고리 메퍼
+
 }

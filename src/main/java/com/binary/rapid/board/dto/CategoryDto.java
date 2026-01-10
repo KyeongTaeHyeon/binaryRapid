@@ -8,5 +8,7 @@ import lombok.Setter;
 public class CategoryDto {
     private String id;
     private String groupId;
+    private String major;
+    private String minor;
     private String name;
 }

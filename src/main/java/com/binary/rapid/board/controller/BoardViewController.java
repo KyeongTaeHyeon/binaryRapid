@@ -17,4 +17,9 @@ public class BoardViewController {
     public String boardEditPage() {
         return "board/boardEdit";
     }
+    @GetMapping("/boardList3")
+    public String boardList3() {
+        // src/main/resources/templates/board/boardList3.html 파일을 찾아갑니다.
+        return "board/boardList3";
+    }
 }

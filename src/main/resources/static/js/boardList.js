@@ -9,27 +9,51 @@ let currentCategory = "전체";
 
 document.addEventListener("DOMContentLoaded", function () {
     const path = window.location.pathname;
+    const urlParams = new URLSearchParams(window.location.search);
+    const categoryFromUrl = urlParams.get("category"); // URL에서 카테고리 읽기
+
     console.log("현재 경로:", path);
 
     // 1. 게시판 목록 페이지 로드
     const postContainer = document.getElementById("postNumber");
     if (postContainer) {
-        loadAndRenderList();
+        // [수정] 목록 로드 후 URL에 카테고리가 있다면 필터 적용
+        loadAndRenderList().then(() => {
+            if (categoryFromUrl) {
+                applyFilter(categoryFromUrl);
+                // UI 활성화 처리
+                const filterLinks = document.querySelectorAll(".filter a");
+                filterLinks.forEach(link => {
+                    const spanText = link.querySelector("span").innerText;
+                    link.classList.toggle("active", spanText === categoryFromUrl);
+                });
+            }
+        });
     }
 
-    // 필터 기능
+    // [중요] 필터 클릭 이벤트 (식당신청 페이지 고려)
     const filterLinks = document.querySelectorAll(".filter a");
     filterLinks.forEach(link => {
         link.addEventListener("click", (event) => {
-            event.preventDefault();
+            event.preventDefault(); // 기본 이동 막음
             const selectedCategory = link.querySelector("span").innerText;
-            filterLinks.forEach(l => l.classList.remove("active"));
-            link.classList.add("active");
-            applyFilter(selectedCategory);
+
+            // 페이지 위치에 따라 다르게 동작
+            if (path.includes("boardList3")) {
+                // 식당신청 페이지에서 클릭하면 목록 페이지로 이동
+                if (selectedCategory !== "식당신청") {
+                    location.href = `/board/boardList?category=${encodeURIComponent(selectedCategory)}`;
+                }
+            } else {
+                // 일반 목록 페이지에서는 기존 필터링 로직 실행
+                filterLinks.forEach(l => l.classList.remove("active"));
+                link.classList.add("active");
+                applyFilter(selectedCategory);
+            }
         });
     });
 
-    // 2. 상세 페이지 로드 (경로 체크 강화)
+    // 2. 상세 페이지 로드
     if (path.includes("boardList2") || path.includes("/board/detail")) {
         initDetailPage();
     }
@@ -85,9 +109,14 @@ document.addEventListener("DOMContentLoaded", function () {
             deleteBoard(urlParams.get("id"));
         };
     }
+
+    // [추가] 식당신청(boardList3) 페이지용 카테고리 로드 로직 유지
+    if (path.includes("boardList3")) {
+        initCategorySelects();
+    }
 });
 
-/* ================= 게시글 관련 함수 (파일 업로드 적용) ================= */
+/* ================= 게시글 관련 함수 (기존 유지) ================= */
 
 async function saveBoard() {
     const title = document.getElementById("postTitle").value;
@@ -108,7 +137,6 @@ async function saveBoard() {
     try {
         const response = await fetch("/api/board/write", {
             method: "POST",
-            // headers는 절대 적지 마세요.
             body: formData
         });
 
@@ -116,11 +144,9 @@ async function saveBoard() {
             alert("게시글이 등록되었습니다.");
             location.href = "/board/boardList";
         } else {
-            alert("등록에 실패했습니다. 서버 로그를 확인하세요.");
+            alert("등록에 실패했습니다.");
         }
-    } catch (e) {
-        console.error("네트워크 에러:", e);
-    }
+    } catch (e) { console.error("네트워크 에러:", e); }
 }
 
 async function initDetailPage() {
@@ -133,75 +159,54 @@ async function initDetailPage() {
         const post = await response.json();
 
         if (post) {
-            // 카테고리 텍스트 설정
             const label = (post.category === "A00") ? "자유게시판" : "식당인증";
             if (document.getElementById("mainCategoryTitle")) document.getElementById("mainCategoryTitle").innerText = label;
             if (document.getElementById("detailCategory")) document.getElementById("detailCategory").innerText = label;
-
-            // 데이터 맵핑
             if (document.getElementById("detailTitle")) document.getElementById("detailTitle").innerText = post.title;
             if (document.getElementById("detailContent")) document.getElementById("detailContent").value = post.contents;
             if (document.getElementById("detailWriter")) document.getElementById("detailWriter").innerText = post.writerName || `사용자(${post.userId})`;
             if (document.getElementById("detailDate")) document.getElementById("detailDate").innerText = post.createDate ? post.createDate.substring(0, 10) : '';
 
-            // --- [추가] 파일 목록 표시 로직 ---
-            // 만약 서버의 BoardDto에 List<BoardFileDto> files 가 포함되어 있다면 사용
-            if (post.files && post.files.length > 0) {
-                renderFiles(post.files);
-            }
-
+            if (post.files && post.files.length > 0) renderFiles(post.files);
             fetchCommentList(postId);
 
-            // 본인 확인 버튼 권한
             const isOwner = String(post.userId) === String(currentUserId);
             if(document.getElementById("editBtn")) document.getElementById("editBtn").style.display = isOwner ? "inline-block" : "none";
             if(document.getElementById("deleteBtn")) document.getElementById("deleteBtn").style.display = isOwner ? "inline-block" : "none";
         }
-    } catch (error) {
-        console.error("상세 데이터 로드 실패:", error);
-    }
+    } catch (error) { console.error("상세 로드 실패:", error); }
 }
 
-// 상세페이지에서 이미지를 보여주는 함수
 function renderFiles(files) {
     const contentArea = document.querySelector(".contentPost");
     if (!contentArea) return;
-
     const fileDiv = document.createElement("div");
     fileDiv.style.marginTop = "20px";
     fileDiv.style.textAlign = "center";
-
     files.forEach(file => {
-        // 이미지 파일인 경우 화면에 출력
         const img = document.createElement("img");
-        // 서버에서 파일을 내려주는 API 주소에 맞춰 설정 필요
         img.src = `/api/board/file/display?path=${encodeURIComponent(file.fileAddr)}`;
         img.style.maxWidth = "100%";
         img.style.marginBottom = "10px";
         img.style.borderRadius = "8px";
         fileDiv.appendChild(img);
     });
-
     contentArea.appendChild(fileDiv);
 }
 
-/* ================= 공통 리스트 및 페이징 함수 ================= */
+/* ================= 리스트 및 필터 (핵심 수정) ================= */
 
 async function loadAndRenderList() {
     try {
         const response = await fetch("/api/board/list");
-        const data = await response.json();
-        allPosts = data;
-        applyFilter("전체");
-    } catch (e) {
-        console.error("목롤 로드 중 에러:", e);
-    }
+        allPosts = await response.json();
+        applyFilter(currentCategory);
+    } catch (e) { console.error("목록 로드 에러:", e); }
 }
 
 function renderList(page) {
     const container = document.getElementById("postNumber");
     if (!container) return;
-
     const startIndex = (page - 1) * itemsPerPage;
     const pagePosts = filteredPosts.slice(startIndex, startIndex + itemsPerPage);
 
@@ -226,8 +231,7 @@ function renderList(page) {
 function renderPagination() {
     const pageList = document.querySelector(".page-list");
     if (!pageList) return;
-
-    const totalPages = Math.ceil(filteredPosts.length / itemsPerPage);
+    const totalPages = Math.ceil(filteredPosts.length / itemsPerPage) || 1;
     let html = "";
     for (let i = 1; i <= totalPages; i++) {
         html += `<li class="page-item ${i === currentPage ? 'active' : ''}">
@@ -244,6 +248,10 @@ function goToPage(page) {
 }
 
 function applyFilter(category) {
+    if (category === "식당신청") {
+        location.href = "/boardList3";
+        return;
+    }
     currentCategory = category;
     currentPage = 1;
     if (currentCategory === "전체") {
@@ -256,70 +264,32 @@ function applyFilter(category) {
     renderPagination();
 }
 
-/* ================= 게시글 수정/삭제 관련 ================= */
+/* ================= 수정/삭제/댓글 (기존 유지) ================= */
 
 async function handlePostUpdate(postId) {
-    // 1. HTML 요소에서 값 가져오기
     const title = document.getElementById("postTitle").value;
     const contents = document.getElementById("postContent").value;
     const category = document.getElementById("boardCategory").value;
-
-    if (!title.trim() || !contents.trim()) {
-        alert("제목과 내용을 모두 입력해주세요.");
-        return;
-    }
-
-    // 2. 보낼 데이터 구성 (CamelCase 사용)
-    const updateData = {
-        id: parseInt(postId),
-        title: title,
-        contents: contents,
-        category: category,
-        userId: currentUserId // 전역 변수로 설정된 ID
-    };
-
-    console.log("보내는 데이터:", updateData);
-
+    const updateData = { id: parseInt(postId), title, contents, category, userId: currentUserId };
     try {
-        // 3. fetch 요청 (JSON 방식)
         const response = await fetch("/api/board/update", {
             method: "POST",
-            headers: {
-                "Content-Type": "application/json" // JSON임을 명시
-            },
-            body: JSON.stringify(updateData) // 객체를 문자열로 변환
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(updateData)
         });
-
-        if (response.ok) {
-            alert("수정이 완료되었습니다.");
-            location.href = "/board/boardList"; // 목록으로 이동
-        } else {
-            const errorMsg = await response.text();
-            alert("수정 실패: " + errorMsg);
-        }
-    } catch (e) {
-        console.error("네트워크 에러:", e);
-        alert("서버와 통신 중 오류가 발생했습니다.");
-    }
+        if (response.ok) { alert("수정 완료"); location.href = "/board/boardList"; }
+    } catch (e) { console.error(e); }
 }
+
 async function deleteBoard(id) {
-    if (!confirm("정말로 이 게시글을 삭제하시겠습니까?")) return;
+    if (!confirm("삭제하시겠습니까?")) return;
     try {
         const response = await fetch(`/api/board/delete/${id}`, { method: "DELETE" });
-        if (response.ok) {
-            alert("삭제되었습니다.");
-            location.href = "/board/boardList";
-        }
-    } catch (e) {
-        console.error("삭제 실패:", e);
-    }
+        if (response.ok) { alert("삭제되었습니다."); location.href = "/board/boardList"; }
+    } catch (e) { console.error(e); }
 }
 
-function goToEditPage(id){
-    location.href=`/board/boardEdit?id=${id}`;
-}
-
-/* ================= 댓글 관련 함수 ================= */
+function goToEditPage(id){ location.href=`/board/boardEdit?id=${id}`; }
 
 async function fetchCommentList(postId) {
     try {
@@ -328,53 +298,32 @@ async function fetchCommentList(postId) {
             const comments = await response.json();
             renderComments(comments);
         }
-    } catch (e) {
-        console.error("댓글 로드 실패:", e);
-    }
+    } catch (e) { console.error(e); }
 }
 
 async function saveComment() {
     const urlParams = new URLSearchParams(window.location.search);
     const postId = urlParams.get("id");
     const commentInput = document.getElementById("commentInput");
-
-    if (!commentInput?.value.trim()) {
-        alert("내용을 입력해주세요.");
-        return;
-    }
-
-    const commentDto = {
-        id: parseInt(postId),
-        comment: commentInput.value,
-        userId: currentUserId
-    };
-
+    if (!commentInput?.value.trim()) { alert("내용을 입력해주세요."); return; }
+    const commentDto = { id: parseInt(postId), comment: commentInput.value, userId: currentUserId };
     try {
         const response = await fetch("/api/board/comment/write", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(commentDto)
         });
-
-        if (response.ok) {
-            alert("댓글이 등록되었습니다.");
-            commentInput.value = "";
-            fetchCommentList(postId);
-        }
-    } catch (error) {
-        console.error("댓글 저장 에러:", error);
-    }
+        if (response.ok) { alert("댓글 등록 완료"); commentInput.value = ""; fetchCommentList(postId); }
+    } catch (e) { console.error(e); }
 }
 
 function renderComments(comments) {
     const container = document.getElementById("detailCommentList");
     if (!container) return;
-
     if (!comments || comments.length === 0) {
         container.innerHTML = `<div style="color:#999; padding:20px; text-align:center;">등록된 댓글이 없습니다.</div>`;
         return;
     }
-
     container.innerHTML = comments.map(c => {
         const isOwner = String(c.userId) === String(currentUserId);
         return `
@@ -400,26 +349,43 @@ function renderComments(comments) {
 async function updateComment(id, seq){
     const newComment = prompt("수정할 내용을 입력하세요.");
     if (!newComment || !newComment.trim()) return;
-
     const updateDto = { id, commentSeq: seq, comment: newComment, userId: currentUserId };
-
     try {
         const response = await fetch("/api/board/comment/update", {
             method: "POST",
             headers: {"Content-Type":"application/json"},
             body: JSON.stringify(updateDto)
         });
-        if (response.ok){
-            alert("댓글수정이 완료되었습니다.");
-            location.reload();
-        }
+        if (response.ok){ alert("댓글수정 완료"); location.reload(); }
     } catch (e) { console.error(e); }
 }
 
 async function deleteComment(id, seq) {
     if (!confirm("댓글을 삭제하시겠습니까?")) return;
     try {
-        const response = await fetch(`/api/board/comment/delete?id=${id}&commentSeq=${seq}`, { method: "POST" });
+        const response = await fetch(`/api/board/comment/delete?id=${id}&commentSeq=${seq}`, {method: "POST"});
         if (response.ok) { alert("삭제되었습니다."); location.reload(); }
     } catch (e) { console.error(e); }
+}
+
+/* ================= 식당신청 카테고리 로드 (기존 유지) ================= */
+
+async function initCategorySelects() {
+    try {
+        const response = await fetch("/api/category/map");
+        const categoryMap = await response.json();
+        const config = { "category1": "region", "category2": "category", "category3": "shape", "category4": "thickness", "category5": "style", "category6": "kind", "category7": "rich", "category8": "richness" };
+        Object.entries(config).forEach(([selectId, groupId]) => {
+            const selectElement = document.getElementById(selectId);
+            const items = categoryMap[groupId];
+            if (selectElement && items) {
+                items.forEach(item => {
+                    const option = document.createElement("option");
+                    option.value = item.id;
+                    option.textContent = item.name;
+                    selectElement.appendChild(option);
+                });
+            }
+        });
+    } catch (error) { console.error("카테고리 데이터 실패:", error); }
 }

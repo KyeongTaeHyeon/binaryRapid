@@ -12,7 +12,7 @@ import org.springframework.security.web.SecurityFilterChain;
 @EnableWebSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
-    
+
     // 암호화 메서드
     @Bean
     public BCryptPasswordEncoder passwordEncoder() {
@@ -53,5 +53,5 @@ public class SecurityConfig {
 
         return http.build();
     }
-    
+
 }

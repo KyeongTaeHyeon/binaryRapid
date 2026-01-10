@@ -81,6 +81,7 @@ public class BoardController {
         return "board/boardEdit"; // templates/board/boardEdit.html 파일을 찾아감
     }
 
+
     // --- 댓글 관련 ---
 
     // 1. 댓글 등록
@@ -112,4 +113,5 @@ public class BoardController {
         boardService.deleteComment(id, commentSeq);
         return ResponseEntity.ok("success");
     }
+
 }
