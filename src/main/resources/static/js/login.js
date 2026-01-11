@@ -66,19 +66,22 @@ document.addEventListener('DOMContentLoaded', function () {
           return result.data;
         })
         .then((data) => {
-          // 여기서 data는 ApiResponse의 'data' 필드에 담긴 UserResponseDto 혹은 Token 정보입니다.
-          console.log('로그인 성공:', data);
+          console.log('로그인 성공 데이터:', data);
 
-          // JWT 토큰이 있다면 로컬 스토리지에 저장
-          if (data.token) {
-            localStorage.setItem('accessToken', data.token);
+          // [핵심 수정] 서버 DTO 필드명인 accessToken으로 저장
+          if (data.accessToken) {
+            localStorage.setItem('accessToken', data.accessToken);
+            localStorage.setItem('refreshToken', data.refreshToken);
+
+            // 구글 로그인과의 호환성을 위해 추가 (필요시)
+            localStorage.setItem('isLoggedIn', 'true');
+
+            window.location.href = '/';
+          } else {
+            alert("토큰을 수신하지 못했습니다.");
           }
-
-          // 로그인 성공 시 메인 페이지로 이동
-          window.location.href = '/';
         })
         .catch((error) => {
-          // throw new Error()에서 던진 메시지가 여기 걸립니다.
           errorMsg.textContent = error.message;
           errorMsg.style.display = 'block';
         });

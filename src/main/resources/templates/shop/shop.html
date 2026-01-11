@@ -1,29 +1,27 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
     <head>
         <meta charset="UTF-8"/>
         <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-        <title>regionTheme</title>
+        <title>지역별/테마별 맛집</title>
         <link rel="stylesheet" th:href="@{/css/reset.css}"/>
         <link rel="stylesheet" th:href="@{/css/common.css}"/>
-        <link rel="stylesheet" th:href="@{/css/regionTheme.css}"/>
+        <link rel="stylesheet" th:href="@{/css/shop.css}"/>
     </head>
-    <body>
+    <body th:attr="data-authenticated=${session.loginUser != null}, data-login-url=@{/login}">
         <div id="wrapper">
             <header id="header" th:replace="~{fragments/header :: header}"></header>
+
             <main id="main">
                 <div id="filterWrapper">
                     <h1 style="margin-bottom: 20px">지역별/테마별</h1>
 
                     <form id="filterForm" method="get" th:action="@{/shop}" th:object="${searchForm}">
                         <div class="filters">
-
                             <th:block th:each="group : ${filterGroups}">
-
                                 <div th:if="${!group.hideHeader}" class="filterSection filterOutline">
-                                    <div class="filterHeaderTitle" th:text="${group.majorName} + ' ▼'">제목</div>
-
-                                    <div class="filterGroupWrap active">
+                                    <div class="filterHeaderTitle" th:text="${group.majorName} + ' ▲'">제목</div>
+                                    <div class="filterGroupWrap" style="display: none;">
                                         <th:block th:each="minorEntry : ${group.minorMap}">
                                             <div>
                                                 <div class="filterTitle" th:text="${minorEntry.key}">소제목</div>
@@ -71,18 +69,16 @@
                                         </div>
                                     </th:block>
                                 </div>
-
                             </th:block>
-
                         </div>
                     </form>
-
                 </div>
-                <div id="selectorWrapper" style="display: flex; justify-content: space-between; align-items: center;">
+
+                <div id="selectorWrapper">
                     <ul class="selectorContents"></ul>
-
-                    <button type="button" class="btn-clear-all">전체삭제</button>
+                    <button type="button" class="btn-clear-all" style="display: none;">전체삭제</button>
                 </div>
+
                 <div id="contentWrapper">
                     <div id="contentList">
                         <div th:if="${shopList.isEmpty()}" style="text-align: center; padding: 50px;">
@@ -92,80 +88,55 @@
                             <div class="contentItem">
                                 <a th:href="@{/shop/{id}(id=${shop.shopId})}">
                                     <div class="contentImage">
-                                        <img th:src="${shop.imgUrl}" th:alt="${shop.shopName}"/>
+                                        <img th:if="${shop.imgUrl != null}"
+                                             th:src="${shop.imgUrl}"
+                                             th:alt="${shop.shopName}"/>
+                                        <div th:if="${shop.imgUrl == null}" class="no-image">No Image</div>
                                     </div>
+
                                     <div class="contentsInfo">
                                         <div class="contentTitle" th:text="${shop.shopName}"></div>
+
                                         <div class="contentCategory">
                                             <ul class="categoryList">
                                                 <li th:each="category : ${shop.categories}">
-                                                    <span class="badge" th:text="${category.categoryName}">카테고리명</span>
+                                                    <span class="badge"
+                                                          th:text="${category.categoryName}">
+                                                    </span>
                                                 </li>
                                             </ul>
                                         </div>
-                                        <div class="contentDescription" th:text="${shop.shopContent}"></div>
+
+                                        <div class="contentDescription"
+                                             th:text="${shop.shopContent}">
+                                        </div>
                                     </div>
                                 </a>
-                                <button class="contentLike" type="button"></button>
+
+                                <!-- ✅ 좋아요 버튼 (SSR에서 상태 주입) -->
+                                <button class="contentLike"
+                                        type="button"
+                                        th:if="${session.loginUser != null}"
+                                        th:classappend="${shop.liked} ? ' active' : ''"
+                                        th:attr="data-shop-id=${shop.shopId},
+                                                data-liked=${shop.liked},
+                                                aria-pressed=${shop.liked}">
+                                </button>
                             </div>
+
                         </div>
                     </div>
 
-                    <div id="contentNav" th:if="${!shopList.isEmpty()}">
-                        <nav class="pagination">
-
-                            <button class="pageBtn prev" aria-label="이전 페이지"
-                                    th:disabled="${shopList.first}"
-                                    th:onclick="|changePage(${shopList.number - 1})|">
-                                &lt;
-                            </button>
-
-                            <ul class="pageList">
-                                <li th:each="page : ${#numbers.sequence(0, shopList.totalPages - 1)}"
-                                    th:if="${page >= shopList.number - 2 and page <= shopList.number + 2}">
-
-                                    <button type="button"
-                                            th:text="${page + 1}"
-                                            th:classappend="${page == shopList.number} ? 'active' : ''"
-                                            th:onclick="|changePage(${page})|">
-                                        1
-                                    </button>
-                                </li>
-                            </ul>
-
-                            <button class="pageBtn next" aria-label="다음 페이지"
-                                    th:disabled="${shopList.last}"
-                                    th:onclick="|changePage(${shopList.number + 1})|">
-                                &gt;
-                            </button>
-
-                        </nav>
-                    </div>
+                    <div id="contentNav"></div>
                 </div>
             </main>
+
             <footer id="footer" th:replace="~{fragments/footer :: footer}"></footer>
         </div>
 
         <script th:src="@{/js/common.js}"></script>
-        <script type="text/javascript">
-            function googleTranslateElementInit() {
-                new google.translate.TranslateElement(
-                    {pageLanguage: 'ko', includedLanguages: 'en,ja,zh-CN,ko'},
-                    'google_translate_element'
-                );
-            }
-
-            function resetFilter(groupId) {
-                const targetName = "conditions['" + groupId + "']";
-                const checkboxes = document.getElementsByName(targetName);
-                for (let i = 0; i < checkboxes.length; i++) {
-                    checkboxes[i].checked = false;
-                }
-                document.getElementById('filterForm').submit();
-            }
-        </script>
-        <script src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
-        <script type="module" th:src="@{/js/regionTheme.js}"></script>
+        <script type="module" th:src="@{/js/shop.js}"></script>
+
     </body>
 </html>

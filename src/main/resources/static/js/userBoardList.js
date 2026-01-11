@@ -1,90 +1,101 @@
-// userBoardList.js
+/**
+ * userBoardList.js
+ */
+
+// 1. 토큰 체크 (즉시 실행)
+(function() {
+  const token = localStorage.getItem("accessToken");
+  if (!token) {
+    alert("로그인 정보가 없습니다. 로그인 페이지로 이동합니다.");
+    location.href = "/login";
+    return;
+  }
+})();
 
 let allPosts = [];
 let currentPage = 1;
 let ITEMS_PER_PAGE = 10;
 const MAX_TITLE_LENGTH = 20;
 
-// DOM
+// DOM 요소
 const userTableBody = document.getElementById('userTableBody');
 const paginationList = document.querySelector('.page-list');
 const prevButton = document.querySelector('.page-btn.prev');
 const nextButton = document.querySelector('.page-btn.next');
 const itemsPerPageSelect = document.getElementById('sarray_numbers');
 
-// ----------------- 날짜 포맷터 (yyyy-MM-dd) -----------------
+// 날짜 포맷
 function formatDate(dateStr) {
   if (!dateStr) return '-';
   return dateStr.split('T')[0];
 }
 
-// ----------------- 제목 길이 제한 -----------------
+// 제목 제한
 function truncateTitle(title, maxLength = MAX_TITLE_LENGTH) {
   if (!title) return '';
-  return title.length > maxLength
-    ? title.substring(0, maxLength) + '...'
-    : title;
+  return title.length > maxLength ? title.substring(0, maxLength) + '...' : title;
 }
 
-// ----------------- 게시글 로드 -----------------
+// 데이터 로드
 async function loadBoardData() {
+  const token = localStorage.getItem("accessToken");
   try {
-    const response = await fetch('/user/api/my/board');
+    const response = await fetch('/user/api/my/board', {
+      method: 'GET',
+      headers: {
+        'Authorization': 'Bearer ' + token,
+        'Content-Type': 'application/json'
+      }
+    });
 
     if (response.status === 401) {
-      alert('로그인이 필요합니다.');
-      location.href = '/';
+      alert('인증이 만료되었습니다.');
+      location.href = '/login';
       return [];
     }
 
-    if (!response.ok) {
-      throw new Error(`HTTP error: ${response.status}`);
-    }
-
-    return await response.json();
+    const result = await response.json();
+    return Array.isArray(result) ? result : [];
   } catch (e) {
-    console.error('게시글 로딩 실패:', e);
+    console.error('데이터 로드 실패:', e);
     return [];
   }
 }
 
-// ----------------- 게시글 삭제 -----------------
+// 게시글 삭제
 async function deleteBoard(boardId) {
-  if (!confirm('정말 삭제하시겠습니까?')) return;
+  if (!confirm("정말로 이 게시글을 삭제하시겠습니까?")) return;
 
   try {
-    const response = await fetch(`/board/delete?id=${boardId}`, {
-      method: 'GET',
+    const token = localStorage.getItem("accessToken");
+    // BoardController의 @DeleteMapping("/delete/{id}") 경로 사용
+    const response = await fetch(`/api/board/delete/${boardId}`, {
+      method: 'DELETE',
+      headers: {
+        'Authorization': 'Bearer ' + token
+      }
     });
 
-    if (!response.ok) {
-      throw new Error('삭제 실패');
+    if (response.ok) {
+      alert("삭제되었습니다.");
+      // 새로고침 대신 배열에서 제거 후 재렌더링
+      allPosts = allPosts.filter(post => String(post.id) !== String(boardId));
+      showBoardList();
+    } else {
+      alert("삭제 권한이 없거나 오류가 발생했습니다.");
     }
-
-    alert('삭제되었습니다.');
-
-    // 🔥 목록 다시 로드
-    allPosts = await loadBoardData();
-    currentPage = 1;
-    showBoardList();
-  } catch (e) {
-    console.error(e);
-    alert('삭제 중 오류가 발생했습니다.');
+  } catch (error) {
+    alert("서버 통신 오류");
   }
 }
 
-// ----------------- 테이블 렌더링 -----------------
+// 테이블 렌더링
 function renderPosts(posts) {
+  if (!userTableBody) return;
   userTableBody.innerHTML = '';
 
   if (posts.length === 0) {
-    userTableBody.innerHTML = `
-      <tr>
-        <td colspan="5" style="text-align:center;">
-          작성한 게시글이 없습니다.
-        </td>
-      </tr>
-    `;
+    userTableBody.innerHTML = `<tr><td colspan="5" style="text-align:center;">작성한 게시글이 없습니다.</td></tr>`;
     return;
   }
 
@@ -92,137 +103,80 @@ function renderPosts(posts) {
     const row = document.createElement('tr');
 
     let boardName = '기타';
-    if (post.type?.startsWith('B')) boardName = '식당인증';
-    else if (post.type?.startsWith('A')) boardName = '자유게시판';
+    if (post.category === 'B00') boardName = '식당인증';
+    else if (post.category === 'A00') boardName = '자유게시판';
 
-    const displayId = (currentPage - 1) * ITEMS_PER_PAGE + index + 1;
-    const shortTitle = truncateTitle(post.title);
+    const displayNum = (currentPage - 1) * ITEMS_PER_PAGE + index + 1;
 
     row.innerHTML = `
-      <td>${displayId}</td>
-      <td>${boardName}</td>
-      <td>
-        <a href="/board/view?id=${post.id}" title="${post.title}">
-          ${shortTitle}
-        </a>
-      </td>
-      <td>${formatDate(post.createDate)}</td>
-      <td>
-        <button class="delete-btn" data-id="${post.id}">
-          삭제
-        </button>
-      </td>
+        <td>${displayNum}</td>
+        <td>${boardName}</td>
+        <td>
+            <a href="/board/boardList2?id=${post.id}" style="color:inherit; text-decoration:none;">
+                ${truncateTitle(post.title)}
+            </a>
+        </td>
+        <td>${formatDate(post.createDate)}</td>
+        <td>
+            <button class="delete-btn" data-id="${post.id}" 
+                    style="color:#ff4d4d; border:1px solid #ff4d4d; background:none; cursor:pointer; padding:2px 6px; border-radius:4px;">
+                삭제
+            </button>
+        </td>
     `;
-
     userTableBody.appendChild(row);
   });
 
-  // 🔥 삭제 버튼 이벤트 바인딩
-  document.querySelectorAll('.delete-btn').forEach((btn) => {
-    btn.addEventListener('click', () => {
-      const boardId = btn.dataset.id;
-      deleteBoard(boardId);
-    });
+  // 버튼 이벤트 연결
+  document.querySelectorAll('.delete-btn').forEach(btn => {
+    btn.onclick = () => deleteBoard(btn.dataset.id);
   });
 }
 
-// ----------------- 페이지 + 목록 갱신 -----------------
+// 페이징 처리
 function showBoardList() {
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-  const endIndex = startIndex + ITEMS_PER_PAGE;
-  const paginatedPosts = allPosts.slice(startIndex, endIndex);
-
+  const paginatedPosts = allPosts.slice(startIndex, startIndex + ITEMS_PER_PAGE);
   renderPosts(paginatedPosts);
-  renderPaginationButtons(allPosts.length);
+  renderPagination(allPosts.length);
 }
 
-// ----------------- 페이지네이션 버튼 -----------------
-function renderPaginationButtons(totalItems) {
+function renderPagination(totalItems) {
   const totalPages = Math.ceil(totalItems / ITEMS_PER_PAGE);
+  if (!paginationList) return;
   paginationList.innerHTML = '';
 
-  // prev
-  prevButton.onclick = () => {
-    if (currentPage > 1) {
-      currentPage--;
-      showBoardList();
-    }
-  };
-  prevButton.disabled = currentPage === 1;
+  if (prevButton) prevButton.disabled = (currentPage === 1);
+  if (nextButton) nextButton.disabled = (currentPage === totalPages || totalPages === 0);
 
-  const maxPageButtons = 10;
-  let startPage = Math.max(1, currentPage - Math.floor(maxPageButtons / 2));
-  let endPage = Math.min(totalPages, startPage + maxPageButtons - 1);
-
-  if (endPage - startPage + 1 < maxPageButtons) {
-    startPage = Math.max(1, endPage - maxPageButtons + 1);
-  }
-
-  if (startPage > 1) {
-    paginationList.innerHTML += `
-      <li class="page-item ellipsis"><span>...</span></li>
-    `;
-  }
-
-  for (let i = startPage; i <= endPage; i++) {
+  for (let i = 1; i <= totalPages; i++) {
     const li = document.createElement('li');
-    li.classList.add('page-item');
-    if (i === currentPage) li.classList.add('active');
-
+    li.className = `page-item ${i === currentPage ? 'active' : ''}`;
     const btn = document.createElement('button');
     btn.textContent = i;
-    btn.onclick = () => {
-      currentPage = i;
-      showBoardList();
-    };
-
+    btn.onclick = () => { currentPage = i; showBoardList(); };
     li.appendChild(btn);
     paginationList.appendChild(li);
   }
-
-  if (endPage < totalPages) {
-    paginationList.innerHTML += `
-      <li class="page-item ellipsis"><span>...</span></li>
-    `;
-
-    const lastLi = document.createElement('li');
-    lastLi.classList.add('page-item');
-    if (currentPage === totalPages) lastLi.classList.add('active');
-
-    const lastBtn = document.createElement('button');
-    lastBtn.textContent = totalPages;
-    lastBtn.onclick = () => {
-      currentPage = totalPages;
-      showBoardList();
-    };
-
-    lastLi.appendChild(lastBtn);
-    paginationList.appendChild(lastLi);
-  }
-
-  // next
-  nextButton.onclick = () => {
-    if (currentPage < totalPages) {
-      currentPage++;
-      showBoardList();
-    }
-  };
-  nextButton.disabled = currentPage === totalPages;
 }
 
-// ----------------- 초기 로드 -----------------
+// 초기화
 document.addEventListener('DOMContentLoaded', async () => {
   if (itemsPerPageSelect) {
     ITEMS_PER_PAGE = parseInt(itemsPerPageSelect.value);
-
-    itemsPerPageSelect.addEventListener('change', () => {
+    itemsPerPageSelect.onchange = () => {
       ITEMS_PER_PAGE = parseInt(itemsPerPageSelect.value);
       currentPage = 1;
       showBoardList();
-    });
+    };
   }
 
+  if (prevButton) prevButton.onclick = () => { if (currentPage > 1) { currentPage--; showBoardList(); } };
+  if (nextButton) nextButton.onclick = () => {
+    const totalPages = Math.ceil(allPosts.length / ITEMS_PER_PAGE);
+    if (currentPage < totalPages) { currentPage++; showBoardList(); }
+  };
+
   allPosts = await loadBoardData();
-  currentPage = 1;
   showBoardList();
 });

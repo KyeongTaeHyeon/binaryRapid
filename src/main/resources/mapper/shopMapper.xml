@@ -10,6 +10,7 @@
         <result property="shopAddress" column="shop_address"/>
         <result property="shopContent" column="shop_content"/>
         <result property="imgUrl" column="img_url"/>
+        <result property="liked" column="liked"/>
         <collection property="categories" ofType="com.binary.rapid.shop.form.ShopForm$CategoryInfo">
             <result property="categoryId" column="category_id"/>
             <result property="categoryName" column="category_name"/>
@@ -40,6 +41,7 @@
              , s.address AS shop_address
              , s.content AS shop_content
              , si.img_url AS img_url
+             , CASE WHEN uw.user_id IS NULL THEN FALSE ELSE TRUE END AS liked
              , c.id      AS category_id
              , c.name    AS category_name
         FROM tb_shop s
@@ -52,11 +54,12 @@
                     LIMIT #{limit} OFFSET #{offset}
                 </if>
             ) paged_s ON s.id = paged_s.id
-            
             JOIN tb_shopdetail sd_main ON sd_main.id = s.id
             JOIN tb_category c ON c.id = sd_main.contents
             LEFT OUTER JOIN tb_shopimg si ON si.id = s.id AND si.main_img = 'Y'
-        
+            LEFT OUTER JOIN tb_userwishlist uw
+                ON uw.shop_id COLLATE utf8mb4_0900_ai_ci = s.id COLLATE utf8mb4_0900_ai_ci
+                 <if test="userId != null">AND uw.user_id = #{userId}</if>
         ORDER BY s.id, c.view
     </select>
     
@@ -66,21 +69,44 @@
         <include refid="searchConditions"/>
     </select>
     
-    <select id="shopInfo" resultMap="shopResultMap" parameterType="String">
+    <select id="shopInfo" resultMap="shopResultMap" parameterType="map">
         SELECT s.id       AS shop_id
              , s.name     AS shop_name
              , s.address  AS shop_address
              , s.content  AS shop_content
              , si.img_url AS img_url
+             , CASE WHEN uw.user_id IS NULL THEN FALSE ELSE TRUE END AS liked
              , c.id       AS category_id
              , c.name     AS category_name
         FROM tb_shop s
                  JOIN tb_shopdetail sd ON sd.id = s.id
                  LEFT OUTER JOIN tb_shopimg si ON si.id = s.id AND si.main_img = 'Y'
                  JOIN tb_category c ON c.id = sd.contents
+                 LEFT OUTER JOIN tb_userwishlist uw
+                    ON uw.shop_id COLLATE utf8mb4_0900_ai_ci = s.id COLLATE utf8mb4_0900_ai_ci
+                     <if test="userId != null">AND uw.user_id = #{userId}</if>
         WHERE COALESCE(s.req_type, '') = 'Y'
           AND s.id = #{shopId}
         ORDER BY s.id, c.view
     </select>
+    
+    <select id="existsWishlist" resultType="int">
+        SELECT COUNT(*)
+        FROM tb_userwishlist
+        WHERE user_id = #{userId}
+          AND shop_id = #{shopId}
+    </select>
+    
+    <insert id="insertWishlist">
+        INSERT INTO tb_userwishlist (user_id, shop_id, create_date)
+        VALUES (#{userId}, #{shopId}, NOW())
+    </insert>
+    
+    <delete id="deleteWishlist">
+        DELETE
+        FROM tb_userwishlist
+        WHERE user_id = #{userId}
+          AND shop_id = #{shopId}
+    </delete>
 
 </mapper>

@@ -1,6 +1,6 @@
 <!DOCTYPE mapper
-        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
-        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.binary.rapid.user.mapper.UserMapper">
 
     <!-- 회원가입 -->
@@ -9,29 +9,27 @@
             useGeneratedKeys="true"
             keyProperty="userId"
             keyColumn="user_id">
-        INSERT INTO tb_user (
-        id, password, nickname, name, taste,
-        birth, email, social, gender, role
-        )
-        VALUES (
-        #{id},
-        #{password},
-        #{nickName},
-        #{name},
-        #{taste},
-        #{birth},
-        #{email},
-        #{social},
-        #{gender},
-        #{role}
-        )
+        INSERT INTO tb_user (id, password, nickname, name, taste,
+                             birth, email, social, gender, role)
+        VALUES (#{id},
+                #{password},
+                #{nickName},
+                #{name},
+                #{taste},
+                #{birth},
+                #{email},
+                #{social},
+                #{gender},
+                #{role})
     </insert>
 
     <!-- 아이디 중복 체크 -->
     <select id="duplicateUserId"
             parameterType="string"
             resultType="int">
-        SELECT COUNT(*) FROM tb_user WHERE id = #{id}
+        SELECT COUNT(*)
+        FROM tb_user
+        WHERE id = #{id}
     </select>
 
     <!-- 아이디로 유저 조회 -->
@@ -49,7 +47,7 @@
             resultType="UserResponseDto">
         SELECT *
         FROM tb_user
-        WHERE id = #{email}
+        WHERE email = #{email}
     </select>
 
     <!-- 유저 id로 게시글 리스트 전체 조회 -->
@@ -81,4 +79,62 @@
         WHERE id = #{id};
     </select>
 
+    <select id="selectUserList" resultType="adminDto">
+        SELECT user_id
+             , id
+             , password
+             , nickname AS nickName
+             , email
+             , taste
+             , gender
+             , birth
+             , role
+             , create_date
+             , update_date
+             , delete_date
+        FROM tb_user
+        WHERE delete_date IS NULL
+        
+        <if test="category != null and category != ''">
+            AND taste = #{category}
+        </if>
+        
+        <if test="keyword != null and keyword != ''">
+            AND (nickname LIKE CONCAT('%', #{keyword}, '%') 
+                 OR email LIKE CONCAT('%', #{keyword}, '%'))
+        </if>
+        
+        <if test="startDate != null and startDate != ''">
+            AND create_date >= #{startDate}
+        </if>
+        <if test="endDate != null and endDate != ''">
+            AND create_date &lt;= CONCAT(#{endDate}, ' 23:59:59')
+        </if>
+        
+        ORDER BY create_date DESC
+    </select>
+
+    <select id="selectUserById" resultType="com.binary.rapid.user.dto.SelectUserResponseForJwtDto">
+        SELECT * FROM tb_user WHERE user_id = #{userId}
+    </select>
+
+
+    <select id="selectWishlistByUserId" resultType="WishlistResponseDto">
+        SELECT
+        w.user_id AS userId,
+        w.shop_id AS shopId,
+        w.create_date AS createDate,
+        s.name AS shopName,
+        s.address AS shopAddress,
+        s.content AS shopContent,
+        NULL AS imgUrl,   NULL AS siteUrl    FROM tb_userwishlist w
+        JOIN tb_shop s ON w.shop_id = s.id COLLATE utf8mb4_unicode_ci
+        WHERE w.user_id = #{userId}
+        ORDER BY w.create_date DESC
+    </select>
+
+    <delete id="deleteWishlist">
+        DELETE FROM tb_userwishlist
+        WHERE user_id = #{userId} AND shop_id = #{shopId}
+    </delete>
 </mapper>

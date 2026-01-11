@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE configuration
-        PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
-        "https://mybatis.org/dtd/mybatis-3-config.dtd">
+    PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+    "https://mybatis.org/dtd/mybatis-3-config.dtd">
 <configuration>
     <settings>
         <setting name="mapUnderscoreToCamelCase" value="true"/>
@@ -9,18 +9,27 @@
     </settings>
 
     <typeAliases>
-        <typeAlias alias="boardCommentDto" type="com.binary.rapid.Board.dto.BoardCommentDto"/>
-        <typeAlias alias="boardDto" type="com.binary.rapid.Board.dto.BoardDto"/>
+        <!--    main    -->
+        <typeAlias alias="boardCommentDto" type="com.binary.rapid.board.dto.BoardCommentDto"/>
+        <typeAlias alias="shopForm" type="com.binary.rapid.shop.form.ShopForm"/>
+        <typeAlias alias="newsDto" type="com.binary.rapid.news.dto.NewsDto"/>
+        <typeAlias alias="boardDto" type="com.binary.rapid.board.dto.BoardDto"/>
         <typeAlias alias="infoDto" type="com.binary.rapid.ramen.dto.RamenInfoDto"/>
         <typeAlias alias="popupDto" type="com.binary.rapid.ramen.dto.RamenPopupDto"/>
-        <typeAlias alias="heroDto" type="com.binary.rapid.ramen.dto.RamenHeroDto"/>
         <typeAlias alias="cateDto" type="com.binary.rapid.ramen.dto.RamenCateDto"/>
-        <typeAlias alias="shopForm" type="com.binary.rapid.shop.form.ShopForm"/>
+        <!--    user    -->
         <typeAlias alias="userDto" type="com.binary.rapid.user.dto.UserDto"/>
+        <typeAlias alias="WishlistResponseDto" type="com.binary.rapid.user.dto.WishlistResponseDto"/>
+        <!--    shop    -->
+        <typeAlias alias="shopForm" type="com.binary.rapid.shop.form.ShopForm"/>
         <typeAlias alias="myBoardDto" type="com.binary.rapid.user.dto.myBoardDto"/>
         <typeAlias alias="UserResponseDto" type="com.binary.rapid.user.dto.UserResponseDto"/>
         <typeAlias alias="shopSearchForm" type="com.binary.rapid.shop.form.ShopSearchForm"/>
+        <!--    category    -->
         <typeAlias alias="categoryForm" type="com.binary.rapid.category.form.CategoryForm"/>
         <typeAlias alias="loginJwtDto" type="com.binary.rapid.user.dto.SelectUserResponseForJwtDto"/>
+        <!--    admin    -->
+        <typeAlias alias="adminDto" type="com.binary.rapid.admin.dto.AdminDto"/>
+        <typeAlias alias="noticeDto" type="com.binary.rapid.admin.dto.NoticeDto"/>
     </typeAliases>
 </configuration>

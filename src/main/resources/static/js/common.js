@@ -69,6 +69,67 @@ function loadScript(url) {
         document.head.appendChild(script);
     });
 }
+// 인증 헤더가 포함된 공통 요청 함수 (자동 리프레시 포함)
+
+async function authFetch(url, options = {}) {
+    let accessToken = localStorage.getItem("accessToken");
+
+    const headers = {
+        'Authorization': accessToken ? `Bearer ${accessToken}` : '',
+        'Content-Type': 'application/json',
+        ...options.headers
+    };
+
+    let response = await fetch(url, { ...options, headers });
+
+    if (response.status === 401) {
+        console.warn("액세스 토큰 만료됨. 재발급 시도 중...");
+        const isRefreshed = await refreshTokens();
+
+        if (isRefreshed) {
+            accessToken = localStorage.getItem("accessToken");
+            headers['Authorization'] = `Bearer ${accessToken}`;
+            return await fetch(url, { ...options, headers });
+        } else {
+            alert("세션이 만료되었습니다. 다시 로그인해주세요.");
+            localStorage.clear();
+            sessionStorage.clear();
+            location.href = "/login";
+            return response;
+        }
+    }
+    return response;
+}
+
+// 리프레시 토큰으로 액세스 토큰 갱신
+async function refreshTokens() {
+    const refreshToken = localStorage.getItem("refreshToken");
+    // UserController.java에서 요구하는 userId 추출 (캐시된 정보 활용)
+    const cachedUser = JSON.parse(sessionStorage.getItem("cachedUser"));
+    const userId = cachedUser ? cachedUser.userId : null;
+
+    if (!refreshToken || !userId) return false;
+
+    try {
+        const response = await fetch("/user/refresh", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ userId, refreshToken })
+        });
+
+        if (response.ok) {
+            const result = await response.json();
+            if (result.success && result.data.accessToken) {
+                localStorage.setItem("accessToken", result.data.accessToken);
+                return true;
+            }
+        }
+    } catch (e) {
+        console.error("토큰 갱신 에러:", e);
+    }
+    return false;
+}
+
 
 window.addEventListener('DOMContentLoaded', () => {
     // Thymeleaf 사용 시 아래 loadHTML은 불필요할 수 있으나, 

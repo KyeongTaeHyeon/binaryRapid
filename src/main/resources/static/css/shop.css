@@ -1,0 +1,437 @@
+@charset "UTF-8";
+
+/* ========================================= */
+/* 기본 레이아웃 (기존 유지) */
+/* ========================================= */
+#main {
+    margin-top: 40px;
+}
+
+#filterWrapper {
+    width: 1440px;
+    margin: 0 auto;
+    padding: 10px;
+    color: #222;
+    text-align: center;
+}
+
+#contentWrapper {
+    width: 1440px;
+    margin: 0 auto;
+    padding-bottom: 30px;
+}
+
+#selectorWrapper {
+    width: 1440px;
+    margin: 0 auto;
+    padding-top: 40px;
+    padding-bottom: 40px;
+    color: #222;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* ========================================= */
+/* 필터 스타일 (기존 유지) */
+/* ========================================= */
+.filterOutline {
+    box-shadow: #dedede 0px 0px 5px 0px;
+    color: #000;
+    border-radius: 10px;
+    background: #fff;
+}
+
+#filterWrapper #filterForm .filters {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+#filterWrapper #filterForm .filters .filterHeaderTitle {
+    width: 100%;
+    font-size: 18px;
+    font-weight: 700;
+    padding: 8px;
+    border-bottom: 1px solid #dedede;
+    margin-bottom: 0;
+    background-color: #f9f9f9;
+    cursor: pointer;
+    user-select: none;
+}
+
+#filterWrapper #filterForm .filters .filterSection {
+    display: flex;
+    flex-direction: column;
+    text-align: center;
+}
+
+#filterWrapper #filterForm .filters > div, #filterWrapper #filterForm .filters .filterGroupWrap > div {
+    display: flex;
+    align-items: stretch;
+    justify-content: center;
+}
+
+#filterWrapper #filterForm .filters > div .filterTitle, #filterWrapper #filterForm .filters .filterGroupWrap > div .filterTitle {
+    width: 80px;
+    font-size: 14px;
+    font-weight: 700;
+    padding-right: 10px;
+    margin-right: 10px;
+    text-align: right;
+    align-self: stretch;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+#filterWrapper #filterForm .filters .filterList {
+    display: grid !important;
+    grid-template-columns: 1fr 40px !important;
+    align-items: stretch !important;
+    position: relative;
+    border-left: 1px solid #dedede;
+    flex: 1;
+}
+
+.filterGroupWrap {
+    overflow: hidden;
+    transition: none;
+}
+
+.filterContents {
+    grid-column: 1;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 12px;
+    padding: 8px !important;
+    margin: 0;
+    list-style: none;
+}
+
+.filterContents.collapsed {
+    height: 45px !important;
+    overflow: hidden !important;
+}
+
+.filterList ul:not(.collapsed) {
+    max-height: 1000px;
+    transition: max-height 0.3s ease-in;
+}
+
+.filterList .filterContents li {
+    padding: 4px 12px;
+    font-size: 14px;
+    border-bottom: 1px solid #eee;
+    background: #fff;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-bottom: 4px;
+    border-radius: 4px;
+}
+
+.filterList .filterContents li:hover {
+    background: #f0f0f0;
+    color: #5ac3f5;
+}
+
+.filterContents li.active {
+    background-color: #E3F2FD !important;
+    color: #1976D2 !important;
+    font-weight: bold !important;
+    border-radius: 4px;
+}
+
+.filterMoreBtn {
+    grid-column: 2;
+    background-color: #f5f5f5;
+    border-left: 1px solid #dedede;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: bold;
+    color: #333;
+    padding: 5px 0;
+    text-orientation: keeps-upright;
+}
+
+.filterMoreBtn:hover {
+    background-color: #e8e8e8;
+}
+
+/* 태그 */
+.selectedTag {
+    display: inline-flex;
+    align-items: center;
+    padding: 5px 12px;
+    background: #ffffff;
+    border: 1px solid #1976D2;
+    border-radius: 20px;
+    margin-right: 10px;
+    font-size: 14px;
+    color: #1976D2;
+    font-weight: bold;
+}
+
+.selectedTag .removeTag {
+    margin-left: 8px;
+    cursor: pointer;
+    color: #ff4d4f;
+    font-weight: bold;
+    font-size: 16px;
+}
+
+.btn-clear-all {
+    display: none;
+    cursor: pointer;
+    background-color: #ff4d4f;
+    color: white;
+    border: none;
+    padding: 6px 16px;
+    border-radius: 4px;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+.btn-clear-all:hover {
+    background-color: #d9363e;
+}
+
+/* 리스트 */
+#contentList {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 40px;
+}
+
+#contentList .contentItem {
+    position: relative;
+    width: 330px;
+    margin-bottom: 30px;
+}
+
+#contentList .contentItem .contentImage {
+    width: 100%;
+    height: 280px; /* 이미지 영역 고정 */
+    background-color: #f5f5f5; /* 이미지 없을 때 배경 */
+    border-radius: 4px;
+    overflow: hidden;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#contentList .contentItem .contentImage img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* 비율 유지 + 꽉 채우기 */
+    display: block;
+}
+
+#contentList .contentItem .contentImage .no-image {
+    width: 100%;
+    height: 100%;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    font-size: 14px;
+    color: #999;
+    background-color: #f0f0f0;
+    border-radius: 4px;
+}
+
+
+#contentList .contentItem .contentsInfo {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    color: #222;
+}
+
+#contentList .contentItem .contentsInfo .contentTitle {
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 12px;
+    margin-top: 10px;
+    padding-right: 52px;
+}
+
+#contentList .contentItem .contentsInfo .contentCategory {
+    margin-bottom: 10px;
+}
+
+#contentList .contentItem .contentsInfo .contentCategory .categoryList {
+    display: flex;
+    gap: 4px;
+    flex-wrap: wrap;
+    padding: 0;
+    margin: 0;
+    list-style: none;
+}
+
+#contentList .contentItem .contentsInfo .contentCategory .categoryList li {
+    padding: 4px 12px;
+    background-color: #e0f0fa;
+    border-radius: 20px;
+    color: #176d9f;
+    font-size: 13px;
+    font-weight: 500;
+}
+
+#contentList .contentItem .contentsInfo .contentDescription {
+    font-size: 14px;
+    line-height: 1.5;
+    color: #555;
+    margin-bottom: 20px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    max-width: 300px;
+}
+
+.contentLike {
+    position: absolute;
+    top: 280px;
+    right: 0;
+    z-index: 10;
+    cursor: pointer;
+    width: 40px;
+    height: 40px;
+    background-image: url('../img/ico-heart-gr.png');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-color: transparent;
+    border: none;
+}
+
+.contentLike.active {
+    background-image: url('../img/ico-heart-red.png');
+}
+
+/* ========================================= */
+/* 페이지 네비게이션 (Pagination) - 디자인 복구 */
+/* ========================================= */
+#contentNav {
+    width: 1440px;
+    margin: 0 auto;
+    padding-bottom: 80px;
+    margin-top: 40px;
+}
+
+/* 중앙 정렬용 컨테이너 */
+.pagination-container {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+}
+
+.pagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+/* [이전/다음] 버튼 - 기존 색상 유지 */
+.pagination .pageBtn {
+    background: #fff;
+    border: 1px solid #ddd;
+    color: #555;
+    font-size: 14px;
+    width: 36px;
+    height: 36px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.pagination .pageBtn:hover:not([disabled]) {
+    background: #f0f0f0;
+    border-color: #bbb;
+}
+
+.pagination .pageBtn[disabled] {
+    color: #ccc;
+    background: #f9f9f9;
+    border-color: #eee;
+    cursor: default;
+}
+
+/* [숫자 리스트] */
+.pageList {
+    display: flex;
+    gap: 6px;
+    padding: 0;
+    margin: 0;
+    list-style: none;
+}
+
+/* [숫자 버튼] - 기존 색상 유지 */
+.pageList li button {
+    background: #fff;
+    border: 1px solid #ddd;
+    color: #666;
+    font-size: 14px;
+    min-width: 36px;
+    height: 36px;
+    padding: 0 5px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.pageList li button:hover {
+    background: #f0faff;
+    color: #5ac3f5;
+    border-color: #5ac3f5;
+}
+
+/* [현재 페이지 활성화] - 파란색 유지 */
+.pageList li button.active {
+    background-color: #5ac3f5 !important;
+    color: #ffffff !important;
+    border-color: #5ac3f5 !important;
+    font-weight: 800 !important;
+    box-shadow: 0 2px 4px rgba(90, 195, 245, 0.3);
+    pointer-events: none;
+}
+
+/* [우측 셀렉트 박스] - 위치만 잡음 */
+.page-size-control {
+    position: absolute;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.page-size-control select {
+    padding: 6px 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    color: #555;
+    font-size: 14px;
+    cursor: pointer;
+    outline: none;
+}
+
+.page-size-control select:hover {
+    border-color: #5ac3f5;
+}

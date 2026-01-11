@@ -1,0 +1,17 @@
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.binary.rapid.user.mapper.BlacklistMapper">
+
+    <insert id="insertBlacklist">
+        INSERT INTO tb_tokenBlacklist (token, expiry_date)
+        VALUES (#{token}, #{expiryDate, jdbcType=TIMESTAMP})
+    </insert>
+
+    <select id="existsByToken" resultType="int">
+        SELECT COUNT(*)
+        FROM tb_tokenBlacklist
+        WHERE token = #{token}
+        AND expiry_date > NOW() </select>
+
+</mapper>

@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+    <div th:fragment="sidebar(currentMenu)" id="managerLeft">
+
+        <div class="profile-box">
+            <span class="admin-icon">🛡️</span>
+            <span class="admin-text">관리자 <strong>***</strong> 님</span>
+        </div>
+
+        <ul class="admin-menu">
+            <li th:classappend="${currentMenu == 'notice'} ? 'on'">
+                <a th:href="@{/admin/notices}">📢 공지 관리</a>
+            </li>
+
+            <li th:classappend="${currentMenu == 'user'} ? 'on'">
+                <a th:href="@{/admin/users}">👥 유저 관리</a>
+            </li>
+
+            <!--            <li th:classappend="${currentMenu == 'report'} ? 'on'">-->
+            <!--                <a th:href="@{/admin/reports}">🚨 신고 관리</a>-->
+            <!--            </li>-->
+
+            <li th:classappend="${currentMenu == 'restaurant'} ? 'on'">
+                <a th:href="@{/admin/shops}">🍽️ 식당 인가 관리</a>
+            </li>
+
+            <li th:classappend="${currentMenu == 'category'} ? 'on'">
+                <a th:href="@{/admin/categories}">📂 카테고리 관리</a>
+            </li>
+        </ul>
+
+    </div>
+</html>

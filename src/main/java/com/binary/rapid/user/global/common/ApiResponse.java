@@ -25,7 +25,7 @@ public class ApiResponse<T> {
 
     // 2. 실패 응답 (상태 코드와 메시지를 직접 입력)
     // 예: ApiResponse.fail("400", "비밀번호가 틀렸습니다.")
-    public static ApiResponse<?> fail(String code, String message) {
+    public static <T> ApiResponse<T> fail(String code, String message) {
         return new ApiResponse<>(false, code, message, null);
     }
 

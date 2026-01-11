@@ -1,0 +1,206 @@
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.binary.rapid.admin.mapper.AdminMapper">
+    <select id="selectUserList" resultType="com.binary.rapid.admin.dto.AdminDto">
+        SELECT user_id      AS userId
+             , id           AS id
+             , password     AS password
+             , nickname     AS nickName
+             , email        AS email
+             , taste        AS taste
+             , gender       AS gender
+             , birth        AS birth
+             , role         AS role
+             , create_date  AS createDate
+             , update_date  AS updateDate
+             , delete_date  AS deleteDate
+        FROM tb_user
+        WHERE 1=1
+        <if test="category != null and category != ''">
+            AND taste = #{category}
+        </if>
+        
+        <if test="keyword != null and keyword != ''">
+            AND (nickname LIKE CONCAT('%', #{keyword}, '%') 
+                 OR email LIKE CONCAT('%', #{keyword}, '%'))
+        </if>
+        
+        <if test="startDate != null and startDate != ''">
+            AND create_date >= #{startDate}
+        </if>
+        <if test="endDate != null and endDate != ''">
+            AND create_date &lt;= CONCAT(#{endDate}, ' 23:59:59')
+        </if>
+        
+        ORDER BY create_date DESC
+    </select>
+    
+    <update id="updateUserStatusToSuspend">
+        UPDATE tb_user
+        SET delete_date = NOW()
+        WHERE user_id = #{userId}
+    </update>
+    
+    <update id="updateUserStatusToRestore">
+        UPDATE tb_user
+        SET delete_date = NULL
+        WHERE user_id = #{userId}
+    </update>
+
+
+    <!--  Notice  -->
+    <select id="selectNoticeList" resultType="com.binary.rapid.admin.dto.NoticeDto">
+        SELECT notice_id       AS noticeId
+             , notice_title    AS noticeTitle
+             , notice_content  AS noticeContent
+             , notice_type     AS noticeType
+             , admin_id        AS adminId
+             , id              AS id
+             , nickname        AS nickName
+             , notice_createAt AS noticeCreateAt
+             , notice_updateAt AS noticeUpdateAt
+             , notice_YN       AS noticeYN
+        FROM tb_notice
+        WHERE 1=1
+        
+        <if test="type != null and type != ''">
+            AND notice_type = #{type}
+        </if>
+        
+        <if test="keyword != null and keyword != ''">
+            AND notice_title LIKE CONCAT('%', #{keyword}, '%')
+        </if>
+        
+        ORDER BY notice_id DESC
+    </select>
+
+    <insert id="insertNotice" parameterType="com.binary.rapid.admin.dto.NoticeDto">
+        INSERT INTO tb_notice ( notice_title
+                              , notice_content
+                              , notice_type
+                              , admin_id
+                              , id
+                              , nickname
+                              , notice_createAt
+                              , notice_YN)
+        VALUES ( #{noticeTitle}
+               , #{noticeContent}
+               , #{noticeType}
+               , #{adminId}
+               , #{id}
+               , #{nickName}
+               , NOW(), #{noticeYN})
+    </insert>
+    
+    <update id="updateNotice" parameterType="noticeDto">
+        UPDATE tb_notice
+        SET notice_title    = #{noticeTitle}
+          , notice_content  = #{noticeContent}
+          , notice_type     = #{noticeType}
+          , notice_YN       = #{noticeYN}
+          , notice_updateAt = NOW()
+        WHERE notice_id = #{noticeId}
+    </update>
+
+    <!--  category  -->
+    <select id="selectCategoryGroups" resultType="com.binary.rapid.admin.dto.CategoryDto">
+        SELECT group_id
+             , major
+             , MAX(minor) as minor
+             , MIN(id)    as id
+        FROM tb_category
+        WHERE delete_date IS NULL
+        GROUP BY group_id, major
+        ORDER BY group_id ASC
+    </select>
+
+    <select id="selectCategoryListByGroup" resultType="com.binary.rapid.admin.dto.CategoryDto">
+        SELECT *
+        FROM tb_category
+        WHERE group_id = #{groupId}
+          AND delete_date IS NULL
+        ORDER BY view ASC, id ASC
+    </select>
+
+    <select id="countByPrefix" resultType="int">
+        SELECT COUNT(*)
+        FROM tb_category
+        WHERE id LIKE CONCAT(#{prefix}, '%')
+    </select>
+
+    <select id="selectMaxIdByPrefix" resultType="string">
+        SELECT id
+        FROM tb_category
+        WHERE id LIKE CONCAT(#{prefix}, '%')
+          AND id REGEXP CONCAT('^', #{prefix}, '[0-9]+$')
+        ORDER BY LENGTH(id) DESC, id DESC
+        LIMIT 1
+    </select>
+    
+    <select id="selectSampleIdByGroupId" resultType="string">
+        SELECT id
+        FROM tb_category
+        WHERE group_id = #{groupId}
+        LIMIT 1
+    </select>
+
+    <insert id="insertCategory">
+        INSERT INTO tb_category (id, group_id, major, minor, name, view, user_id, create_date)
+        VALUES (#{id}, #{groupId}, #{major}, #{minor}, #{name}, #{view}, #{userId}, NOW())
+    </insert>
+
+    <update id="updateCategory">
+        UPDATE tb_category
+        SET major       = #{major}
+          , minor       = #{minor}
+          , name        = #{name}
+          , view        = #{view}
+          , update_date = NOW()
+        WHERE id = #{id}
+    </update>
+
+    <update id="deleteCategory">
+        UPDATE tb_category
+        SET delete_date = NOW()
+        WHERE id = #{id}
+    </update>
+
+    <!--  Shop  -->
+    <select id="selectShopList" resultType="com.binary.rapid.admin.dto.AdminShopDto">
+        SELECT id, name, address, content, req_type AS reqType, req_user_id AS reqUserId, create_date AS createDate
+        FROM tb_shop
+        WHERE delete_date IS NULL
+        
+        <if test="status == 'pending'">
+            AND (req_type IS NULL OR req_type = '')
+        </if>
+        
+        <if test="status == 'processed'">
+            AND req_type IN ('Y', 'N', 'P') 
+        </if>
+        
+        ORDER BY create_date DESC
+        LIMIT #{limit} OFFSET #{offset}
+    </select>
+    
+    <select id="countShopList" resultType="int">
+        SELECT COUNT(*) FROM tb_shop WHERE delete_date IS NULL
+        <if test="status == 'pending'">
+            AND (req_type IS NULL OR req_type = '')
+        </if>
+        <if test="status == 'processed'">
+            AND req_type IN ('Y', 'N', 'P')
+        </if>
+    </select>
+
+    <update id="updateShopStatus">
+        UPDATE tb_shop
+        SET req_type    = #{status}
+          , update_date = NOW()
+        WHERE id = #{id}
+    </update>
+    
+</mapper>
+
+

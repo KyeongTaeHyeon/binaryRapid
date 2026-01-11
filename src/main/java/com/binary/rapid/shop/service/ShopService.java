@@ -8,6 +8,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collections;
 import java.util.List;
@@ -21,7 +22,7 @@ public class ShopService {
     private final ShopMapper shopMapper;
 
     // 컨트롤러에서 이 메서드를 호출함
-    public Page<ShopForm> allShopList(Map<String, Object> map, Pageable pageable) {
+    public Page<ShopForm> allShopList(Map<String, Object> map, Pageable pageable, Integer userId) {
 
         // 1. 페이징 계산 (변수명 매칭 준비)
         int page = pageable.getPageNumber();
@@ -31,6 +32,9 @@ public class ShopService {
         // 2. 맵에 XML이 기다리는 변수명("limit", "offset")을 넣어줌
         map.put("limit", size);
         map.put("offset", offset);
+        if (userId != null) {
+            map.put("userId", userId);
+        }
 
         // 3. 카운트 조회 (Map 그대로 전달)
         int totalCount = shopMapper.countShopList(map);
@@ -45,7 +49,26 @@ public class ShopService {
         return new PageImpl<>(content, pageable, totalCount);
     }
 
-    public ShopForm shopInfo(String shopId) {
-        return shopMapper.shopInfo(shopId);
+    public ShopForm shopInfo(String shopId, Integer userId) {
+        return shopMapper.shopInfo(createParam(shopId, userId));
+    }
+
+    @Transactional
+    public boolean toggleWishlist(int userId, String shopId) {
+        int exists = shopMapper.existsWishlist(userId, shopId);
+        if (exists > 0) {
+            shopMapper.deleteWishlist(userId, shopId);
+            return false;
+        } else {
+            shopMapper.insertWishlist(userId, shopId);
+            return true;
+        }
+    }
+
+    private Map<String, Object> createParam(String shopId, Integer userId) {
+        Map<String, Object> map = new java.util.HashMap<>();
+        map.put("shopId", shopId);
+        if (userId != null) map.put("userId", userId);
+        return map;
     }
 }

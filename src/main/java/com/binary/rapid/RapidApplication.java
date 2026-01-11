@@ -3,16 +3,17 @@ package com.binary.rapid;
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
+import org.springframework.boot.autoconfigure.jdbc.DataSourceTransactionManagerAutoConfiguration;
+import org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
+
+//@EnableScheduling
 @SpringBootApplication
-
-@MapperScan("com.binary.rapid.shop.mapper")
-@MapperScan("com.binary.rapid.user.mapper")
-@MapperScan("com.binary.rapid.category.mapper")
-@MapperScan("com.binary.rapid.ramen.mapper")
-@MapperScan("com.binary.rapid.board.mapper")
 public class RapidApplication {
     public static void main(String[] args) {
         SpringApplication.run(RapidApplication.class, args);
     }
+    
 }

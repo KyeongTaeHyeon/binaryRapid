@@ -17,7 +17,14 @@ public class ShopForm {
     private String imgUrl;
     private String siteUrl;
 
+    // 로그인 사용자의 찜 여부(없으면 false)
+    private Boolean liked;
+
     private List<CategoryInfo> categories;
+
+    public boolean isLiked() {
+        return Boolean.TRUE.equals(liked);
+    }
 
     @Data
     public static class CategoryInfo {
