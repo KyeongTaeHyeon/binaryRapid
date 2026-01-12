@@ -3,7 +3,7 @@
 // const currentUserId = 1; // 테스트용 사용자 ID
 const currentUserId = 2; // 테스트용 사용자 ID
 let currentPage = 1;
-const itemsPerPage = 5; // 게시글은 5개씩 출력
+const itemsPerPage = 10; // 게시글은 5개씩 출력
 let allPosts = [];
 let filteredPosts = [];
 let currentCategory = "전체";
