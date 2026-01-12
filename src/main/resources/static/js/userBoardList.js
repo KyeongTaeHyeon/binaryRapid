@@ -1,7 +1,3 @@
-/**
- * userBoardList.js
- */
-
 // 1. 토큰 체크 (즉시 실행)
 (function() {
   const token = localStorage.getItem("accessToken");
@@ -38,21 +34,8 @@ function truncateTitle(title, maxLength = MAX_TITLE_LENGTH) {
 
 // 데이터 로드
 async function loadBoardData() {
-  const token = localStorage.getItem("accessToken");
   try {
-    const response = await fetch('/user/api/my/board', {
-      method: 'GET',
-      headers: {
-        'Authorization': 'Bearer ' + token,
-        'Content-Type': 'application/json'
-      }
-    });
-
-    if (response.status === 401) {
-      alert('인증이 만료되었습니다.');
-      location.href = '/login';
-      return [];
-    }
+    const response = await authFetch('/user/api/my/board', { method: 'GET' });
 
     const result = await response.json();
     return Array.isArray(result) ? result : [];
@@ -61,6 +44,7 @@ async function loadBoardData() {
     return [];
   }
 }
+
 
 // 게시글 삭제
 async function deleteBoard(boardId) {
