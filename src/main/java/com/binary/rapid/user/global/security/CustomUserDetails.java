@@ -60,4 +60,8 @@ public class CustomUserDetails implements UserDetails {
     public UserResponseDto getUser() {
         return user;
     }
+
+    public int getUserId() {
+        return user.getUserId();
+    }
 }

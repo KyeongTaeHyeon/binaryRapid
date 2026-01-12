@@ -38,7 +38,7 @@
             resultType="loginJwtDto">
         SELECT *
         FROM tb_user
-        WHERE id = #{id}
+        WHERE id = #{id} AND delete_date IS NULL
     </select>
 
     <!-- 아이디로 유저 조회 -->
@@ -48,6 +48,7 @@
         SELECT *
         FROM tb_user
         WHERE email = #{email}
+        AND delete_date IS NULL
     </select>
 
     <!-- 유저 id로 게시글 리스트 전체 조회 -->
@@ -116,7 +117,7 @@
     </select>
 
     <select id="selectUserById" resultType="com.binary.rapid.user.dto.SelectUserResponseForJwtDto">
-        SELECT * FROM tb_user WHERE user_id = #{userId}
+        SELECT * FROM tb_user WHERE user_id = #{userId} AND delete_date IS NULL
     </select>
 
 
@@ -148,4 +149,43 @@
         ORDER BY create_date DESC
     </select>
 
+    <update id="deleteUserByPk" parameterType="map">
+        UPDATE tb_user
+        SET delete_date = NOW()
+        WHERE user_id = #{userId}
+        AND password = #{password} 
+    </update>
+
+    <select id="duplicateUserEmail" parameterType="string" resultType="int">
+        SELECT COUNT(*) FROM tb_user WHERE email = #{email} AND delete_date IS NULL
+    </select>
+
+    <select id="duplicateUserNickName" parameterType="string" resultType="int">
+        SELECT COUNT(*) FROM tb_user WHERE nickname = #{nickName} AND delete_date IS NULL
+    </select>
+
+    <select id="selectMyBoardList" resultType="UserMyReqShopDto">
+        SELECT
+        id,
+        category,
+        title,
+        create_date as createDate
+        FROM tb_board
+        WHERE user_id = #{userId}
+        AND delete_date IS NULL
+        <if test="category != null and category != ''">
+            AND category = #{category}
+        </if>
+        <if test="title != null and title != ''">
+            AND title LIKE CONCAT('%', #{title}, '%')
+        </if>
+        <if test="startDate != null and startDate != ''">
+            AND create_date &gt;= #{startDate}
+        </if>
+        <if test="endDate != null and endDate != ''">
+            AND create_date &lt;= CONCAT(#{endDate}, ' 23:59:59')
+        </if>
+        ORDER BY create_date DESC
+    </select>
+    
 </mapper>

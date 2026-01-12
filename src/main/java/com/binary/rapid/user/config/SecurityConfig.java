@@ -33,8 +33,21 @@ public class SecurityConfig {
                 )
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
-                                "/", "/user/LocalSignin", "/user/signup", "/user/refresh", "/login",
-                                "/admin/users", "/admin/notices", "/admin/categories", "/admin/shops", // HTML 페이지 허용
+                                "/",
+                                "/user/LocalSignin",
+                                "/login/register",
+                                "/user/refresh",
+                                "/login",
+                                "/login/user/**",      
+                                "/api/ramen/**",       
+                                "/shop/**",            
+                                "/board/**",           
+                                "/api/board/**",       
+                                "/admin/users",        
+                                "/admin/notices",      
+                                "/admin/categories",   
+                                "/user/check-duplicate", 
+                                "/user/LocalSignup",
                                 "/css/**", "/js/**", "/images/**", "/fragments/**", "/img/**", "/favicon.ico", "/error"
                         ).permitAll()
                         .requestMatchers("/admin/api/**").hasAuthority("ADMIN")

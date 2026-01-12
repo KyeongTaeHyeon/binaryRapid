@@ -17,7 +17,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @Service
@@ -34,6 +36,7 @@ public class UserService {
     // 로컬 회원가입
     @Transactional
     public int localSignup(UserSignUpForm form) {
+        
         int dupleUser = userMapper.duplicateUserId(form.getId());
         if (dupleUser > 0) throw new DuplicateEmailException();
 
@@ -173,5 +176,46 @@ public class UserService {
 
     public List<UserMyReqShopDto> getBoardListByUserId(int userId) {
         return userMapper.selectBoardListByUserId(userId);
+    }
+    
+    @Transactional
+    public boolean deleteUser(int userId, String rawPassword) {
+        // 1. 유저 정보 조회 (SelectUserResponseForJwtDto 등 사용)
+        SelectUserResponseForJwtDto user = userMapper.selectUserById(userId);
+
+        if (user == null) return false;
+
+        // 2. 비밀번호 일치 확인
+        if (passwordEncoder.matches(rawPassword, user.getPassword())) {
+            // 3. 일치하면 탈퇴 처리 (delete_date = NOW())
+            // 주의: 매퍼 XML의 deleteUserByPk가 userId와 password를 모두 필요로 한다면 
+            // Map에 담아 보내거나, XML을 수정하여 userId만 조건으로 사용하세요.
+            Map<String, Object> params = new HashMap<>();
+            params.put("userId", userId);
+            params.put("password", user.getPassword()); // 암호화된 비밀번호 전달
+
+            return userMapper.deleteUserByPk(params) > 0;
+        }
+
+        return false; // 비밀번호 불일치
+    }
+
+
+    public boolean isIdDuplicate(String id) {
+        // 결과가 0보다 크면 중복된 아이디가 존재한다는 뜻
+        return userMapper.duplicateUserId(id) > 0;
+    }
+    
+    public boolean isEmailDuplicate(String email) {
+        return userMapper.duplicateUserEmail(email) > 0;
+    }
+
+
+    public boolean isNickNameDuplicate(String nickName) {
+        return userMapper.duplicateUserNickName(nickName) > 0;
+    }
+
+    public List<UserMyReqShopDto> getMyBoardList(Map<String, Object> params) {
+        return userMapper.selectMyBoardList(params);
     }
 }
