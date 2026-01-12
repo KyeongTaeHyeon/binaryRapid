@@ -22,7 +22,8 @@ public class CustomUserDetails implements UserDetails {
     // 권한 설정
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return Collections.singleton(new SimpleGrantedAuthority("ROLE_" + user.getRole().name()));
+        // "ROLE_" 접두사를 빼고 DB 값("ADMIN")만 넣습니다.
+        return Collections.singleton(new SimpleGrantedAuthority(user.getRole().name()));
     }
 
 
@@ -58,5 +59,9 @@ public class CustomUserDetails implements UserDetails {
 
     public UserResponseDto getUser() {
         return user;
+    }
+
+    public int getUserId() {
+        return user.getUserId();
     }
 }

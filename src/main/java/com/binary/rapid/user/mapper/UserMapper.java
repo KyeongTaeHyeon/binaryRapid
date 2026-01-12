@@ -1,10 +1,12 @@
 package com.binary.rapid.user.mapper;
 
+
 import com.binary.rapid.user.dto.*;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
+import java.util.Map;
 
 @Mapper
 public interface UserMapper {
@@ -12,6 +14,8 @@ public interface UserMapper {
     int insertUser(UserDto user);
 
     int duplicateUserId(String id);
+    int duplicateUserEmail(String email); // 추가
+    int duplicateUserNickName(String nickName); // 추가
 
     SelectUserResponseForJwtDto selectUserId(String id);
     
@@ -27,5 +31,10 @@ public interface UserMapper {
     List<WishlistResponseDto> selectWishlistByUserId(int userId);
     // 찜 삭제 (취소)
     int deleteWishlist(@Param("userId") int userId, @Param("shopId") String shopId);
-    
+
+    List<UserMyReqShopDto> selectBoardListByUserId(int userId);
+
+    int deleteUserByPk(Map<String, Object> params);
+
+    List<UserMyReqShopDto> selectMyBoardList(Map<String, Object> params);
 }

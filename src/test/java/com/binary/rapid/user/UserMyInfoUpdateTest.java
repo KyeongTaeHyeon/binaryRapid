@@ -2,6 +2,7 @@ package com.binary.rapid.user;
 
 import com.binary.rapid.user.constant.SocialType;
 import com.binary.rapid.user.constant.UserRole;
+import com.binary.rapid.user.dto.SelectUserResponseForJwtDto;
 import com.binary.rapid.user.dto.UserResponseDto;
 import com.binary.rapid.user.form.UserLoginForm;
 import com.binary.rapid.user.form.UserSignUpForm;
@@ -26,14 +27,14 @@ public class UserMyInfoUpdateTest {
     public void insertMemberTest() {
 
         // 임시로 로그인 세션 생성
-        UserResponseDto loginUser = service.userLocalsignin(new UserLoginForm("test1", "a123!"));
+        SelectUserResponseForJwtDto loginUser = service.userLocalsignin(new UserLoginForm("test1", "a123!"));
 
 
         loginUser.setNickName("업데이트 테스트맨");
         loginUser.setTaste("시오");
         loginUser.setEmail("test2@naver.com");
 
-        UserResponseDto result = service.updateMyInfo(loginUser);
+        SelectUserResponseForJwtDto result = service.updateMyInfo(loginUser);
 
         System.out.println("결과 데이터: " + result.toString());
         

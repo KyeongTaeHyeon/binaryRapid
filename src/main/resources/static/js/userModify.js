@@ -113,7 +113,6 @@ async function handleUpdate(e) {
         }
     }
 }
-
 /**
  * 회원 탈퇴 요청
  */
@@ -126,18 +125,26 @@ async function handleDeleteUser() {
             const response = await authFetch("/user/api/my/delete", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ password: password })
+                // ⚠️ [수정됨] userId를 추가해서 보내야 컨트롤러에서 NPE가 안 납니다.
+                body: JSON.stringify({ 
+                    userId: userPk, 
+                    password: password 
+                })
             });
 
             if (response.ok) {
                 alert("탈퇴 처리가 완료되었습니다.");
+                // 탈퇴 성공 시 토큰과 세션 모두 삭제
+                localStorage.removeItem("accessToken");
                 sessionStorage.clear();
                 location.href = "/";
             } else {
-                alert("비밀번호가 틀렸거나 탈퇴 처리에 실패했습니다.");
+                const errorMsg = await response.text();
+                alert(errorMsg || "비밀번호가 틀렸거나 탈퇴 처리에 실패했습니다.");
             }
         } catch (e) {
-            alert("서버 통신 에러");
+            console.error("탈퇴 요청 중 에러:", e);
+            alert("서버 통신 에러가 발생했습니다.");
         }
     }
 }
