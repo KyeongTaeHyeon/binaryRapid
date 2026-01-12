@@ -1,8 +1,9 @@
+// boardList.js
+
 // const currentUserId = 1; // 테스트용 사용자 ID
 const currentUserId = 2; // 테스트용 사용자 ID
-//const currentUserId = 3; // 테스트용 사용자 ID'
 let currentPage = 1;
-const itemsPerPage = 5;
+const itemsPerPage = 5; // 게시글은 5개씩 출력
 let allPosts = [];
 let filteredPosts = [];
 let currentCategory = "전체";
@@ -17,7 +18,6 @@ document.addEventListener("DOMContentLoaded", function () {
     // 1. 게시판 목록 페이지 로드
     const postContainer = document.getElementById("postNumber");
     if (postContainer) {
-        // [수정] 목록 로드 후 URL에 카테고리가 있다면 필터 적용
         loadAndRenderList().then(() => {
             if (categoryFromUrl) {
                 applyFilter(categoryFromUrl);
@@ -31,21 +31,18 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
-    // [중요] 필터 클릭 이벤트 (식당신청 페이지 고려)
+    // 필터 클릭 이벤트
     const filterLinks = document.querySelectorAll(".filter a");
     filterLinks.forEach(link => {
         link.addEventListener("click", (event) => {
-            event.preventDefault(); // 기본 이동 막음
+            event.preventDefault();
             const selectedCategory = link.querySelector("span").innerText;
 
-            // 페이지 위치에 따라 다르게 동작
             if (path.includes("boardList3")) {
-                // 식당신청 페이지에서 클릭하면 목록 페이지로 이동
                 if (selectedCategory !== "식당신청") {
                     location.href = `/board/boardList?category=${encodeURIComponent(selectedCategory)}`;
                 }
             } else {
-                // 일반 목록 페이지에서는 기존 필터링 로직 실행
                 filterLinks.forEach(l => l.classList.remove("active"));
                 link.classList.add("active");
                 applyFilter(selectedCategory);
@@ -54,14 +51,8 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     // 2. 상세 페이지 로드
-    if (path.includes("boardList2") || path.includes("/board/detail")) {
+    if (path.includes("boardList2") || path.includes("/board/detail") || path.includes("boardDetail")) {
         initDetailPage();
-    }
-
-    // 3. 게시글 등록 버튼
-    const submitPostBtn = document.getElementById("submitPostBtn");
-    if (submitPostBtn) {
-        submitPostBtn.onclick = saveBoard;
     }
 
     // 4. 댓글 등록 버튼
@@ -110,44 +101,21 @@ document.addEventListener("DOMContentLoaded", function () {
         };
     }
 
-    // [추가] 식당신청(boardList3) 페이지용 카테고리 로드 로직 유지
+    // 식당신청(boardList3) 페이지용 카테고리 로드 로직 유지
     if (path.includes("boardList3")) {
         initCategorySelects();
     }
+
+    // [추가] 모달 바깥 배경 클릭 시 닫기 기능
+    window.onclick = function (event) {
+        const modal = document.getElementById("imageModal");
+        if (event.target === modal) {
+            modal.classList.remove("is-open");
+        }
+    }
 });
 
-/* ================= 게시글 관련 함수 (기존 유지) ================= */
-
-async function saveBoard() {
-    const title = document.getElementById("postTitle").value;
-    const contents = document.getElementById("postContent").value;
-    const category = document.getElementById("boardCategory").value;
-
-    if (!title.trim() || !contents.trim()) {
-        alert("제목과 내용을 입력해주세요.");
-        return;
-    }
-
-    const formData = new FormData();
-    formData.append("title", title);
-    formData.append("contents", contents);
-    formData.append("category", category);
-    formData.append("userId", currentUserId);
-
-    try {
-        const response = await fetch("/api/board/write", {
-            method: "POST",
-            body: formData
-        });
-
-        if (response.ok) {
-            alert("게시글이 등록되었습니다.");
-            location.href = "/board/boardList";
-        } else {
-            alert("등록에 실패했습니다.");
-        }
-    } catch (e) { console.error("네트워크 에러:", e); }
-}
+/* ================= 게시글 관련 함수 ================= */
 
 async function initDetailPage() {
     const urlParams = new URLSearchParams(window.location.search);
@@ -160,48 +128,97 @@ async function initDetailPage() {
 
         if (post) {
             const label = (post.category === "A00") ? "자유게시판" : "식당인증";
+
+            // 텍스트 주입
             if (document.getElementById("mainCategoryTitle")) document.getElementById("mainCategoryTitle").innerText = label;
             if (document.getElementById("detailCategory")) document.getElementById("detailCategory").innerText = label;
             if (document.getElementById("detailTitle")) document.getElementById("detailTitle").innerText = post.title;
-            if (document.getElementById("detailContent")) document.getElementById("detailContent").value = post.contents;
+
+            // [변경] textarea가 div로 바뀌었으므로 value 대신 innerText 사용
+            const contentEl = document.getElementById("detailContent");
+            if (contentEl) {
+                // 줄바꿈이나 공백을 유지하고 싶다면 innerText가 적절
+                contentEl.innerText = post.contents;
+            }
+
             if (document.getElementById("detailWriter")) document.getElementById("detailWriter").innerText = post.writerName || `사용자(${post.userId})`;
             if (document.getElementById("detailDate")) document.getElementById("detailDate").innerText = post.createDate ? post.createDate.substring(0, 10) : '';
 
+            // 파일 렌더링
             if (post.files && post.files.length > 0) renderFiles(post.files);
+
+            // 댓글 로드
             fetchCommentList(postId);
 
+            // 작성자 본인 확인 후 버튼 표시
             const isOwner = String(post.userId) === String(currentUserId);
-            if(document.getElementById("editBtn")) document.getElementById("editBtn").style.display = isOwner ? "inline-block" : "none";
-            if(document.getElementById("deleteBtn")) document.getElementById("deleteBtn").style.display = isOwner ? "inline-block" : "none";
+            const editBtn = document.getElementById("editBtn");
+            const deleteBtn = document.getElementById("deleteBtn");
+
+            if (editBtn) editBtn.style.display = isOwner ? "inline-block" : "none";
+            if (deleteBtn) deleteBtn.style.display = isOwner ? "inline-block" : "none";
         }
-    } catch (error) { console.error("상세 로드 실패:", error); }
+    } catch (error) {
+        console.error("상세 로드 실패:", error);
+    }
 }
 
+// [수정됨] 파일 목록을 썸네일로 렌더링하고, 클릭 시 모달 띄우기
 function renderFiles(files) {
-    const contentArea = document.querySelector(".contentPost");
-    if (!contentArea) return;
-    const fileDiv = document.createElement("div");
-    fileDiv.style.marginTop = "20px";
-    fileDiv.style.textAlign = "center";
+    const galleryArea = document.getElementById("galleryArea");
+    if (!galleryArea) return;
+
+    galleryArea.innerHTML = "";
+
     files.forEach(file => {
         const img = document.createElement("img");
-        img.src = `/api/board/file/display?path=${encodeURIComponent(file.fileAddr)}`;
-        img.style.maxWidth = "100%";
-        img.style.marginBottom = "10px";
-        img.style.borderRadius = "8px";
-        fileDiv.appendChild(img);
+        // Controller의 displayFile 메서드 호출 URL
+        const imgSrc = `/api/board/file/display?path=${encodeURIComponent(file.fileAddr)}`;
+
+        img.src = imgSrc;
+        img.className = "gallery-item"; // CSS 클래스 적용
+        img.alt = "첨부이미지";
+
+        // 클릭 시 모달 열기
+        img.onclick = function () {
+            openImageModal(imgSrc);
+        };
+
+        galleryArea.appendChild(img);
     });
-    contentArea.appendChild(fileDiv);
 }
 
-/* ================= 리스트 및 필터 (핵심 수정) ================= */
+// [추가] 모달 열기 함수
+function openImageModal(src) {
+    const modal = document.getElementById("imageModal");
+    const modalImg = document.getElementById("modalImage");
+
+    if (modal && modalImg) {
+        modal.classList.add("is-open");
+        modal.style.zIndex = 199999999;
+        modalImg.src = src;
+    }
+}
+
+// [추가] 모달 닫기 함수
+function closeImageModal() {
+    const modal = document.getElementById("imageModal");
+    if (modal) {
+        modal.classList.remove("is-open");
+    }
+}
+
+
+/* ================= 리스트 및 필터 ================= */
 
 async function loadAndRenderList() {
     try {
         const response = await fetch("/api/board/list");
         allPosts = await response.json();
         applyFilter(currentCategory);
-    } catch (e) { console.error("목록 로드 에러:", e); }
+    } catch (e) {
+        console.error("목록 로드 에러:", e);
+    }
 }
 
 function renderList(page) {
@@ -217,7 +234,7 @@ function renderList(page) {
             <div class="post">
                 <div class="name">
                     <span class="tage">${label}</span>
-                    <a href="/board/boardList2?id=${post.id}">${post.title}</a>
+                    <a href="/board/boardDetail?id=${post.id}">${post.title}</a>
                 </div>
                 <div class="user">${post.writerName || '익명'}</div>
                 <div class="userTime">${post.createDate ? post.createDate.substring(0, 10) : ''}</div>
@@ -231,12 +248,25 @@ function renderList(page) {
 function renderPagination() {
     const pageList = document.querySelector(".page-list");
     if (!pageList) return;
+
     const totalPages = Math.ceil(filteredPosts.length / itemsPerPage) || 1;
+    const pageGroupSize = 10;
+    const startPage = (Math.ceil(currentPage / pageGroupSize) - 1) * pageGroupSize + 1;
+    let endPage = startPage + pageGroupSize - 1;
+
+    if (endPage > totalPages) {
+        endPage = totalPages;
+    }
+
     let html = "";
-    for (let i = 1; i <= totalPages; i++) {
-        html += `<li class="page-item ${i === currentPage ? 'active' : ''}">
-                    <button type="button" onclick="goToPage(${i})">${i}</button>
-                 </li>`;
+    if (startPage > 1) {
+        html += `<li class="page-item prev"><button type="button" onclick="goToPage(${startPage - 1})">&lt;</button></li>`;
+    }
+    for (let i = startPage; i <= endPage; i++) {
+        html += `<li class="page-item ${i === currentPage ? 'active' : ''}"><button type="button" onclick="goToPage(${i})">${i}</button></li>`;
+    }
+    if (endPage < totalPages) {
+        html += `<li class="page-item next"><button type="button" onclick="goToPage(${endPage + 1})">&gt;</button></li>`;
     }
     pageList.innerHTML = html;
 }
@@ -264,32 +294,44 @@ function applyFilter(category) {
     renderPagination();
 }
 
-/* ================= 수정/삭제/댓글 (기존 유지) ================= */
+/* ================= 수정/삭제/댓글 ================= */
 
 async function handlePostUpdate(postId) {
     const title = document.getElementById("postTitle").value;
     const contents = document.getElementById("postContent").value;
     const category = document.getElementById("boardCategory").value;
-    const updateData = { id: parseInt(postId), title, contents, category, userId: currentUserId };
+    const updateData = {id: parseInt(postId), title, contents, category, userId: currentUserId};
     try {
         const response = await fetch("/api/board/update", {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
+            headers: {"Content-Type": "application/json"},
             body: JSON.stringify(updateData)
         });
-        if (response.ok) { alert("수정 완료"); location.href = "/board/boardList"; }
-    } catch (e) { console.error(e); }
+        if (response.ok) {
+            alert("수정 완료");
+            location.href = "/board/boardList";
+        }
+    } catch (e) {
+        console.error(e);
+    }
 }
 
 async function deleteBoard(id) {
     if (!confirm("삭제하시겠습니까?")) return;
     try {
-        const response = await fetch(`/api/board/delete/${id}`, { method: "DELETE" });
-        if (response.ok) { alert("삭제되었습니다."); location.href = "/board/boardList"; }
-    } catch (e) { console.error(e); }
+        const response = await fetch(`/api/board/delete/${id}`, {method: "DELETE"});
+        if (response.ok) {
+            alert("삭제되었습니다.");
+            location.href = "/board/boardList";
+        }
+    } catch (e) {
+        console.error(e);
+    }
 }
 
-function goToEditPage(id){ location.href=`/board/boardEdit?id=${id}`; }
+function goToEditPage(id) {
+    location.href = `/board/boardEdit?id=${id}`;
+}
 
 async function fetchCommentList(postId) {
     try {
@@ -298,23 +340,34 @@ async function fetchCommentList(postId) {
             const comments = await response.json();
             renderComments(comments);
         }
-    } catch (e) { console.error(e); }
+    } catch (e) {
+        console.error(e);
+    }
 }
 
 async function saveComment() {
     const urlParams = new URLSearchParams(window.location.search);
     const postId = urlParams.get("id");
     const commentInput = document.getElementById("commentInput");
-    if (!commentInput?.value.trim()) { alert("내용을 입력해주세요."); return; }
-    const commentDto = { id: parseInt(postId), comment: commentInput.value, userId: currentUserId };
+    if (!commentInput?.value.trim()) {
+        alert("내용을 입력해주세요.");
+        return;
+    }
+    const commentDto = {id: parseInt(postId), comment: commentInput.value, userId: currentUserId};
     try {
         const response = await fetch("/api/board/comment/write", {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
+            headers: {"Content-Type": "application/json"},
             body: JSON.stringify(commentDto)
         });
-        if (response.ok) { alert("댓글 등록 완료"); commentInput.value = ""; fetchCommentList(postId); }
-    } catch (e) { console.error(e); }
+        if (response.ok) {
+            alert("댓글 등록 완료");
+            commentInput.value = "";
+            fetchCommentList(postId);
+        }
+    } catch (e) {
+        console.error(e);
+    }
 }
 
 function renderComments(comments) {
@@ -346,35 +399,47 @@ function renderComments(comments) {
     }).join('');
 }
 
-async function updateComment(id, seq){
+async function updateComment(id, seq) {
     const newComment = prompt("수정할 내용을 입력하세요.");
     if (!newComment || !newComment.trim()) return;
-    const updateDto = { id, commentSeq: seq, comment: newComment, userId: currentUserId };
+    const updateDto = {id, commentSeq: seq, comment: newComment, userId: currentUserId};
     try {
         const response = await fetch("/api/board/comment/update", {
             method: "POST",
-            headers: {"Content-Type":"application/json"},
+            headers: {"Content-Type": "application/json"},
             body: JSON.stringify(updateDto)
         });
-        if (response.ok){ alert("댓글수정 완료"); location.reload(); }
-    } catch (e) { console.error(e); }
+        if (response.ok) {
+            alert("댓글수정 완료");
+            location.reload();
+        }
+    } catch (e) {
+        console.error(e);
+    }
 }
 
 async function deleteComment(id, seq) {
     if (!confirm("댓글을 삭제하시겠습니까?")) return;
     try {
         const response = await fetch(`/api/board/comment/delete?id=${id}&commentSeq=${seq}`, {method: "POST"});
-        if (response.ok) { alert("삭제되었습니다."); location.reload(); }
-    } catch (e) { console.error(e); }
+        if (response.ok) {
+            alert("삭제되었습니다.");
+            location.reload();
+        }
+    } catch (e) {
+        console.error(e);
+    }
 }
-
-/* ================= 식당신청 카테고리 로드 (기존 유지) ================= */
 
 async function initCategorySelects() {
     try {
         const response = await fetch("/api/category/map");
         const categoryMap = await response.json();
-        const config = { "category1": "region", "category2": "category", "category3": "shape", "category4": "thickness", "category5": "style", "category6": "kind", "category7": "rich", "category8": "richness" };
+        const config = {
+            "category1": "region", "category2": "category", "category3": "shape",
+            "category4": "thickness", "category5": "style", "category6": "kind",
+            "category7": "rich", "category8": "richness"
+        };
         Object.entries(config).forEach(([selectId, groupId]) => {
             const selectElement = document.getElementById(selectId);
             const items = categoryMap[groupId];
@@ -387,5 +452,7 @@ async function initCategorySelects() {
                 });
             }
         });
-    } catch (error) { console.error("카테고리 데이터 실패:", error); }
+    } catch (error) {
+        console.error("카테고리 데이터 실패:", error);
+    }
 }

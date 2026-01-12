@@ -35,8 +35,10 @@ public class RapidController {
         return "board/boardList";
     }
 
-    @GetMapping("/board/boardList2")
-    public String boardList2Page(){ return "board/boardList2";}
+    @GetMapping("/board/boardDetail")
+    public String boardList2Page() {
+        return "board/boardDetail";
+    }
 
     @GetMapping("/login/register")
     public String registerPage() {
