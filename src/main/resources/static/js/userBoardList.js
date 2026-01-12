@@ -35,7 +35,7 @@ function truncateTitle(title, maxLength = MAX_TITLE_LENGTH) {
 // 데이터 로드
 async function loadBoardData() {
   try {
-    const response = await authFetch('/user/api/my/board', { method: 'GET' });
+    const response = await Fetch('/user/api/my/board', { method: 'GET' });
 
     const result = await response.json();
     return Array.isArray(result) ? result : [];
