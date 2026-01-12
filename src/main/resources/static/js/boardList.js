@@ -128,20 +128,35 @@ async function initDetailPage() {
 
         if (post) {
             const label = (post.category === "A00") ? "자유게시판" : "식당인증";
+
+            // 텍스트 주입
             if (document.getElementById("mainCategoryTitle")) document.getElementById("mainCategoryTitle").innerText = label;
             if (document.getElementById("detailCategory")) document.getElementById("detailCategory").innerText = label;
             if (document.getElementById("detailTitle")) document.getElementById("detailTitle").innerText = post.title;
-            if (document.getElementById("detailContent")) document.getElementById("detailContent").value = post.contents;
+
+            // [변경] textarea가 div로 바뀌었으므로 value 대신 innerText 사용
+            const contentEl = document.getElementById("detailContent");
+            if (contentEl) {
+                // 줄바꿈이나 공백을 유지하고 싶다면 innerText가 적절
+                contentEl.innerText = post.contents;
+            }
+
             if (document.getElementById("detailWriter")) document.getElementById("detailWriter").innerText = post.writerName || `사용자(${post.userId})`;
             if (document.getElementById("detailDate")) document.getElementById("detailDate").innerText = post.createDate ? post.createDate.substring(0, 10) : '';
 
-            // [수정] 파일이 있으면 갤러리로 렌더링
+            // 파일 렌더링
             if (post.files && post.files.length > 0) renderFiles(post.files);
+
+            // 댓글 로드
             fetchCommentList(postId);
 
+            // 작성자 본인 확인 후 버튼 표시
             const isOwner = String(post.userId) === String(currentUserId);
-            if (document.getElementById("editBtn")) document.getElementById("editBtn").style.display = isOwner ? "inline-block" : "none";
-            if (document.getElementById("deleteBtn")) document.getElementById("deleteBtn").style.display = isOwner ? "inline-block" : "none";
+            const editBtn = document.getElementById("editBtn");
+            const deleteBtn = document.getElementById("deleteBtn");
+
+            if (editBtn) editBtn.style.display = isOwner ? "inline-block" : "none";
+            if (deleteBtn) deleteBtn.style.display = isOwner ? "inline-block" : "none";
         }
     } catch (error) {
         console.error("상세 로드 실패:", error);

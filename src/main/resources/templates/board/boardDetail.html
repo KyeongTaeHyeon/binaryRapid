@@ -5,52 +5,65 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
         <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
         <meta name="board" content="boardDetail"/>
+
         <title>게시판 상세보기</title>
+
         <link rel="stylesheet" th:href="@{/css/reset.css}"/>
         <link rel="stylesheet" th:href="@{/css/common.css}"/>
         <link rel="stylesheet" th:href="@{/css/boardList.css}"/>
+
+        <link rel="stylesheet" as="style" crossorigin
+              href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css"/>
     </head>
     <body>
         <div id="wrapper">
             <header id="header" th:replace="~{fragments/header :: header}"></header>
 
             <main id="main">
-                <div id="boardcreat">
-                    <div class="id creatPost">
-                        <div class="title"><h1 id="mainCategoryTitle">게시판</h1></div>
-
-                        <div class="postHeaderBar">
-                            <span id="detailCategory" class="tage"
-                                  style="background:#87ceeb; color:white; padding:5px 10px; border-radius:5px;">카테고리</span>
-                            <strong id="detailTitle" style="flex:2; margin-left:20px;">게시물 제목</strong>
-                            <span id="detailWriter" style="flex:1; text-align:center;">작성자</span>
-                            <span id="detailDate" style="flex:1; text-align:right; color:#999;">작성시간</span>
-                        </div>
-
-                        <div class="contentPost">
-                            <textarea id="detailContent" readonly>내용을 불러오는 중입니다...</textarea>
-
-                            <div id="galleryArea"></div>
-                        </div>
-
-                        <div id="bTn" style="display:flex; justify-content: flex-end; gap:10px; margin-bottom:20px;">
-                            <button type="button" id="goListBtn" class="btn">목록</button>
-                            <button type="button" id="editBtn" class="btn">수정</button>
-                            <button type="button" id="deleteBtn" class="btn">삭제</button>
-                        </div>
-
-                        <div class="commentArea">
-                            <div class="commentInputBox">
-                                <input type="text" id="commentInput" placeholder="댓글을 입력하시오"/>
-                                <button type="button" id="commentSubmit" class="btn"
-                                        style="background:#87ceeb; color:white; border:none; padding:0 20px; border-radius:5px;">
-                                    댓글등록
-                                </button>
+                <div class="board-container">
+                    <article class="post-card">
+                        <div class="post-header">
+                            <span id="detailCategory" class="category-badge">카테고리</span>
+                            <h1 id="detailTitle" class="post-title">게시물 제목</h1>
+                            <div class="post-meta">
+                                <span class="meta-item writer">
+                                    <span id="detailWriter">작성자</span>
+                                </span>
+                                <span class="meta-divider">·</span>
+                                <span class="meta-item date" id="detailDate">YYYY-MM-DD</span>
                             </div>
-                            <div id="detailCommentList" style="margin-top:20px;">
+                        </div>
+
+                        <div class="divider"></div>
+
+                        <div class="post-body">
+                            <div id="detailContent" class="content-text">
+                                내용을 불러오는 중입니다...
                             </div>
+
+                            <div id="galleryArea" class="image-gallery"></div>
+                        </div>
+                    </article>
+
+                    <div class="action-bar">
+                        <button type="button" id="goListBtn" class="btn btn-outline">목록으로</button>
+                        <div class="owner-btns">
+                            <button type="button" id="editBtn" class="btn btn-primary">수정</button>
+                            <button type="button" id="deleteBtn" class="btn btn-danger">삭제</button>
                         </div>
                     </div>
+
+                    <section class="comment-section">
+                        <h3 class="section-title">댓글</h3>
+
+                        <div class="comment-input-wrapper">
+                            <input type="text" id="commentInput" placeholder="댓글을 남겨보세요..."/>
+                            <button type="button" id="commentSubmit" class="btn-comment">등록</button>
+                        </div>
+
+                        <div id="detailCommentList" class="comment-list">
+                        </div>
+                    </section>
                 </div>
             </main>
 
