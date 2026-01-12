@@ -1,131 +1,125 @@
-document.addEventListener('DOMContentLoaded', () => {
-  const navUserName = document.querySelector('#userName');
-  const logInUser = localStorage.getItem('userRegistForm');
-  const contentEl = document.querySelector('#userRequestMain');
-  const paginationContainer = document.querySelector('#contentNav');
+/**
+ * userRequestShop.js - tb_board 전용 페이지네이션 적용 버전
+ */
+let allPostsData = [];    // 전체 게시글 저장
+let ITEMS_PER_PAGE = 5;   // 한 페이지당 표시 개수
+let currentPage = 1;      // 현재 페이지
 
-  // JSON 파일 경로
-  const jsonFilePath = '/data/requestShop.json';
-  const ITEMS_PER_PAGE = 5; // 한 페이지에 표시할 게시글 수
-  let currentPage = 1; // 현재 페이지
-  let allPostsData = []; // 모든 게시글 데이터
+const contentEl = document.querySelector('#userRequestMain');    // <tbody>
+const paginationList = document.querySelector(".page-list");     // 페이지 번호 <ul>
+const prevButton = document.querySelector(".page-btn.prev");     // 이전 버튼
+const nextButton = document.querySelector(".page-btn.next");     // 다음 버튼
 
-  // 유저 아이디 nav상단 출력
-  if (logInUser) {
-    const userObject = JSON.parse(logInUser);
-    const parUserName = userObject.userName;
+// 1. 초기 데이터 로드 (me 호출 후 userId로 목록 조회)
+async function init() {
+    try {
+        // [1단계] 내 정보에서 고유 번호(int) 가져오기
+        const meRes = await authFetch('/user/me');
+        if (!meRes.ok) throw new Error('유저 정보를 불러올 수 없습니다.');
+        const result = await meRes.json();
+        const myRealUserId = result.data.userId; 
 
-    if (parUserName) {
-      navUserName.textContent = `${parUserName} 님`;
-    }
+        if (!myRealUserId) return;
 
-    // JSON 파일을 비동기적으로 불러오기
-    fetch(jsonFilePath)
-      .then((response) => {
-        // 응답이 성공적이지 않으면 에러 발생
-        if (!response.ok) {
-          throw new Error('JSON 파일을 불러오는 데 실패했습니다.');
+        // [2단계] 확보한 숫자 ID로 tb_board 목록 호출
+        const listRes = await authFetch(`/user/api/my/reqShopList?userId=${myRealUserId}`);
+        if (listRes.ok) {
+            allPostsData = await listRes.json();
+            updateUI(); // UI 업데이트 호출
         }
-        return response.json();
-      })
-      .then((data) => {
-        // 데이터가 정상적으로 로드되면 로그인한 유저의 글만 필터링
-        allPostsData = data.filter((item) => item.userName === parUserName);
-        updatePostListAndPagination();
-      })
-      .catch((error) => {
-        console.error('Error loading JSON data:', error);
-      });
-  }
-
-  // 게시글과 페이지네이션 갱신 함수
-  function updatePostListAndPagination() {
-    if (!contentEl) {
-      console.warn(
-        'WARNING: 게시글을 표시할 #userRequestMain 요소를 찾을 수 없습니다.'
-      );
-      return;
+    } catch (error) {
+        console.error("에러 발생:", error);
+        if (contentEl) contentEl.innerHTML = '<tr><td colspan="6" style="text-align:center;">데이터 로드 실패</td></tr>';
     }
+}
 
-    contentEl.innerHTML = ''; // 기존 게시글 모두 비우기
-    paginationContainer.innerHTML = ''; // 페이지네이션 비우기
-
-    // 페이지네이션 로직
-    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-    const endIndex = startIndex + ITEMS_PER_PAGE;
-    const postsToShow = allPostsData.slice(startIndex, endIndex); // 현재 페이지에 해당하는 게시글만 선택
-
-    // 게시글 데이터 생성 및 추가
-    if (postsToShow.length === 0) {
-      const noPostMessage = document.createElement('p');
-      noPostMessage.textContent = '표시할 게시글이 없습니다.';
-      noPostMessage.style.textAlign = 'center';
-      noPostMessage.style.padding = '20px';
-      contentEl.appendChild(noPostMessage);
-    } else {
-      postsToShow.forEach((post, index) => {
-        const tr = document.createElement('tr'); // tr 요소 생성
-        tr.innerHTML = `
-          <td>${startIndex + index + 1}</td>
-          <td>${post.name}</td>
-          <td>${post.region}</td>
-          <td>${post.category}</td>
-          <td>${post.userName}</td>
-          <td>${post.creatAt}</td>
-        `;
-        contentEl.appendChild(tr); // 게시글 데이터 tr 추가
-      });
-    }
-
-    // 페이지네이션 버튼 렌더링
+// 2. UI 갱신 (현재 페이지 데이터만 잘라서 렌더링)
+function updateUI() {
+    const start = (currentPage - 1) * ITEMS_PER_PAGE;
+    const end = start + ITEMS_PER_PAGE;
+    renderTable(allPostsData.slice(start, end));
     renderPaginationButtons(allPostsData.length);
-  }
+}
 
-  // 페이지네이션 버튼 생성 함수
-  function renderPaginationButtons(totalPosts) {
-    const totalPages = Math.ceil(totalPosts / ITEMS_PER_PAGE); // 총 페이지 수
-    const paginationList = document.createElement('ul');
-    paginationList.classList.add('page-list');
+// 3. 테이블 렌더링
+function renderTable(posts) {
+    if (!contentEl) return;
+    contentEl.innerHTML = '';
 
-    // 첫 페이지 버튼
-    if (currentPage > 1) {
-      const prevButton = document.createElement('li');
-      prevButton.innerHTML = `<button>&lt;</button>`;
-      prevButton.addEventListener('click', () => {
-        currentPage--;
-        updatePostListAndPagination();
-      });
-      paginationList.appendChild(prevButton);
+    if (posts.length === 0) {
+        contentEl.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:20px;">작성한 글이 없습니다.</td></tr>';
+        return;
     }
 
-    // 페이지 번호 버튼들
+    posts.forEach((post, index) => {
+        const tr = document.createElement('tr');
+        // 순번 계산
+        const displayNum = (currentPage - 1) * ITEMS_PER_PAGE + index + 1;
+        
+        tr.innerHTML = `
+            <td>${displayNum}</td>
+            <td style="cursor:pointer; color:#007bff;" onclick="location.href='/user/board/detail/${post.id}'">
+                ${post.title}
+            </td>
+            <td>${post.category || '일반'}</td>
+            <td>${post.category || '게시글'}</td>
+            <td>${post.writerName || '본인'}</td>
+            <td>${new Date(post.createDate).toLocaleDateString()}</td>
+        `;
+        contentEl.appendChild(tr);
+    });
+}
+
+// 4. 페이지네이션 버튼 생성 (userMywish.js 방식 참고)
+function renderPaginationButtons(totalItems) {
+    if (!paginationList) return;
+    const totalPages = Math.ceil(totalItems / ITEMS_PER_PAGE) || 1;
+    paginationList.innerHTML = "";
+
+    // 이전/다음 버튼 상태 제어
+    if (prevButton) prevButton.disabled = (currentPage === 1);
+    if (nextButton) nextButton.disabled = (currentPage === totalPages);
+
+    // 숫자 버튼 생성
     for (let i = 1; i <= totalPages; i++) {
-      const pageItem = document.createElement('li');
-      pageItem.classList.add('page-item');
-      const pageButton = document.createElement('button');
-      pageButton.textContent = i;
-      if (i === currentPage) {
-        pageItem.classList.add('active');
-      }
-      pageButton.addEventListener('click', () => {
-        currentPage = i;
-        updatePostListAndPagination();
-      });
-      pageItem.appendChild(pageButton);
-      paginationList.appendChild(pageItem);
+        const li = document.createElement("li");
+        li.className = `page-item ${i === currentPage ? 'active' : ''}`;
+        
+        const btn = document.createElement("button");
+        btn.textContent = i;
+        btn.className = "page-link"; // 스타일링을 위해 클래스 추가
+        btn.onclick = (e) => {
+            e.preventDefault();
+            currentPage = i;
+            updateUI();
+        };
+        
+        li.appendChild(btn);
+        paginationList.appendChild(li);
     }
+}
 
-    // 마지막 페이지 버튼
-    if (currentPage < totalPages) {
-      const nextButton = document.createElement('li');
-      nextButton.innerHTML = `<button>&gt;</button>`;
-      nextButton.addEventListener('click', () => {
-        currentPage++;
-        updatePostListAndPagination();
-      });
-      paginationList.appendChild(nextButton);
-    }
+// 5. 이전/다음 버튼 이벤트 리스너 (한 번만 등록)
+if (prevButton) {
+    prevButton.onclick = (e) => {
+        e.preventDefault();
+        if (currentPage > 1) {
+            currentPage--;
+            updateUI();
+        }
+    };
+}
 
-    paginationContainer.appendChild(paginationList);
-  }
-});
+if (nextButton) {
+    nextButton.onclick = (e) => {
+        e.preventDefault();
+        const totalPages = Math.ceil(allPostsData.length / ITEMS_PER_PAGE);
+        if (currentPage < totalPages) {
+            currentPage++;
+            updateUI();
+        }
+    };
+}
+
+// 실행
+init();

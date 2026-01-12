@@ -170,5 +170,8 @@ public class UserService {
     public boolean removeWishlist(int userId, String shopId) {
         return userMapper.deleteWishlist(userId, shopId) > 0;
     }
-    
+
+    public List<UserMyReqShopDto> getBoardListByUserId(int userId) {
+        return userMapper.selectBoardListByUserId(userId);
+    }
 }

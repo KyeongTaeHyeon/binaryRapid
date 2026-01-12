@@ -1,5 +1,6 @@
 package com.binary.rapid.user.mapper;
 
+
 import com.binary.rapid.user.dto.*;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
@@ -27,5 +28,6 @@ public interface UserMapper {
     List<WishlistResponseDto> selectWishlistByUserId(int userId);
     // 찜 삭제 (취소)
     int deleteWishlist(@Param("userId") int userId, @Param("shopId") String shopId);
-    
+
+    List<UserMyReqShopDto> selectBoardListByUserId(int userId);
 }

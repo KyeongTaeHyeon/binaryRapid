@@ -32,27 +32,13 @@ public class SecurityConfig {
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
                 .authorizeHttpRequests(auth -> auth
-                        // 인증 없이 접근 가능한 API (로그인, 회원가입 등)
                         .requestMatchers(
-                                "/",
-                                "/user/LocalSignin",
-                                "/user/signup", // 회원가입 경로가 있다면 추가
-                                "/user/refresh",
-                                "/login",
-                                "/login/user/**",
-                                "/api/ramen/**",
-                                "/shop/**",
-                                "/board/**",
-                                "/api/board/**",
-                                "/css/**", "/js/**", "/images/**", "/fragments/**", "/img/**","/favicon.ico",
-                                "/error"
+                                "/", "/user/LocalSignin", "/user/signup", "/user/refresh", "/login",
+                                "/admin/users", "/admin/notices", "/admin/categories", "/admin/shops", // HTML 페이지 허용
+                                "/css/**", "/js/**", "/images/**", "/fragments/**", "/img/**", "/favicon.ico", "/error"
                         ).permitAll()
-
-                        // 로그아웃, 토큰 갱신 등은 '인증된 사용자'만 접근 가능하도록 설정
-                        // 이렇게 해야 @AuthenticationPrincipal에 데이터가 들어옵니다.
-                        .requestMatchers("/user/logout","/user/me","/user/api/my/**").authenticated()
-
-                        // 그 외 모든 요청은 인증 필요
+                        .requestMatchers("/admin/api/**").hasAuthority("ADMIN")
+                        .requestMatchers("/user/logout", "/user/me", "/user/api/my/**").authenticated()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)

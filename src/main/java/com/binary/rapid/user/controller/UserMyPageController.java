@@ -1,15 +1,16 @@
 package com.binary.rapid.user.controller;
 
+import com.binary.rapid.user.dto.UserMyReqShopDto;
 import com.binary.rapid.user.dto.UserResponseDto;
 import com.binary.rapid.user.dto.WishlistResponseDto;
 import com.binary.rapid.user.dto.myBoardDto;
 import com.binary.rapid.user.global.security.CustomUserDetails;
 import com.binary.rapid.user.service.UserService;
-import jakarta.servlet.http.HttpSession;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -47,6 +48,8 @@ public class UserMyPageController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("로그인이 필요합니다.");
         }
 
+        log.info("수정하고자 하는 유저 데이터 확인 form: "+ updateRequestDto.toString());
+        
         try {
             // 서비스에서 비밀번호 검증과 수정을 동시에 처리
             UserResponseDto result = service.updateMyInfo(updateRequestDto);
@@ -71,5 +74,12 @@ public class UserMyPageController {
     public ResponseEntity<String> removeWish(@AuthenticationPrincipal CustomUserDetails userDetails, @RequestParam("shopId") String shopId) {
         boolean deleted = service.removeWishlist(userDetails.getUser().getUserId(), shopId);
         return deleted ? ResponseEntity.ok("success") : ResponseEntity.status(HttpStatus.BAD_REQUEST).body("fail");
+    }
+
+    @GetMapping("/reqShopList")
+    public ResponseEntity<List<UserMyReqShopDto>> getMyRequestShopList(@RequestParam("userId") int userId) {
+        // 이제 토큰에서 꺼내지 않고, JS가 보내준 userId를 파라미터로 직접 받습니다.
+        List<UserMyReqShopDto> list = service.getBoardListByUserId(userId);
+        return ResponseEntity.ok(list);
     }
 }
