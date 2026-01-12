@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.binary.rapid.approval.mapper.ApprovalMapper">
+
+    <select id="selectApprovalList" resultType="com.binary.rapid.approval.dto.ApprovalDto">
+        SELECT
+            s.id,
+            s.name,
+            u.nickname AS writerName,
+            s.create_date AS createDate,
+            (SELECT img_url FROM tb_shopimg WHERE id = s.id AND main_img = 'Y' LIMIT 1) AS mainImgUrl
+        FROM tb_shop s
+            LEFT JOIN tb_user u ON s.user_id = u.user_id
+        WHERE s.req_type = 'Y'
+        ORDER BY s.create_date DESC
+    </select>
+
+    <select id="selectApprovalInfo" resultType="com.binary.rapid.approval.dto.ApprovalDetailDto">
+        SELECT s.id, s.name, s.address, s.content, u.nickname AS writerName
+        FROM tb_shop s
+                 LEFT JOIN tb_user u ON s.user_id = u.user_id
+        WHERE s.id = #{id}
+    </select>
+
+    <select id="selectApprovalImages" resultType="com.binary.rapid.approval.dto.ApprovalDetailDto$ShopImageDto">
+        SELECT img_seq AS imgSeq, img_url AS imgUrl, main_img AS mainImg
+        FROM tb_shopimg
+        WHERE id = #{id}
+        ORDER BY img_seq ASC
+    </select>
+
+    <select id="selectApprovalCategories" resultType="string">
+        SELECT c.name FROM tb_shopdetail sd
+                               JOIN tb_category c ON sd.contents = c.id
+        WHERE sd.id = #{id}
+    </select>
+
+    <delete id="deleteShopDetail">DELETE FROM tb_shopdetail WHERE id = #{id}</delete>
+    <delete id="deleteShopImg">DELETE FROM tb_shopimg WHERE id = #{id}</delete>
+    <delete id="deleteShop">DELETE FROM tb_shop WHERE id = #{id}</delete>
+
+</mapper>

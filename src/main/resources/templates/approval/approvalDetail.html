@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <title>RaFeed - 상세보기</title>
+    <link rel="stylesheet" th:href="@{/css/reset.css}" />
+    <link rel="stylesheet" th:href="@{/css/common.css}" />
+    <link rel="stylesheet" th:href="@{/css/approval.css}" />
+
+</head>
+<body>
+<div id="wrapper">
+    <header id="header" th:replace="~{fragments/header :: header}"></header>
+
+    <main class="approval-container">
+        <div class="detail-card">
+            <div class="detail-top-nav">
+                <a href="/approvalList" class="back-btn">&lt; 뒤로가기</a>
+            </div>
+
+            <h1 id="shopName" class="detail-main-title">로딩중...</h1>
+
+            <div id="detailTagsSection" class="tag-container"></div>
+
+            <div class="detail-split">
+                <div class="detail-img-box">
+                    <img id="shopImage" src="/images/no_image.png" alt="가게 이미지" />
+                </div>
+
+                <div class="detail-info-box">
+                    <div class="info-group">
+                        <span class="info-label">상세주소</span>
+                        <span id="shopAddress" class="info-value"></span>
+                    </div>
+
+                    <div class="info-group">
+                        <span class="info-label">정보</span>
+                        <div id="shopContent" class="info-value content-box"></div>
+                    </div>
+
+                    <div class="info-footer">
+                        작성자: <span id="writerName"></span> |
+                        날짜: <span id="createDate"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer id="footer" th:replace="~{fragments/footer :: footer}"></footer>
+</div>
+
+<script th:src="@{/js/common.js}"></script>
+<script th:src="@{/js/approval.js}"></script>
+</body>
+</html>

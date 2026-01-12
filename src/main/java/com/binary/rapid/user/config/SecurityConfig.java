@@ -47,7 +47,10 @@ public class SecurityConfig {
                                 "/board/**",
                                 "/api/board/**",
                                 "/css/**", "/js/**", "/images/**", "/fragments/**", "/img/**","/favicon.ico",
-                                "/error"
+                                "/error",
+                                "/approvalList",      // 추가
+                                "/approvalDetail",    // 추가
+                                "/api/approval/**"
                         ).permitAll()
 
                         // 로그아웃, 토큰 갱신 등은 '인증된 사용자'만 접근 가능하도록 설정
