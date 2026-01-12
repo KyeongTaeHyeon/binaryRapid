@@ -2,8 +2,6 @@ package com.binary.rapid.user.dto;
 
 import com.binary.rapid.user.constant.SocialType;
 import com.binary.rapid.user.constant.UserRole;
-// User 엔티티의 실제 패키지 경로를 임포트하세요. 
-// 예: import com.binary.rapid.user.entity.User; 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -15,7 +13,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class UserResponseDto {
+public class SelectUserResponseForJwtDto {
 
     // 유저 고유값 (PK)
     private int userId;
@@ -47,5 +45,31 @@ public class UserResponseDto {
     private LocalDateTime updateDate;
     private LocalDateTime deleteDate;
 
- 
+    /**
+     * ✅ Entity를 DTO로 변환하는 정적 팩토리 메서드
+     * @param user 엔티티 객체
+     * @return 변환된 UserResponseDto
+     */
+// 파라미터 타입을 실제 엔티티 클래스인 'User'로 지정합니다.
+    public static SelectUserResponseForJwtDto from(UserResponseDto user) {
+        return SelectUserResponseForJwtDto.builder()
+                .userId(user.getUserId())    // user 객체에서 값을 꺼내서
+                .id(user.getId())            // DTO의 필드에 하나씩 채웁니다.
+                .nickName(user.getNickName())
+                .name(user.getName())
+                .taste(user.getTaste())
+                .birth(user.getBirth())
+                .email(user.getEmail())
+                .social(user.getSocial())
+                .gender(user.getGender())
+                .role(user.getRole())
+                .createDate(user.getCreateDate())
+                .updateDate(user.getUpdateDate())
+                .build();
+    }
+
+    public boolean isAdmin() {
+        return role == UserRole.ADMIN;
+    }
+
 }

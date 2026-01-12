@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<div th:fragment="sideBar(menuName)">
+    <div id="managerLeft">
+        <div id="managerLeftInner">
+            <span id="sideBarNickName">사용자님</span>
+            <ul>
+                <li th:classappend="${menuName == 'modify'} ? 'on'">
+                    <a href="/login/user/modify">내 정보 변경</a>
+                </li>
+                <li th:classappend="${menuName == 'board'} ? 'on'">
+                    <a href="/login/user/boardList">작성글 관리</a>
+                </li>
+                <li th:classappend="${menuName == 'wish'} ? 'on'">
+                    <a href="/login/user/mywish">찜 목록</a>
+                </li>
+                <li th:classappend="${menuName == 'request'} ? 'on'">
+                    <a href="/login/user/requestShop">등록 신청 관리</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>
+</html>

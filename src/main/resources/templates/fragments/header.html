@@ -1,11 +1,8 @@
 <header id="header" th:fragment="header" xmlns:th="http://www.thymeleaf.org">
     <div class="inner">
         <div id="logo">
-            <a th:href="@{/}">
-                <img th:src="@{/img/raFeed_Logo-Photoroom.png}" alt="RaFeed_Logo"/>
-            </a>
+            <a th:href="@{/}"><img th:src="@{/img/raFeed_Logo-Photoroom.png}" alt="RaFeed_Logo"/></a>
         </div>
-
         <div class="navigation">
             <ul class="navMenu">
                 <li><a th:href="@{/origin}">유래</a></li>
@@ -14,45 +11,21 @@
                 <li><a th:href="@{/board/boardList}">게시판</a></li>
             </ul>
         </div>
-
         <div class="headerContent">
             <div id="user">
-
-                <!-- 비로그인 -->
-                <div class="userBox" th:if="${session.loginUser == null}">
+                <div id="guestBox" class="userBox" style="display: none;">
                     <p><a th:href="@{/login}">로그인</a></p>
                     <span>|</span>
-                    <p><a th:href="@{/login/register}">회원가입</a></p>
+                    <p><a th:href="@{/signup}">회원가입</a></p>
                 </div>
-
-                <!-- 일반 유저 -->
-                <div class="userBox"
-                     th:if="${session.loginUser != null and session.loginUser.role.name() == 'USER'}">
-                    <p>
-                        <span th:text="${session.loginUser.nickName}"></span>님 안녕하세요
-                    </p>
+                <div id="loginBox" class="userBox" style="display: none;">
+                    <p><span id="userNickname"></span>님 안녕하세요</p>
                     <span>|</span>
-                    <p><a th:href="@{/login/userBoardList}">마이 페이지</a></p>
+                    <p><a id="mypageLink" href="#">마이 페이지</a></p>
                     <span>|</span>
-                    <p><a href="#" class="logoutBtn">로그아웃</a></p>
+                    <p><a href="javascript:void(0)" id="logoutBtn">로그아웃</a></p>
                 </div>
-
-                <!-- 관리자 -->
-                <div class="userBox admin"
-                     th:if="${session.loginUser != null and session.loginUser.role.name() == 'ADMIN'}">
-                    <p>
-                        <span th:text="${session.loginUser.nickName}"></span>님 안녕하세요
-                    </p>
-                    <span>|</span>
-                    <p><a th:href="@{/admin/users}">관리자 페이지</a></p>
-                    <span>|</span>
-                    <p><a href="#" class="logoutBtn">로그아웃</a></p>
-                </div>
-
-                <div id="google_translate_element"></div>
             </div>
-
-            <!-- 🔍 검색 영역 유지 -->
             <div class="searchWrap">
                 <input type="text" id="search" placeholder=" Search..."/>
                 <button id="search-button">
@@ -61,6 +34,5 @@
             </div>
         </div>
     </div>
-
-    <script th:src="@{/js/logout.js}"></script>
+    <script th:src="@{/js/logout.js}" ></script>
 </header>
