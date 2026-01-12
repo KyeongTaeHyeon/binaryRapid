@@ -2,7 +2,7 @@
 const currentUserId = 2; // 테스트용 사용자 ID
 //const currentUserId = 3; // 테스트용 사용자 ID'
 let currentPage = 1;
-const itemsPerPage = 5;
+const itemsPerPage = 10;
 let allPosts = [];
 let filteredPosts = [];
 let currentCategory = "전체";
@@ -53,6 +53,7 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     });
 
+
     // 2. 상세 페이지 로드
     if (path.includes("boardList2") || path.includes("/board/detail")) {
         initDetailPage();
@@ -62,6 +63,38 @@ document.addEventListener("DOMContentLoaded", function () {
     const submitPostBtn = document.getElementById("submitPostBtn");
     if (submitPostBtn) {
         submitPostBtn.onclick = saveBoard;
+    }
+    const writingBtn = document.querySelector(".writing");
+    if (writingBtn) {
+        writingBtn.addEventListener("click", function(event) {
+            event.preventDefault(); // 기본 이동을 막고 JS로 이동
+
+            // "전체"일 경우 기본값으로 "자유게시판"을 사용
+            const targetCategory = (currentCategory === "전체") ? "자유게시판" : currentCategory;
+
+            // URL 파라미터에 category를 담아서 이동
+            location.href = `/board/write?category=${encodeURIComponent(targetCategory)}`;
+        });
+    }
+    if (path.includes("/board/write")) {
+        const urlParams = new URLSearchParams(window.location.search);
+        const categoryName = urlParams.get("category");
+
+        if (categoryName) {
+            // 1. "새 게시글 작성" 문구를 현재 카테고리명으로 교체
+            // h1 태그나 제목 클래스를 찾아서 텍스트 변경
+            const mainTitle = document.querySelector("#main h1") || document.querySelector(".title");
+            if (mainTitle) {
+                mainTitle.innerText = categoryName;
+            }
+
+            // 2. 게시판 선택 셀렉트 박스(boardCategory) 자동 선택
+            const categorySelect = document.getElementById("boardCategory");
+            if (categorySelect) {
+                // "자유게시판" -> A00, "식당인증" -> B00 매핑
+                categorySelect.value = (categoryName === "식당인증") ? "B00" : "A00";
+            }
+        }
     }
 
     // 4. 댓글 등록 버튼
