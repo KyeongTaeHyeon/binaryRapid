@@ -20,27 +20,19 @@
                 <div id="managerSearch">
                     <div class="searchWrapper">
                         <div class="searchWrap managerSearchWrap">
-                            <input
-                                    id="searchInput"
-                                    type="text"
-                                    placeholder=" 게시글 제목: "
-                            />
-                            <button id="search-button">
+                            <input id="reqSearchInput" type="text" placeholder=" 게시글 제목: " />
+                            <button id="reqSearchBtn" type="button" style="background-color: var(--primary-color)">
                                 <img th:src="@{/img/ico-search-wh-56x56.png}" alt="Search"/>
                             </button>
                         </div>
                     </div>
+
                     <div class="searchWrapper">
-                        <form
-                                class="searchWrap managerSearchWrap"
-                                id="managerSearchDate"
-                                action="/submit"
-                                method="post"
-                        >
-                            <input type="date" id="start" name="startDate" required/>
-                            <input type="date" id="end" name="endDate" required/>
-                            <button type="submit">제출</button>
-                        </form>
+                        <div class="searchWrap managerSearchWrap" id="reqDateWrap">
+                            <input type="date" id="reqStart" name="startDate" />
+                            <input type="date" id="reqEnd" name="endDate" />
+                            <button type="button" id="reqDateBtn">제출</button>
+                        </div>
                     </div>
                 </div>
                 <table>
@@ -62,48 +54,26 @@
                             &lt;
                         </button>
                         <ul class="page-list">
-                            <li class="page-item active">
-                                <button>1</button>
-                            </li>
-                            <li class="page-item">
-                                <button>2</button>
-                            </li>
-                            <li class="page-item">
-                                <button>3</button>
-                            </li>
-                            <li class="page-item">
-                                <button>4</button>
-                            </li>
-                            <li class="page-item">
-                                <button>5</button>
-                            </li>
-                            <li class="page-item">
-                                <button>6</button>
-                            </li>
-                            <li class="page-item">
-                                <button>7</button>
-                            </li>
-                            <li class="page-item">
-                                <button>8</button>
-                            </li>
-                            <li class="page-item">
-                                <button>9</button>
-                            </li>
-                            <li class="page-item">
-                                <button>10</button>
-                            </li>
                         </ul>
                         <button class="page-btn next" aria-label="다음 페이지">
                             &gt;
                         </button>
                     </nav>
+
+                    <div class="select_box array_num">
+                        <select name="numbers" id="req_sarray_numbers">
+                            <option value="5">5개</option>
+                            <option value="10" selected>10개</option>
+                            <option value="15">15개</option>
+                            <option value="20">20개</option>
+                        </select>
+                    </div>
                 </div>
             </div>
         </div>
     </main>
     <footer id="footer" th:replace="~{fragments/footer :: footer}"></footer>
 </div>
-<script th:src="@{/js/common.js}"></script>
 <script type="text/javascript">
     function googleTranslateElementInit() {
       new google.translate.TranslateElement(
@@ -112,7 +82,15 @@
       );
     }
 </script>
-<script src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
-<script th:src="@{/js/userRequestShop.js}"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+
+<script th:src="@{/js/common.js}"></script>
+
+<script type="module" th:src="@{/js/main.js}"></script>
+
+<script type="module">
+    import '/js/userRequestShop.js';
+</script>
 </body>
 </html>

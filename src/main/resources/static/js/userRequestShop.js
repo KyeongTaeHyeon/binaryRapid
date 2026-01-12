@@ -1,131 +1,106 @@
-document.addEventListener('DOMContentLoaded', () => {
-  const navUserName = document.querySelector('#userName');
-  const logInUser = localStorage.getItem('userRegistForm');
-  const contentEl = document.querySelector('#userRequestMain');
-  const paginationContainer = document.querySelector('#contentNav');
+/**
+ * userRequestShop.js - 깔끔한 필터링 및 페이징 통합본
+ */
+let reqPosts = [];
+let REQ_PER_PAGE = 10;
+let reqPage = 1;
+let reqUserId = null;
 
-  // JSON 파일 경로
-  const jsonFilePath = '/data/requestShop.json';
-  const ITEMS_PER_PAGE = 5; // 한 페이지에 표시할 게시글 수
-  let currentPage = 1; // 현재 페이지
-  let allPostsData = []; // 모든 게시글 데이터
+let reqFilters = { title: '', start: '', end: '' };
 
-  // 유저 아이디 nav상단 출력
-  if (logInUser) {
-    const userObject = JSON.parse(logInUser);
-    const parUserName = userObject.userName;
+const reqTable = document.querySelector('#userRequestMain');
+const reqList = document.querySelector(".page-list");
 
-    if (parUserName) {
-      navUserName.textContent = `${parUserName} 님`;
-    }
-
-    // JSON 파일을 비동기적으로 불러오기
-    fetch(jsonFilePath)
-      .then((response) => {
-        // 응답이 성공적이지 않으면 에러 발생
-        if (!response.ok) {
-          throw new Error('JSON 파일을 불러오는 데 실패했습니다.');
+// 1. 초기 데이터 로드
+async function initReqPage() {
+    try {
+        if (!reqUserId) {
+            const res = await authFetch('/user/me');
+            const json = await res.json();
+            reqUserId = json.data.userId;
         }
-        return response.json();
-      })
-      .then((data) => {
-        // 데이터가 정상적으로 로드되면 로그인한 유저의 글만 필터링
-        allPostsData = data.filter((item) => item.userName === parUserName);
-        updatePostListAndPagination();
-      })
-      .catch((error) => {
-        console.error('Error loading JSON data:', error);
-      });
-  }
+        await fetchReqData();
+    } catch (e) { console.error("초기화 실패", e); }
+}
 
-  // 게시글과 페이지네이션 갱신 함수
-  function updatePostListAndPagination() {
-    if (!contentEl) {
-      console.warn(
-        'WARNING: 게시글을 표시할 #userRequestMain 요소를 찾을 수 없습니다.'
-      );
-      return;
+// 2. 서버 통신
+async function fetchReqData() {
+    const url = `/user/api/my/reqShopList?userId=${reqUserId}&title=${reqFilters.title}&startDate=${reqFilters.start}&endDate=${reqFilters.end}`;
+    const res = await authFetch(url);
+    if (res.ok) {
+        reqPosts = await res.json();
+        reqPage = 1;
+        renderReqUI();
+    }
+}
+
+// 3. UI 렌더링
+function renderReqUI() {
+    if (!reqTable) return;
+    reqTable.innerHTML = '';
+
+    const startIdx = (reqPage - 1) * REQ_PER_PAGE;
+    const pagedData = reqPosts.slice(startIdx, startIdx + REQ_PER_PAGE);
+
+    if (pagedData.length === 0) {
+        reqTable.innerHTML = '<tr><td colspan="6" style="text-align:center;">데이터가 없습니다.</td></tr>';
+        return;
     }
 
-    contentEl.innerHTML = ''; // 기존 게시글 모두 비우기
-    paginationContainer.innerHTML = ''; // 페이지네이션 비우기
-
-    // 페이지네이션 로직
-    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-    const endIndex = startIndex + ITEMS_PER_PAGE;
-    const postsToShow = allPostsData.slice(startIndex, endIndex); // 현재 페이지에 해당하는 게시글만 선택
-
-    // 게시글 데이터 생성 및 추가
-    if (postsToShow.length === 0) {
-      const noPostMessage = document.createElement('p');
-      noPostMessage.textContent = '표시할 게시글이 없습니다.';
-      noPostMessage.style.textAlign = 'center';
-      noPostMessage.style.padding = '20px';
-      contentEl.appendChild(noPostMessage);
-    } else {
-      postsToShow.forEach((post, index) => {
-        const tr = document.createElement('tr'); // tr 요소 생성
+    pagedData.forEach((post, i) => {
+        const tr = document.createElement('tr');
         tr.innerHTML = `
-          <td>${startIndex + index + 1}</td>
-          <td>${post.name}</td>
-          <td>${post.region}</td>
-          <td>${post.category}</td>
-          <td>${post.userName}</td>
-          <td>${post.creatAt}</td>
+            <td>${startIdx + i + 1}</td>
+            <td style="cursor:pointer; color:#007bff;" onclick="location.href='/user/board/detail/${post.id}'">${post.title}</td>
+            <td>${post.category === 'B00' ? '식당인증' : '기타'}</td>
+            <td>식당신청</td>
+            <td>본인</td>
+            <td>${post.createDate ? post.createDate.split('T')[0] : '-'}</td>
         `;
-        contentEl.appendChild(tr); // 게시글 데이터 tr 추가
-      });
+        reqTable.appendChild(tr);
+    });
+    renderReqPager();
+}
+
+// 4. 페이지네이션
+function renderReqPager() {
+    if (!reqList) return;
+    const total = Math.ceil(reqPosts.length / REQ_PER_PAGE) || 1;
+    reqList.innerHTML = "";
+
+    document.querySelector(".page-btn.prev").onclick = () => { if(reqPage > 1) { reqPage--; renderReqUI(); }};
+    document.querySelector(".page-btn.next").onclick = () => { if(reqPage < total) { reqPage++; renderReqUI(); }};
+
+    for (let i = 1; i <= total; i++) {
+        const li = document.createElement("li");
+        li.className = `page-item ${i === reqPage ? 'active' : ''}`;
+        li.innerHTML = `<button>${i}</button>`;
+        li.onclick = () => { reqPage = i; renderReqUI(); };
+        reqList.appendChild(li);
     }
+}
 
-    // 페이지네이션 버튼 렌더링
-    renderPaginationButtons(allPostsData.length);
-  }
+// 5. 이벤트 바인딩
+document.addEventListener('DOMContentLoaded', () => {
+    // 제목 검색 (클릭/엔터)
+    const sBtn = document.getElementById('reqSearchBtn');
+    const sInput = document.getElementById('reqSearchInput');
+    const doSearch = () => { reqFilters.title = sInput.value.trim(); fetchReqData(); };
 
-  // 페이지네이션 버튼 생성 함수
-  function renderPaginationButtons(totalPosts) {
-    const totalPages = Math.ceil(totalPosts / ITEMS_PER_PAGE); // 총 페이지 수
-    const paginationList = document.createElement('ul');
-    paginationList.classList.add('page-list');
+    if(sBtn) sBtn.onclick = doSearch;
+    if(sInput) sInput.onkeydown = (e) => { if(e.key === 'Enter') doSearch(); };
 
-    // 첫 페이지 버튼
-    if (currentPage > 1) {
-      const prevButton = document.createElement('li');
-      prevButton.innerHTML = `<button>&lt;</button>`;
-      prevButton.addEventListener('click', () => {
-        currentPage--;
-        updatePostListAndPagination();
-      });
-      paginationList.appendChild(prevButton);
-    }
+    // 날짜 검색
+    const dBtn = document.getElementById('reqDateBtn');
+    if(dBtn) dBtn.onclick = () => {
+        reqFilters.start = document.getElementById('reqStart').value;
+        reqFilters.end = document.getElementById('reqEnd').value;
+        fetchReqData();
+    };
 
-    // 페이지 번호 버튼들
-    for (let i = 1; i <= totalPages; i++) {
-      const pageItem = document.createElement('li');
-      pageItem.classList.add('page-item');
-      const pageButton = document.createElement('button');
-      pageButton.textContent = i;
-      if (i === currentPage) {
-        pageItem.classList.add('active');
-      }
-      pageButton.addEventListener('click', () => {
-        currentPage = i;
-        updatePostListAndPagination();
-      });
-      pageItem.appendChild(pageButton);
-      paginationList.appendChild(pageItem);
-    }
+    // 개수 선택
+    const sel = document.getElementById('req_sarray_numbers');
+    if(sel) sel.onchange = () => { REQ_PER_PAGE = parseInt(sel.value); reqPage = 1; renderReqUI(); };
 
-    // 마지막 페이지 버튼
-    if (currentPage < totalPages) {
-      const nextButton = document.createElement('li');
-      nextButton.innerHTML = `<button>&gt;</button>`;
-      nextButton.addEventListener('click', () => {
-        currentPage++;
-        updatePostListAndPagination();
-      });
-      paginationList.appendChild(nextButton);
-    }
-
-    paginationContainer.appendChild(paginationList);
-  }
+    initReqPage();
 });

@@ -33,6 +33,21 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         String authHeader = request.getHeader("Authorization");
 
+        // 1. 요청 경로(URI)를 가져오는 이 코드가 필요합니다!
+        String path = request.getRequestURI();
+
+        // 2. 인증 없이 통과시켜줄 경로 설정
+        // 회원가입 페이지(/user/register)와 소셜 가입 로직은 토큰 검사를 건너뜁니다.
+        if (path.contains("/user/register") ||
+                path.contains("/user/LocalSignup") ||
+                path.contains("/user/check-duplicate") ||
+                path.equals("/login") ||
+                path.equals("/")) {
+
+            filterChain.doFilter(request, response);
+            return; // 필터 로직 종료 (다음 필터로 이동)
+        }
+
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
             String token = authHeader.substring(7);
 

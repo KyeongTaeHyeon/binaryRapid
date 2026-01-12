@@ -131,4 +131,18 @@ public class UserController {
         return ResponseEntity.ok(ApiResponse.success(user));
     }
 
+    @GetMapping("/check-duplicate")
+    public ResponseEntity<ApiResponse<Boolean>> checkDuplicate(
+            @RequestParam(required = false) String id,
+            @RequestParam(required = false) String email,
+            @RequestParam(required = false) String nickName) {
+
+        boolean isDuplicate = false;
+        if (id != null) isDuplicate = service.isIdDuplicate(id);
+        else if (email != null) isDuplicate = service.isEmailDuplicate(email);
+        else if (nickName != null) isDuplicate = service.isNickNameDuplicate(nickName);
+
+        return ResponseEntity.ok(ApiResponse.success(isDuplicate));
+    }
+
 }
