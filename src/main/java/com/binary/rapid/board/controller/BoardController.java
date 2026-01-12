@@ -1,16 +1,18 @@
+// src/main/java/com/binary/rapid/board/controller/BoardController.java
 package com.binary.rapid.board.controller;
 
 import com.binary.rapid.board.dto.BoardCommentDto;
 import com.binary.rapid.board.dto.BoardDto;
 import com.binary.rapid.board.service.BoardService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.unit.DataSize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/board")
@@ -18,6 +20,16 @@ import java.util.List;
 public class BoardController {
 
     private final BoardService boardService;
+
+    // yml에 설정된 파일 용량 제한 값을 가져옵니다.
+    @Value("${spring.servlet.multipart.max-file-size}")
+    private DataSize maxFileSize;
+
+    // 프론트엔드(JS)가 용량 제한을 물어보면 알려주는 API
+    @GetMapping("/config")
+    public ResponseEntity<Map<String, Long>> getBoardConfig() {
+        return ResponseEntity.ok(Map.of("maxFileSize", maxFileSize.toBytes()));
+    }
 
     // --- 게시글 관련 ---
 
@@ -40,72 +52,83 @@ public class BoardController {
     }
 
     @PostMapping("/write")
-    public ResponseEntity<Integer> saveBoard(BoardDto boardDto) { // @RequestBody를 삭제했습니다.
-        // 여기서 값이 잘 들어오는지 로그로 확인해 보세요.
-        System.out.println("받은 제목: " + boardDto.getTitle());
-        System.out.println("받은 내용: " + boardDto.getContents());
+    public ResponseEntity<String> writeBoard(
+            @ModelAttribute BoardDto boardDto,
+            @RequestParam(value = "files", required = false) List<MultipartFile> files) {
 
-        int boardId = boardService.saveBoard(boardDto);
-        return ResponseEntity.status(HttpStatus.CREATED).body(boardId);
+        try {
+            // (임시) 로그인 유저 ID 1번 강제 주입
+            boardDto.setUserId(1);
+            boardService.writeBoard(boardDto, files);
+            return ResponseEntity.ok("성공");
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(500).body("실패");
+        }
     }
 
     @PostMapping("/update")
     public ResponseEntity<String> updateBoard(@RequestBody BoardDto boardDto) {
-        // 로그를 찍어 값이 잘 들어오는지 확인하세요
         System.out.println("수정 요청 데이터: " + boardDto.toString());
-
         boardService.updateBoard(boardDto);
         return ResponseEntity.ok("success");
     }
 
-    // --- 파일 관련 ---
-
-    @PostMapping("/file/upload")
-    public ResponseEntity<String> uploadFiles(
-            @RequestParam("id") int id,
-            @RequestParam("userId") int userId,
-            @RequestParam("files") MultipartFile[] files,
-            @RequestParam("fileSeqs") int[] fileSeqs) {
-
+    // [이미지 출력 API]
+    @GetMapping("/file/display")
+    public ResponseEntity<org.springframework.core.io.Resource> displayFile(@RequestParam("path") String path) {
         try {
-            for (int i = 0; i < files.length; i++) {
-                boardService.saveFileWithOrder(id, files[i], fileSeqs[i], userId);
+            String projectPath = System.getProperty("user.dir") + "/src/main/resources/static";
+            String fullPath = projectPath + path;
+
+            java.nio.file.Path filePath = java.nio.file.Paths.get(fullPath);
+            org.springframework.core.io.Resource resource = new org.springframework.core.io.UrlResource(filePath.toUri());
+
+            if (!resource.exists() || !resource.isReadable()) {
+                return ResponseEntity.notFound().build();
             }
-            return ResponseEntity.ok("success");
-        } catch (IOException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("파일 업로드 실패");
+
+            String contentType = java.nio.file.Files.probeContentType(filePath);
+            if (contentType == null) {
+                contentType = "application/octet-stream";
+            }
+
+            return ResponseEntity.ok()
+                    .header(org.springframework.http.HttpHeaders.CONTENT_TYPE, contentType)
+                    .body(resource);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(500).build();
         }
     }
-    @GetMapping("/board/boardEdit")
-    public String boardEditPage(@RequestParam("id") int id) {
-        return "board/boardEdit"; // templates/board/boardEdit.html 파일을 찾아감
-    }
 
+    @GetMapping("/boardEdit")
+    public String boardEditPage(@RequestParam("id") int id) {
+        return "board/boardEdit";
+    }
 
     // --- 댓글 관련 ---
 
-    // 1. 댓글 등록
     @PostMapping("/comment/write")
     public ResponseEntity<String> saveComment(@RequestBody BoardCommentDto boardCommentDto) {
         boardService.saveComment(boardCommentDto);
         return ResponseEntity.ok("success");
     }
 
-    // 2. 댓글 목록 조회 (중복되었던 /api/board 경로 제거)
     @GetMapping("/comment/list/{id}")
     public ResponseEntity<List<BoardCommentDto>> getCommentList(@PathVariable("id") int id) {
         List<BoardCommentDto> list = boardService.getCommentList(id);
         return ResponseEntity.ok(list);
     }
 
-    // 3. 댓글 수정 (JS의 fetch 방식에 맞춰 @PostMapping 사용 가능)
     @PostMapping("/comment/update")
     public ResponseEntity<String> updateComment(@RequestBody BoardCommentDto boardCommentDto) {
         boardService.updateComment(boardCommentDto);
         return ResponseEntity.ok("success");
     }
 
-    // 4. 댓글 삭제 (JS 요청 방식에 맞춤: /api/board/comment/delete?id=..&commentSeq=..)
     @PostMapping("/comment/delete")
     public ResponseEntity<String> deleteComment(
             @RequestParam("id") int id,
@@ -113,5 +136,4 @@ public class BoardController {
         boardService.deleteComment(id, commentSeq);
         return ResponseEntity.ok("success");
     }
-
 }

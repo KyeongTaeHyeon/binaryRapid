@@ -11,6 +11,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
@@ -26,7 +27,12 @@ public class BoardService {
 
     // 2. 게시글 상세 조회
     public BoardDto getBoardDetail(int id) {
-        return boardMapper.selectBoardDetail(id);
+        BoardDto detail = boardMapper.selectBoardDetail(id);
+        if (detail == null) return null;
+
+        List<BoardFileDto> files = boardMapper.selectFileList(id);
+        detail.setFiles(files != null ? files : Collections.emptyList());
+        return detail;
     }
 
     // 3. 게시글 저장
@@ -70,28 +76,44 @@ public class BoardService {
 
     // --- 파일 관련 ---
     @Transactional(rollbackFor = Exception.class)
-    public void saveFileWithOrder(int id, MultipartFile file, int fileSeq, int userId) throws IOException {
-        if (file != null && !file.isEmpty()) {
-            String projectPath = System.getProperty("user.dir") + "/src/main/resources/static/files";
+    public void writeBoard(BoardDto boardDto, List<MultipartFile> files) throws IOException {
+
+        // 1. 게시글 저장
+        boardMapper.saveBoard(boardDto);
+        int boardId = boardDto.getId();
+        int userId = boardDto.getUserId();
+
+        // 2. 파일 저장
+        if (files != null && !files.isEmpty()) {
+
+            // 경로: 프로젝트 내부 static/img/attachFile/
+            String projectPath = System.getProperty("user.dir") + "/src/main/resources/static/img/attachFile/";
 
             File directory = new File(projectPath);
             if (!directory.exists()) {
                 directory.mkdirs();
             }
 
-            String fileName = UUID.randomUUID() + "_" + file.getOriginalFilename();
-            File saveFile = new File(projectPath, fileName);
-            file.transferTo(saveFile);
+            int fileSeq = 1;
 
-            BoardFileDto fileDto = new BoardFileDto();
-            fileDto.setId(id);
-            fileDto.setFileSeq(fileSeq);
-            fileDto.setFileAddr("/files/" + fileName);
-            fileDto.setUserId(userId);
+            for (MultipartFile file : files) {
+                if (file.isEmpty()) continue;
 
-            boardMapper.insertBoardFile(fileDto);
+                // 파일명 난수화
+                String saveFileName = UUID.randomUUID() + "_" + file.getOriginalFilename();
+
+                // 물리 저장
+                file.transferTo(new File(projectPath, saveFileName));
+
+                // DB 저장 (경로: /img/attachFile/...)
+                BoardFileDto fileDto = new BoardFileDto();
+                fileDto.setId(boardId);
+                fileDto.setFileSeq(fileSeq++);
+                fileDto.setFileAddr("/img/attachFile/" + saveFileName);
+                fileDto.setUserId(userId);
+
+                boardMapper.insertBoardFile(fileDto);
+            }
         }
     }
-
-
 }

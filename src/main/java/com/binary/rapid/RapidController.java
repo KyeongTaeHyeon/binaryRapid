@@ -34,8 +34,10 @@ public class RapidController {
         return "board/boardList";
     }
 
-    @GetMapping("/board/boardList2")
-    public String boardList2Page(){ return "board/boardList2";}
+    @GetMapping("/board/boardDetail")
+    public String boardList2Page() {
+        return "board/boardDetail";
+    }
 
     @GetMapping("/login/register")
     public String registerPage() {
@@ -46,14 +48,17 @@ public class RapidController {
     public String userBoardListPage() {
         return "login/userBoardList";
     }
+
     @GetMapping("/login/modify")
     public String userInfoModify() {
         return "login/userModify";
     }
+
     @GetMapping("/login/mywish")
     public String userMywish() {
         return "login/userMywish";
     }
+
     @GetMapping("/login/requestShop")
     public String userRequestShop() {
         return "login/userRequestShop";
