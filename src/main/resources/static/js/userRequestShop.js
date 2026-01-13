@@ -1,5 +1,5 @@
 /**
- * userRequestShop.js - 깔끔한 필터링 및 페이징 통합본
+ * userRequestShop.js - 지역, 작성자 컬럼 제거 버전
  */
 let reqPosts = [];
 let REQ_PER_PAGE = 10;
@@ -43,18 +43,18 @@ function renderReqUI() {
     const pagedData = reqPosts.slice(startIdx, startIdx + REQ_PER_PAGE);
 
     if (pagedData.length === 0) {
-        reqTable.innerHTML = '<tr><td colspan="6" style="text-align:center;">데이터가 없습니다.</td></tr>';
+        // 컬럼이 4개로 줄었으므로 colspan을 4로 수정
+        reqTable.innerHTML = '<tr><td colspan="4" style="text-align:center;">데이터가 없습니다.</td></tr>';
         return;
     }
 
     pagedData.forEach((post, i) => {
         const tr = document.createElement('tr');
+        // 지역(post.category === 'B00' 등)과 작성자(본인) td 제거
         tr.innerHTML = `
             <td>${startIdx + i + 1}</td>
-            <td style="cursor:pointer; color:#007bff;" onclick="location.href='/user/board/detail/${post.id}'">${post.title}</td>
-            <td>${post.category === 'B00' ? '식당인증' : '기타'}</td>
+            <td style="cursor:pointer; color:#007bff;" onclick="location.href='/board/boardDetail?id=${post.id}'">${post.title}</td>
             <td>식당신청</td>
-            <td>본인</td>
             <td>${post.createDate ? post.createDate.split('T')[0] : '-'}</td>
         `;
         reqTable.appendChild(tr);
@@ -62,7 +62,7 @@ function renderReqUI() {
     renderReqPager();
 }
 
-// 4. 페이지네이션
+// 4. 페이지네이션 (기존과 동일)
 function renderReqPager() {
     if (!reqList) return;
     const total = Math.ceil(reqPosts.length / REQ_PER_PAGE) || 1;
@@ -80,9 +80,8 @@ function renderReqPager() {
     }
 }
 
-// 5. 이벤트 바인딩
+// 5. 이벤트 바인딩 (기존과 동일)
 document.addEventListener('DOMContentLoaded', () => {
-    // 제목 검색 (클릭/엔터)
     const sBtn = document.getElementById('reqSearchBtn');
     const sInput = document.getElementById('reqSearchInput');
     const doSearch = () => { reqFilters.title = sInput.value.trim(); fetchReqData(); };
@@ -90,7 +89,6 @@ document.addEventListener('DOMContentLoaded', () => {
     if(sBtn) sBtn.onclick = doSearch;
     if(sInput) sInput.onkeydown = (e) => { if(e.key === 'Enter') doSearch(); };
 
-    // 날짜 검색
     const dBtn = document.getElementById('reqDateBtn');
     if(dBtn) dBtn.onclick = () => {
         reqFilters.start = document.getElementById('reqStart').value;
@@ -98,7 +96,6 @@ document.addEventListener('DOMContentLoaded', () => {
         fetchReqData();
     };
 
-    // 개수 선택
     const sel = document.getElementById('req_sarray_numbers');
     if(sel) sel.onchange = () => { REQ_PER_PAGE = parseInt(sel.value); reqPage = 1; renderReqUI(); };
 

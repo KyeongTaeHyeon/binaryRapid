@@ -1,4 +1,25 @@
 // 구글
+// 1. 커스텀 버튼 클릭 시 구글 창 띄우는 함수
+function openGoogleSignIn() {
+    google.accounts.id.prompt(); 
+}
+
+// 2. 구글 로그인 성공 시 실행되는 콜백 함수
+function handleCredentialResponse(response) {
+    const token = response.credential; // 구글이 준 JWT 토큰
+    const payload = JSON.parse(atob(token.split('.')[1])); // 토큰 해석
+    
+    console.log("구글 로그인 사용자:", payload);
+
+    // 임시로 세션/로컬 스토리지에 저장 (나중에 서버 검증 로직으로 대체 가능)
+    localStorage.setItem('userName', payload.name);
+    localStorage.setItem('userEmail', payload.email);
+    localStorage.setItem('isLoggedIn', 'true');
+    localStorage.setItem('accessToken', token); // 임시 토큰 저장
+
+    window.location.href = '/'; // 메인으로 이동
+}
+
 function handleCredentialResponse(response) {
   const token = response.credential;
 

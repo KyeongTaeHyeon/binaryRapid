@@ -1,64 +1,54 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
-  <head>
+<head>
     <meta charset="UTF-8" />
     <title>Login</title>
     <link rel="stylesheet" th:href="@{/css/reset.css}" />
     <link rel="stylesheet" th:href="@{/css/common.css}" />
     <link rel="stylesheet" th:href="@{/css/login.css}" />
-    <script src="https://accounts.google.com/gsi/client" async defer></script>
-  </head>
-  <body>
-    <div id="wrapper">
-      <header id="header" th:replace="~{fragments/header :: header}"></header>
-      <main id="main">
-        <div id="loginWrapper" class="outline">
-          <h1>로그인</h1>
-          <div id="loginFormContainer">
-            <div class="inputWrapper">
-              <div class="inputGroup">
-                <label for="userName">아이디</label>
-                <input type="text" id="userName" name="userName" required />
-              </div>
-              <div class="inputGroup">
-                <label for="password">비밀번호</label>
-                <input type="password" id="password" name="password" required />
-              </div>
-            </div>
-            <p id="loginErrorMsg" class="loginErrorMsg" style="display:none; color:red;"></p>
+</head>
+<body>
+<div id="wrapper">
+    <header id="header" th:replace="~{fragments/header :: header}"></header>
+    <main id="main">
+        <div id="loginWrapper">
+            <h1>로그인</h1>
+            <div id="loginFormContainer" style="width: 100%;">
+                <div class="inputWrapper">
+                    <div class="inputGroup">
+                        <label for="userName">아이디</label>
+                        <input type="text" id="userName" name="userName" placeholder="아이디를 입력하세요" required />
+                    </div>
+                    <div class="inputGroup">
+                        <label for="password">비밀번호</label>
+                        <input type="password" id="password" name="password" placeholder="비밀번호를 입력하세요" required />
+                    </div>
+                </div>
+                <p id="loginErrorMsg" class="loginErrorMsg" style="display:none;"></p>
 
-            <div class="buttonWrapper">
-              <button type="button" id="btnLogin" class="button">로그인</button>
-              <button type="button" id="btnNew" class="button">
-                <a th:href="@{/login/register}">회원가입</a>
-              </button>
+                <div class="buttonWrapper">
+                    <button type="button" id="btnLogin" class="button">로그인</button>
+                    <button type="button" id="btnNew" class="button">
+                        <a th:href="@{/login/register}">회원가입</a>
+                    </button>
+                </div>
             </div>
-          </div>
 
-          <h2 class="socialLogin_title">소셜 로그인</h2>
-          <div class="social-login-buttons">
-            <a href="/oauth2/authorization/google" class="google-login-btn">
-              <div class="google-icon-wrapper">
-                <img class="google-icon" src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_Color_Icon.svg" alt="Google Logo"/>
-              </div>
-              <span class="btn-text">Google 계정으로 로그인</span>
-            </a>
-          </div>
-          <div class="g_id_signin" data-type="standard" data-size="large" data-theme="outline" data-text="sign_in_with" data-shape="rectangular" data-logo_alignment="left"></div>
+            <h2 class="socialLogin_title">소셜 로그인</h2>
+            <div class="social-login-buttons">
+                <a th:href="@{/oauth2/authorization/google}" class="google-login-btn">
+                    <div class="google-icon-wrapper">
+                        <img class="google-icon" src="https://www.gstatic.com/images/branding/product/2x/googleg_48dp.png" alt="Google Logo" />
+                    </div>
+                    <span class="btn-text">Google 계정으로 로그인</span>
+                </a>
+            </div>
         </div>
-      </main>
-      <footer id="footer" th:replace="~{fragments/footer :: footer}"></footer>
-    </div>
-    <script th:src="@{/js/common.js}"></script>
-    <script type="text/javascript">
-      function googleTranslateElementInit() {
-        new google.translate.TranslateElement(
-          { pageLanguage: 'ko', includedLanguages: 'en,ja,zh-CN,ko' },
-          'google_translate_element'
-        );
-      }
-    </script>
-    <script src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
-    <script th:src="@{/js/login.js}"></script>
-  </body>
+    </main>
+    <footer id="footer" th:replace="~{fragments/footer :: footer}"></footer>
+</div>
+
+<script th:src="@{/js/common.js}"></script>
+<script th:src="@{/js/login.js}"></script>
+</body>
 </html>
