@@ -1,56 +1,81 @@
 <!DOCTYPE html>
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8" />
-    <title>RaFeed - 상세보기</title>
-    <link rel="stylesheet" th:href="@{/css/reset.css}" />
-    <link rel="stylesheet" th:href="@{/css/common.css}" />
-    <link rel="stylesheet" th:href="@{/css/approval.css}" />
+    <head>
+        <meta charset="UTF-8"/>
+        <title>RaFeed - 상세보기</title>
+        <link rel="stylesheet" th:href="@{/css/reset.css}"/>
+        <link rel="stylesheet" th:href="@{/css/common.css}"/>
+        <link rel="stylesheet" th:href="@{/css/approval.css}"/>
 
-</head>
-<body>
-<div id="wrapper">
-    <header id="header" th:replace="~{fragments/header :: header}"></header>
+    </head>
+    <body>
+        <div id="wrapper">
+            <header id="header" th:replace="~{fragments/header :: header}"></header>
 
-    <main class="approval-container">
-        <div class="detail-card">
-            <div class="detail-top-nav">
-                <a href="/approvalList" class="back-btn">&lt; 뒤로가기</a>
-            </div>
+            <main class="approval-container">
+                <div class="detail-card">
+                    <div class="detail-top-nav">
+                        <a th:href="@{/approval}" class="back-btn">&lt; 뒤로가기</a>
+                        <div class="detail-actions">
+                            <button type="button" class="btn-secondary" id="editBtn">수정</button>
+                            <button type="button" class="btn-danger" id="deleteBtn">삭제</button>
+                        </div>
+                    </div>
 
-            <h1 id="shopName" class="detail-main-title">로딩중...</h1>
 
-            <div id="detailTagsSection" class="tag-container"></div>
+                    <h1 id="shopName" class="detail-main-title">로딩중...</h1>
 
-            <div class="detail-split">
-                <div class="detail-img-box">
-                    <img id="shopImage" src="/images/no_image.png" alt="가게 이미지" />
+                    <div id="detailTagsSection" class="tag-container"></div>
+
+                    <div class="detail-split">
+                        <div class="detail-img-box">
+                            <div class="detail-main-img-wrap">
+                                <button type="button" id="imgPrevBtn" class="img-nav-btn" aria-label="이전 이미지">&#10094;
+                                </button>
+                                <img id="shopImage" src="/images/no_image.png" alt="가게 이미지"/>
+                                <button type="button" id="imgNextBtn" class="img-nav-btn" aria-label="다음 이미지">&#10095;
+                                </button>
+                                <div id="imgCounter" class="img-counter" aria-label="이미지 개수"></div>
+                            </div>
+
+                            <div class="thumbs-wrap" aria-label="이미지 썸네일 영역">
+                                <button type="button" id="thumbPrevBtn" class="thumb-nav" aria-label="썸네일 이전">&#10094;
+                                </button>
+
+                                <div class="thumbs-center">
+                                    <div id="shopThumbs" class="thumbs" aria-label="이미지 목록"></div>
+                                    <div id="thumbDots" class="thumb-dots" aria-label="썸네일 페이지"></div>
+                                </div>
+
+                                <button type="button" id="thumbNextBtn" class="thumb-nav" aria-label="썸네일 다음">&#10095;
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="detail-info-box">
+                            <div class="info-group">
+                                <span class="info-label">상세주소</span>
+                                <span id="shopAddress" class="info-value"></span>
+                            </div>
+
+                            <div class="info-group">
+                                <span class="info-label">정보</span>
+                                <div id="shopContent" class="info-value content-box"></div>
+                            </div>
+
+                            <div class="info-footer">
+                                작성자: <span id="writerName"></span> |
+                                날짜: <span id="createDate"></span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
+            </main>
 
-                <div class="detail-info-box">
-                    <div class="info-group">
-                        <span class="info-label">상세주소</span>
-                        <span id="shopAddress" class="info-value"></span>
-                    </div>
-
-                    <div class="info-group">
-                        <span class="info-label">정보</span>
-                        <div id="shopContent" class="info-value content-box"></div>
-                    </div>
-
-                    <div class="info-footer">
-                        작성자: <span id="writerName"></span> |
-                        날짜: <span id="createDate"></span>
-                    </div>
-                </div>
-            </div>
+            <footer id="footer" th:replace="~{fragments/footer :: footer}"></footer>
         </div>
-    </main>
 
-    <footer id="footer" th:replace="~{fragments/footer :: footer}"></footer>
-</div>
-
-<script th:src="@{/js/common.js}"></script>
-<script th:src="@{/js/approval.js}"></script>
-</body>
+        <script th:src="@{/js/common.js}"></script>
+        <script th:src="@{/js/approval.js}"></script>
+    </body>
 </html>

@@ -45,6 +45,7 @@ public class SecurityConfig {
                                 "/user/refresh",
                                 "/login",
                                 "/login/user/**",
+                                "/login/oauth2/**",
                                 "/api/ramen/**",
                                 "/shop/**",
                                 "/board/**",
@@ -55,19 +56,12 @@ public class SecurityConfig {
                                 "/user/check-duplicate",
                                 "/user/LocalSignup",
                                 "/css/**", "/js/**", "/images/**", "/fragments/**", "/img/**", "/favicon.ico", "/error",
-                                "/login/oauth2/**", "/login/oauth2/**",
-                                "/login/user/**",
-                                "/api/ramen/**",
-                                "/shop/**",
-                                "/board/**",
-                                "/api/board/**",
                                 "/approval/**",
+                                "/api/approval/**",
                                 "/css/**", "/js/**", "/images/**", "/fragments/**", "/img/**", "/favicon.ico",
                                 "/error"
                         ).permitAll()
                         .requestMatchers("/admin/api/**").hasAuthority("ADMIN")
-                        .requestMatchers("/user/logout", "/user/me", "/user/api/my/**").authenticated()
-
                         // 로그아웃, 토큰 갱신 등은 '인증된 사용자'만 접근 가능하도록 설정
                         // 이렇게 해야 @AuthenticationPrincipal에 데이터가 들어옵니다.
                         .requestMatchers("/user/logout", "/user/me", "/user/api/my/**").authenticated()
@@ -77,9 +71,11 @@ public class SecurityConfig {
                 )
                 .oauth2Login(oauth2 -> oauth2
                         .userInfoEndpoint(userInfo -> userInfo
-                                .userService(oAuth2UserProviderRouter) // 사용자 정보 받아오기
-                        ).successHandler(oAuth2SuccessHandler) // JWT 발급 및 응답
+                                .userService(oAuth2UserProviderRouter)
+                        )
+                        .successHandler(oAuth2SuccessHandler)
                 )
+
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .exceptionHandling(ex -> ex
                         .authenticationEntryPoint((request, response, authException) -> {

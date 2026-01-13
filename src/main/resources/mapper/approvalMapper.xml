@@ -2,41 +2,169 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.binary.rapid.approval.mapper.ApprovalMapper">
 
-    <select id="selectApprovalList" resultType="com.binary.rapid.approval.dto.ApprovalDto">
-        SELECT
-            s.id,
-            s.name,
-            u.nickname AS writerName,
-            s.create_date AS createDate,
-            (SELECT img_url FROM tb_shopimg WHERE id = s.id AND main_img = 'Y' LIMIT 1) AS mainImgUrl
+    <select id="selectApprovalList"
+            resultType="com.binary.rapid.approval.dto.ApprovalDto">
+        SELECT s.id          AS id,
+               s.name        AS name,
+               u.nickname    AS writerName,
+               s.create_date AS createDate,
+               (SELECT img_url
+                FROM tb_shopimg
+                WHERE id = s.id
+                  AND main_img = 'Y'
+                LIMIT 1)     AS mainImgUrl
         FROM tb_shop s
-            LEFT JOIN tb_user u ON s.user_id = u.user_id
-        WHERE s.req_type = 'Y'
+                 LEFT JOIN tb_user u ON s.user_id = u.user_id
+        WHERE s.req_type IS NULL
         ORDER BY s.create_date DESC
     </select>
 
-    <select id="selectApprovalInfo" resultType="com.binary.rapid.approval.dto.ApprovalDetailDto">
-        SELECT s.id, s.name, s.address, s.content, u.nickname AS writerName
+    
+    <select id="selectApprovalListPage"
+            resultType="com.binary.rapid.approval.dto.ApprovalDto">
+        SELECT s.id          AS id,
+               s.name        AS name,
+               u.nickname    AS writerName,
+               s.create_date AS createDate,
+               (SELECT img_url
+                FROM tb_shopimg
+                WHERE id = s.id
+                  AND main_img = 'Y'
+                LIMIT 1)     AS mainImgUrl
+        FROM tb_shop s
+                 LEFT JOIN tb_user u ON s.user_id = u.user_id
+        WHERE s.req_type IS NULL
+        ORDER BY s.create_date DESC
+        LIMIT #{size} OFFSET #{offset}
+    </select>
+
+
+    <select id="countApprovalList" resultType="int">
+        SELECT COUNT(*)
+        FROM tb_shop
+        WHERE req_type IS NULL
+    </select>
+
+    <!-- ✅ RS + SEQ(10자리) 규칙용: 현재 최대 SEQ 조회 (예: RS0000000001) -->
+    <select id="selectMaxRsSeq" resultType="int">
+        SELECT COALESCE(MAX(CAST(SUBSTRING(id, 3) AS UNSIGNED)), 0)
+        FROM tb_shop
+        WHERE id LIKE 'RS%'
+    </select>
+    
+    <insert id="insertShop">
+      INSERT INTO tb_shop (id, name, address, content, user_id, create_date)
+      VALUES (#{id}, #{name}, #{address}, #{content}, #{userId}, NOW())
+    </insert>
+    
+    <insert id="insertShopDetail">
+      INSERT INTO tb_shopdetail (id, contents, user_id, create_date)
+      VALUES (#{id}, #{contents}, #{userId}, NOW())
+    </insert>
+    
+    <insert id="insertShopImg">
+      INSERT INTO tb_shopimg (id, img_seq, img_url, main_img, create_date)
+      VALUES (#{id}, #{imgSeq}, #{imgUrl}, #{mainImg}, NOW())
+    </insert>
+
+    <update id="updateShop">
+        UPDATE tb_shop
+        SET name    = #{name},
+            address = #{address},
+            content = #{content}
+        WHERE id = #{id}
+    </update>
+
+    <select id="selectMaxImgSeq" resultType="int">
+        SELECT COALESCE(MAX(img_seq), 0)
+        FROM tb_shopimg
+        WHERE id = #{id}
+    </select>
+
+    <delete id="deleteShopImgBySeq">
+        DELETE
+        FROM tb_shopimg
+        WHERE id = #{id}
+          AND img_seq = #{imgSeq}
+    </delete>
+
+    <update id="resetMainImg">
+        UPDATE tb_shopimg
+        SET main_img = 'N'
+        WHERE id = #{id}
+    </update>
+
+    <update id="setMainImg">
+        UPDATE tb_shopimg
+        SET main_img = 'Y'
+        WHERE id = #{id}
+          AND img_seq = #{imgSeq}
+    </update>
+
+    <select id="selectMainImgSeq" resultType="int">
+        SELECT img_seq
+        FROM tb_shopimg
+        WHERE id = #{id}
+          AND main_img = 'Y'
+        ORDER BY img_seq ASC
+        LIMIT 1
+    </select>
+
+    <select id="selectFirstImgSeq" resultType="int">
+        SELECT img_seq
+        FROM tb_shopimg
+        WHERE id = #{id}
+        ORDER BY img_seq ASC
+        LIMIT 1
+    </select>
+
+    <select id="selectApprovalInfo"
+            resultType="com.binary.rapid.approval.dto.ApprovalDetailDto">
+        SELECT s.id       AS id,
+               s.name     AS name,
+               s.address  AS address,
+               s.content  AS content,
+               u.nickname AS writerName
         FROM tb_shop s
                  LEFT JOIN tb_user u ON s.user_id = u.user_id
         WHERE s.id = #{id}
     </select>
 
-    <select id="selectApprovalImages" resultType="com.binary.rapid.approval.dto.ApprovalDetailDto$ShopImageDto">
-        SELECT img_seq AS imgSeq, img_url AS imgUrl, main_img AS mainImg
+    <select id="selectApprovalImages"
+            resultType="com.binary.rapid.approval.dto.ApprovalDetailDto$ShopImageDto">
+        SELECT img_seq  AS imgSeq,
+               img_url  AS imgUrl,
+               main_img AS mainImg
         FROM tb_shopimg
         WHERE id = #{id}
         ORDER BY img_seq ASC
     </select>
 
+
     <select id="selectApprovalCategories" resultType="string">
-        SELECT c.name FROM tb_shopdetail sd
-                               JOIN tb_category c ON sd.contents = c.id
+        SELECT c.name
+        FROM tb_shopdetail sd
+                 JOIN tb_category c ON sd.contents = c.id
         WHERE sd.id = #{id}
     </select>
 
-    <delete id="deleteShopDetail">DELETE FROM tb_shopdetail WHERE id = #{id}</delete>
-    <delete id="deleteShopImg">DELETE FROM tb_shopimg WHERE id = #{id}</delete>
-    <delete id="deleteShop">DELETE FROM tb_shop WHERE id = #{id}</delete>
+
+   <delete id="deleteShopDetail">
+        DELETE
+        FROM tb_shopdetail
+        WHERE id = #{id}
+    </delete>
+    
+    <delete id="deleteShopImg">
+        DELETE
+        FROM tb_shopimg
+        WHERE id = #{id}
+    </delete>
+    
+    <delete id="deleteShop">
+        DELETE
+        FROM tb_shop
+        WHERE id = #{id}
+    </delete>
 
 </mapper>
