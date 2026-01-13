@@ -32,7 +32,6 @@ public class BoardController {
     }
 
     // --- 게시글 관련 ---
-
     @GetMapping("/list")
     public ResponseEntity<List<BoardDto>> getBoardList() {
         List<BoardDto> boardList = boardService.getBoardList();

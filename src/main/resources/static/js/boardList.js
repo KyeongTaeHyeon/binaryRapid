@@ -1,12 +1,21 @@
 // boardList.js
 
-// const currentUserId = 1; // 테스트용 사용자 ID
-const currentUserId = 2; // 테스트용 사용자 ID
 let currentPage = 1;
 const itemsPerPage = 10; // 게시글은 5개씩 출력
 let allPosts = [];
 let filteredPosts = [];
 let currentCategory = "전체";
+
+const isLogin = window.isLogin === true; // 혹시 모를 타입 방어
+const currentUserId = window.loginUserId; // 로그인 안 했으면 null
+
+function requireLogin() {
+    if (!isLogin || !currentUserId) {
+        alert("로그인이 필요합니다.");
+        return false;
+    }
+    return true;
+}
 
 document.addEventListener("DOMContentLoaded", function () {
     const path = window.location.pathname;

@@ -51,7 +51,7 @@
                             </button>
                         </nav>
 
-                        <a class="writing" th:href="@{/board/write}">글쓰기</a>
+                        <a class="writing" th:if="${isLogin}" th:href="@{/board/write}">글쓰기</a>
                     </div>
                 </div>
             </main>
@@ -72,6 +72,12 @@
         <script src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
         <!-- 각화면 js생성하여 사용 -->
         <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+
+        <script th:inline="javascript">
+            window.isLogin = [[${isLogin}]];
+            window.loginUserId = [[${loginUserId}]] ?? null;
+        </script>
+        
         <script th:src="@{/js/boardList.js}"></script>
     </body>
 </html>

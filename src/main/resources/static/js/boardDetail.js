@@ -1,12 +1,22 @@
 // boardDetail.js
 
-// const currentUserId = 1; // 테스트용 사용자 ID
-const currentUserId = 2; // 테스트용 사용자 ID
 let currentPage = 1;
 const itemsPerPage = 10;
 let allPosts = [];
 let filteredPosts = [];
 let currentCategory = "전체";
+
+// ✅ 4단계: Thymeleaf에서 주입한 전역값 사용
+const isLogin = window.isLogin === true;
+const currentUserId = window.loginUserId ?? null; // 로그인 안 했으면 null
+
+function requireLogin() {
+    if (!isLogin || !currentUserId) {
+        alert("로그인이 필요합니다.");
+        return false;
+    }
+    return true;
+}
 
 document.addEventListener("DOMContentLoaded", function () {
     const path = window.location.pathname;
@@ -152,7 +162,7 @@ async function initDetailPage() {
             const editBtn = document.getElementById("editBtn");
             const deleteBtn = document.getElementById("deleteBtn");
 
-            // [수정] inline-block 대신 inline-flex를 사용하여 CSS 정렬 유지
+            // inline-flex 유지
             if (editBtn) editBtn.style.display = isOwner ? "inline-flex" : "none";
             if (deleteBtn) deleteBtn.style.display = isOwner ? "inline-flex" : "none";
         }
@@ -169,11 +179,10 @@ function renderFiles(files) {
 
     files.forEach(file => {
         const img = document.createElement("img");
-        // Controller의 displayFile 메서드 호출 URL
         const imgSrc = `/api/board/file/display?path=${encodeURIComponent(file.fileAddr)}`;
 
         img.src = imgSrc;
-        img.className = "gallery-item"; // CSS 클래스 적용
+        img.className = "gallery-item";
         img.alt = "첨부이미지";
 
         img.onclick = function () {
@@ -217,6 +226,7 @@ async function loadAndRenderList() {
 function renderList(page) {
     const container = document.getElementById("postNumber");
     if (!container) return;
+
     const startIndex = (page - 1) * itemsPerPage;
     const pagePosts = filteredPosts.slice(startIndex, startIndex + itemsPerPage);
 
@@ -275,14 +285,17 @@ function applyFilter(category) {
         location.href = "/boardList3";
         return;
     }
+
     currentCategory = category;
     currentPage = 1;
+
     if (currentCategory === "전체") {
         filteredPosts = allPosts;
     } else {
         const code = (currentCategory === "자유게시판") ? "A00" : "B00";
         filteredPosts = allPosts.filter(p => p.category === code);
     }
+
     renderList(currentPage);
     renderPagination();
 }
@@ -290,16 +303,27 @@ function applyFilter(category) {
 /* ================= 수정/삭제/댓글 ================= */
 
 async function handlePostUpdate(postId) {
-    const title = document.getElementById("postTitle").value;
-    const contents = document.getElementById("postContent").value;
-    const category = document.getElementById("boardCategory").value;
-    const updateData = {id: parseInt(postId), title, contents, category, userId: currentUserId};
+    if (!requireLogin()) return;
+
+    const title = document.getElementById("postTitle")?.value ?? "";
+    const contents = document.getElementById("postContent")?.value ?? "";
+    const category = document.getElementById("boardCategory")?.value ?? "";
+
+    const updateData = {
+        id: parseInt(postId, 10),
+        title,
+        contents,
+        category,
+        userId: currentUserId // ✅ 여기 반드시 currentUserId
+    };
+
     try {
         const response = await fetch("/api/board/update", {
             method: "POST",
             headers: {"Content-Type": "application/json"},
             body: JSON.stringify(updateData)
         });
+
         if (response.ok) {
             alert("수정 완료");
             location.href = "/board/boardList";
@@ -310,7 +334,9 @@ async function handlePostUpdate(postId) {
 }
 
 async function deleteBoard(id) {
+    if (!requireLogin()) return;
     if (!confirm("삭제하시겠습니까?")) return;
+
     try {
         const response = await fetch(`/api/board/delete/${id}`, {method: "DELETE"});
         if (response.ok) {
@@ -339,20 +365,30 @@ async function fetchCommentList(postId) {
 }
 
 async function saveComment() {
+    if (!requireLogin()) return;
+
     const urlParams = new URLSearchParams(window.location.search);
     const postId = urlParams.get("id");
     const commentInput = document.getElementById("commentInput");
+
     if (!commentInput?.value.trim()) {
         alert("내용을 입력해주세요.");
         return;
     }
-    const commentDto = {id: parseInt(postId), comment: commentInput.value, userId: currentUserId};
+
+    const commentDto = {
+        id: parseInt(postId, 10),
+        comment: commentInput.value,
+        userId: currentUserId
+    };
+
     try {
         const response = await fetch("/api/board/comment/write", {
             method: "POST",
             headers: {"Content-Type": "application/json"},
             body: JSON.stringify(commentDto)
         });
+
         if (response.ok) {
             alert("댓글 등록 완료");
             commentInput.value = "";
@@ -366,12 +402,15 @@ async function saveComment() {
 function renderComments(comments) {
     const container = document.getElementById("detailCommentList");
     if (!container) return;
+
     if (!comments || comments.length === 0) {
         container.innerHTML = `<div style="color:#999; padding:20px; text-align:center;">등록된 댓글이 없습니다.</div>`;
         return;
     }
+
     container.innerHTML = comments.map(c => {
         const isOwner = String(c.userId) === String(currentUserId);
+
         return `
         <div class="comment-item">
             <div class="comment-left">
@@ -393,15 +432,25 @@ function renderComments(comments) {
 }
 
 async function updateComment(id, seq) {
+    if (!requireLogin()) return;
+
     const newComment = prompt("수정할 내용을 입력하세요.");
     if (!newComment || !newComment.trim()) return;
-    const updateDto = {id, commentSeq: seq, comment: newComment, userId: currentUserId};
+
+    const updateDto = {
+        id,
+        commentSeq: seq,
+        comment: newComment,
+        userId: currentUserId
+    };
+
     try {
         const response = await fetch("/api/board/comment/update", {
             method: "POST",
             headers: {"Content-Type": "application/json"},
             body: JSON.stringify(updateDto)
         });
+
         if (response.ok) {
             alert("댓글수정 완료");
             location.reload();
@@ -412,7 +461,9 @@ async function updateComment(id, seq) {
 }
 
 async function deleteComment(id, seq) {
+    if (!requireLogin()) return;
     if (!confirm("댓글을 삭제하시겠습니까?")) return;
+
     try {
         const response = await fetch(`/api/board/comment/delete?id=${id}&commentSeq=${seq}`, {method: "POST"});
         if (response.ok) {
@@ -428,14 +479,17 @@ async function initCategorySelects() {
     try {
         const response = await fetch("/api/category/map");
         const categoryMap = await response.json();
+
         const config = {
             "category1": "region", "category2": "category", "category3": "shape",
             "category4": "thickness", "category5": "style", "category6": "kind",
             "category7": "rich", "category8": "richness"
         };
+
         Object.entries(config).forEach(([selectId, groupId]) => {
             const selectElement = document.getElementById(selectId);
             const items = categoryMap[groupId];
+
             if (selectElement && items) {
                 items.forEach(item => {
                     const option = document.createElement("option");
