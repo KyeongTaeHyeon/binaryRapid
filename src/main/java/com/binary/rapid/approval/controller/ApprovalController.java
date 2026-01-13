@@ -104,10 +104,35 @@ public class ApprovalController {
     }
 
 
-    // 삭제 API (기존 유지)
+    // 삭제 API (권한 체크 및 에러 매핑)
     @DeleteMapping("/delete/{id}")
-    public ResponseEntity<Void> deleteApproval(@PathVariable String id) {
-        approvalService.deleteApproval(id);
-        return ResponseEntity.ok().build();
+    public ResponseEntity<Map<String, Object>> deleteApproval(
+            @PathVariable String id,
+            @AuthenticationPrincipal CustomUserDetails principal
+    ) {
+        if (principal == null) {
+            Map<String, Object> err = new HashMap<>();
+            err.put("message", "UNAUTHORIZED");
+            return ResponseEntity.status(401).body(err);
+        }
+
+        try {
+            approvalService.deleteApproval(id, principal);
+            Map<String, Object> res = new HashMap<>();
+            res.put("message", "OK");
+            return ResponseEntity.ok(res);
+        } catch (org.springframework.security.access.AccessDeniedException e) {
+            Map<String, Object> err = new HashMap<>();
+            err.put("message", "FORBIDDEN");
+            return ResponseEntity.status(403).body(err);
+        } catch (IllegalStateException e) {
+            // 서비스에서 NOT_FOUND를 던진 경우
+            if ("NOT_FOUND".equals(e.getMessage())) {
+                Map<String, Object> err = new HashMap<>();
+                err.put("message", "NOT_FOUND");
+                return ResponseEntity.status(404).body(err);
+            }
+            throw e;
+        }
     }
 }

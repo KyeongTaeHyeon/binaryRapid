@@ -118,6 +118,13 @@
         LIMIT 1
     </select>
 
+    <select id="selectShopOwnerUserId" resultType="int">
+        SELECT user_id
+        FROM tb_shop
+        WHERE id = #{id}
+        LIMIT 1
+    </select>
+
     <select id="selectApprovalInfo"
             resultType="com.binary.rapid.approval.dto.ApprovalDetailDto">
         SELECT s.id       AS id,

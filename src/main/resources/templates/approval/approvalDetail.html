@@ -16,7 +16,7 @@
                 <div class="detail-card">
                     <div class="detail-top-nav">
                         <a th:href="@{/approval}" class="back-btn">&lt; 뒤로가기</a>
-                        <div class="detail-actions">
+                        <div class="detail-actions" th:if="${#authorization.expression('isAuthenticated()')}">
                             <button type="button" class="btn-secondary" id="editBtn">수정</button>
                             <button type="button" class="btn-danger" id="deleteBtn">삭제</button>
                         </div>

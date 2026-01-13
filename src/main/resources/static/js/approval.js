@@ -334,7 +334,12 @@ document.addEventListener("DOMContentLoaded", () => {
                 try {
                     const res = await fetch(`/api/approval/delete/${encodeURIComponent(id)}`, {
                         method: "DELETE",
+                        headers: buildAuthHeaders(),
                     });
+
+                    if (res.status === 401 || res.status === 403) {
+                        throw new Error("권한이 없습니다. 로그인 후 본인 글만 삭제할 수 있습니다.");
+                    }
 
                     if (!res.ok) throw new Error(`삭제 실패: ${res.status}`);
 
@@ -355,3 +360,18 @@ document.addEventListener("DOMContentLoaded", () => {
         loadApprovalList(1);
     }
 });
+
+// JWT 토큰 헤더(있으면 붙임)
+function buildAuthHeaders() {
+    const headers = {};
+    const token =
+        localStorage.getItem("accessToken") ||
+        localStorage.getItem("ACCESS_TOKEN") ||
+        localStorage.getItem("token") ||
+        localStorage.getItem("jwt");
+
+    if (token) {
+        headers["Authorization"] = token.startsWith("Bearer ") ? token : `Bearer ${token}`;
+    }
+    return headers;
+}

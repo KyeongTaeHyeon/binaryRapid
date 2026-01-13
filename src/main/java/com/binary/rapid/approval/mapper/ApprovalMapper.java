@@ -24,6 +24,8 @@ public interface ApprovalMapper {
 
     ApprovalDetailDto selectApprovalInfo(String id);
 
+    Integer selectShopOwnerUserId(@Param("id") String id);
+
     void updateShop(
             @Param("id") String id,
             @Param("name") String name,
