@@ -1,10 +1,8 @@
 package com.binary.rapid.board.dto;
 
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
 
-@Getter
-@Setter
+@Data
 public class BoardFileDto {
     private int id;
     private int fileSeq;

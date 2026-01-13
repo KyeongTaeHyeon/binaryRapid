@@ -1,18 +1,87 @@
 @charset "UTF-8";
 
-/* 기존 스타일 유지 및 보정 */
+:root {
+    --primary-color: #5ac3f5;
+    --border-line: #dadce0;
+    --text-main: #1f2937;
+    --bg-white: #ffffff;
+}
+
+#main {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+}
+
+#loginWrapper {
+    width: 100%;
+    max-width: 480px; 
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background-color: #fff;
+    border-radius: 20px;
+    padding: 60px 50px;
+    margin: 50px 0 100px 0;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+}
+
+#loginWrapper h1 {
+    font-size: 32px;
+    margin-bottom: 30px;
+    font-weight: 800;
+    color: var(--text-main);
+}
+
+.inputWrapper {
+    width: 100%;
+}
+
+.inputGroup {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 20px;
+}
+
+.inputGroup label {
+    font-size: 14px;
+    font-weight: 700;
+    margin-bottom: 8px;
+    color: #4b5563;
+}
+
+.inputGroup input {
+    width: 100%;
+    height: 52px;
+    box-sizing: border-box;
+    border: 1px solid #d1d5db;
+    border-radius: 10px;
+    padding: 0 16px;
+    font-size: 15px;
+}
+
+/* 버튼 영역 1:1 비율 고정 */
+.buttonWrapper {
+    display: flex;
+    gap: 12px;
+    width: 100%;
+    margin-top: 10px;
+}
+
 .button {
-    flex: 1;
-    height: 50px;
+    flex: 1; /* 두 버튼이 정확히 50%씩 차지 */
+    height: 54px;
     font-size: 16px;
-    background-color: #5ac3f5;
+    font-weight: 700;
+    background-color: var(--primary-color);
     color: #fff;
     border: none;
     border-radius: 10px;
     cursor: pointer;
-    display: flex; /* 버튼 내부 텍스트 중앙 정렬용 */
-    justify-content: center;
-    align-items: center;
+    padding: 0;
 }
 
 .button a {
@@ -25,131 +94,63 @@
     align-items: center;
 }
 
-#main {
-    width: 100%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 20px;
-}
-
-#loginWrapper {
-    min-width: 600px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    background-color: #fff;
-    border-radius: 20px;
-    padding: 60px 80px; /* 패딩 살짝 조정 */
-    margin-top: 50px;
-    margin-bottom: 100px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.1); /* 그림자 추가로 더 깔끔하게 */
-}
-
-#loginWrapper h1 {
-    font-size: 36px;
-    margin-bottom: 24px;
-    font-weight: bold;
-}
-
-.inputWrapper {
-    width: 100%;
-    margin-top: 20px;
-}
-
-#loginWrapper .inputGroup {
-    width: 100%;
-    display: flex;
-    margin-bottom: 16px;
-}
-
-#loginWrapper .inputGroup label {
-    width: 80px;
-    font-size: 15px;
-    text-align: right;
-    margin-right: 15px;
-    line-height: 50px;
-    color: #666;
-}
-
-#loginWrapper .inputGroup input {
-    flex: 1;
-    height: 50px;
-    box-sizing: border-box;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    padding: 0 15px;
-    font-size: 15px;
-}
-
-.buttonWrapper {
-    display: flex;
-    width: 100%;
-    justify-content: center;
-    align-items: center;
-    gap: 12px;
-    margin-top: 20px;
-}
-
-/* 소셜 로그인 구분선 */
+/* 소셜 로그인 타이틀 */
 .socialLogin_title {
     width: 100%;
-    border-top: 1px solid #eee;
+    border-top: 1px solid #f3f4f6;
     margin-top: 40px;
     padding-top: 30px;
     text-align: center;
-    font-size: 16px;
-    color: #888;
+    font-size: 14px;
+    color: #9ca3af;
 }
 
-/* ⭐ 구글 로그인 커스텀 버튼 스타일 ⭐ */
 .social-login-buttons {
     width: 100%;
-    display: flex;
-    justify-content: center;
-    margin-top: 10px;
+    margin-top: 20px;
 }
 
+/* 구글 버튼 가로 정렬 및 아이콘 고정 */
 .google-login-btn {
     width: 100%;
-    max-width: 350px;
-    height: 50px;
+    height: 54px;
     background-color: #ffffff;
     border: 1px solid #dadce0;
-    border-radius: 8px;
+    border-radius: 10px;
     display: flex;
     align-items: center;
     text-decoration: none;
-    transition: background-color 0.2s;
-}
-
-.google-login-btn:hover {
-    background-color: #f8f9fa;
-    box-shadow: 0 1px 3px rgba(60,64,67,0.3);
+    box-sizing: border-box;
 }
 
 .google-icon-wrapper {
-    padding: 12px;
+    width: 50px; /* 아이콘 전용 영역 */
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding-left: 5px;
 }
 
 .google-icon {
-    width: 20px;
-    height: 20px;
+    width: 24px !important;
+    height: 24px !important;
+    display: block;
 }
 
 .btn-text {
-    flex-grow: 1;
+    flex: 1;
     text-align: center;
     color: #3c4043;
-    font-size: 14px;
-    font-weight: 500;
-    margin-right: 44px; /* 아이콘 넓이만큼 우측 여백을 줘서 글자를 중앙으로 */
+    font-size: 15px;
+    font-weight: 600;
+    padding-right: 50px; /* 아이콘 영역만큼 오른쪽 여백을 주어 글자를 정중앙으로 */
 }
 
 .loginErrorMsg {
     margin-top: 12px;
     text-align: center;
-    color: #e53935;
+    color: #ef4444;
     font-size: 14px;
-    font-weight: 500;
+    min-height: 18px;
 }

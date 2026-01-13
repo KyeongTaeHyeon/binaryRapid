@@ -11,20 +11,17 @@
         const guestBox = document.getElementById("guestBox");
         const loginBox = document.getElementById("loginBox");
 
-        // DOM 로드 대기
+        // DOM 로드 대기 (Thymeleaf 조각이 로드될 때까지 반복 확인)
         if (!guestBox || !loginBox) {
             requestAnimationFrame(initHeader);
             return;
         }
 
-        // 현재 경로 확인
         const currentPath = window.location.pathname;
 
-        // 2. 관리자 페이지 접근 제어 (HTML 로드 직후 실행)
+        // 2. 관리자 페이지 접근 제어
         if (currentPath.startsWith("/admin")) {
             const cachedUser = JSON.parse(sessionStorage.getItem("cachedUser") || "{}");
-            
-            // 토큰이 없거나, 권한이 ADMIN이 아니면 퇴출
             if (!accessToken || cachedUser.role !== 'ADMIN') {
                 alert("관리자 권한이 필요합니다.");
                 window.location.href = "/"; 
@@ -32,7 +29,7 @@
             }
         }
 
-        // 3. 비로그인 상태 UI 처리
+        // 3. 비로그인 상태 UI
         if (!accessToken) {
             renderGuestUI();
             return;
@@ -45,7 +42,7 @@
             return;
         }
 
-        // 5. 서버에 최신 유저 정보 요청 (/user/me)
+        // 5. 서버에 최신 유저 정보 요청
         fetch("/user/me", {
             method: "GET",
             headers: { "Authorization": "Bearer " + accessToken }
@@ -55,11 +52,10 @@
             throw new Error("인증 실패");
         })
         .then(res => {
-            const userData = res.data; // SelectUserResponseForJwtDto
+            const userData = res.data;
             sessionStorage.setItem("cachedUser", JSON.stringify(userData));
             renderUserUI(userData);
             
-            // 만약 관리자 페이지인데 서버에서 받아온 결과가 ADMIN이 아니면 뒤늦게라도 쫓아냄
             if (currentPath.startsWith("/admin") && userData.role !== 'ADMIN') {
                 alert("접근 권한이 없습니다.");
                 window.location.href = "/";
@@ -70,7 +66,6 @@
             localStorage.removeItem("accessToken");
             sessionStorage.removeItem("cachedUser");
             renderGuestUI();
-            // 관리자 페이지에서 인증 에러 시 홈으로
             if (currentPath.startsWith("/admin")) window.location.href = "/";
         });
     }
@@ -80,11 +75,11 @@
         const mypageLink = document.getElementById("mypageLink");
         const guestBox = document.getElementById("guestBox");
         const loginBox = document.getElementById("loginBox");
+        const logoutBtn = document.getElementById("logoutBtn");
 
         if (userNickname) userNickname.innerText = userData.nickName;
 
         if (mypageLink) {
-            // ADMIN 여부에 따라 링크와 텍스트 변경
             if (userData.role === 'ADMIN') {
                 mypageLink.innerText = "관리자 페이지";
                 mypageLink.href = "/admin/users";
@@ -92,6 +87,23 @@
                 mypageLink.innerText = "마이 페이지";
                 mypageLink.href = "/login/user/boardList";
             }
+        }
+
+        // 🔥 로그아웃 이벤트 중복 방지 로직
+        if (logoutBtn) {
+            // 기존에 할당된 모든 이벤트를 무효화 (null 처리 후 할당)
+            logoutBtn.onclick = null; 
+            logoutBtn.onclick = function(e) {
+                e.preventDefault();
+                e.stopImmediatePropagation(); // 다른 스크립트의 간섭을 즉시 중단시킴
+
+                if (confirm("로그아웃 하시겠습니까?")) {
+                    localStorage.removeItem("accessToken");
+                    sessionStorage.removeItem("cachedUser");
+                    // 메인 페이지로 이동하면서 새로고침 효과
+                    window.location.href = "/";
+                }
+            };
         }
 
         guestBox.style.display = "none";
@@ -105,21 +117,7 @@
         if(loginBox) loginBox.style.display = "none";
     }
 
-    // 로그아웃 이벤트 처리
-    if (!window.isLogoutBound) {
-        document.addEventListener("click", function(e) {
-            if (e.target && e.target.id === "logoutBtn") {
-                if (confirm("로그아웃 하시겠습니까?")) {
-                    localStorage.removeItem("accessToken");
-                    sessionStorage.removeItem("cachedUser");
-                    window.location.href = "/";
-                }
-            }
-        });
-        window.isLogoutBound = true;
-    }
-
-    // 실행 시점 제어
+    // 초기화 실행
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', initHeader);
     } else {
