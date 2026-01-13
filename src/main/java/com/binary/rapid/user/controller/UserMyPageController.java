@@ -42,27 +42,35 @@ public class UserMyPageController {
     // 유저 마이페이지 개인정보 변경
     @PostMapping("/update")
     public ResponseEntity<?> updateMyInfo(
-            @AuthenticationPrincipal CustomUserDetails userDetails, // 현재 인증된 유저 정보
-            @RequestBody UserResponseDto updateRequestDto         // JS에서 보낸 JSON 데이터
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @RequestBody UserResponseDto updateRequestDto
     ) {
         if (userDetails == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("로그인이 필요합니다.");
         }
 
-        log.info("수정하고자 하는 유저 데이터 확인 form: "+ updateRequestDto.toString());
-        
+        // 1. 요청 데이터 로그 확인 (password가 null인지 혹은 "********"인지 확인용)
+        log.info("수정 요청 데이터: {}, 유저 권한/타입: {}", updateRequestDto.toString(), userDetails.getAuthorities());
+
         try {
-            // 서비스에서 비밀번호 검증과 수정을 동시에 처리
+            // 2. 중요: JS에서 보낸 데이터의 userId가 현재 로그인한 유저의 PK와 일치하는지 보안 검증
+            if (updateRequestDto.getUserId() != userDetails.getUserId()) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("본인의 정보만 수정할 수 있습니다.");
+            }
+
+            // 서비스 호출
             UserResponseDto result = service.updateMyInfo(updateRequestDto);
             return ResponseEntity.ok(result);
+
         } catch (IllegalArgumentException e) {
-            // 비밀번호가 틀렸을 경우 등 예외 처리
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+            // 비밀번호 불일치 혹은 잘못된 인자 전달 시
+            log.warn("수정 거부 (Bad Request): {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("message", e.getMessage()));
         } catch (Exception e) {
+            log.error("수정 중 서버 오류: ", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("수정 중 오류가 발생했습니다.");
         }
     }
-
     // 찜 목록 가져오기
     @GetMapping("/wishlist")
     public ResponseEntity<List<WishlistResponseDto>> getWishlist(@AuthenticationPrincipal CustomUserDetails userDetails) {
@@ -78,9 +86,19 @@ public class UserMyPageController {
     }
 
     @GetMapping("/reqShopList")
-    public ResponseEntity<List<UserMyReqShopDto>> getMyRequestShopList(@RequestParam("userId") int userId) {
-        // 이제 토큰에서 꺼내지 않고, JS가 보내준 userId를 파라미터로 직접 받습니다.
-        List<UserMyReqShopDto> list = service.getBoardListByUserId(userId);
+    public ResponseEntity<List<UserMyReqShopDto>> getMyRequestShopList(
+            @RequestParam("userId") int userId,
+            @RequestParam(required = false) String title,
+            @RequestParam(required = false) String startDate,
+            @RequestParam(required = false) String endDate) {
+
+        Map<String, Object> params = new HashMap<>();
+        params.put("userId", userId);
+        params.put("title", title);
+        params.put("startDate", startDate);
+        params.put("endDate", endDate);
+
+        List<UserMyReqShopDto> list = service.getBoardListByUserId(params);
         return ResponseEntity.ok(list);
     }
 

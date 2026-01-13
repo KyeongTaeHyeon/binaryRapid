@@ -135,6 +135,23 @@ window.addEventListener('DOMContentLoaded', () => {
     // Thymeleaf 사용 시 아래 loadHTML은 불필요할 수 있으나, 
     // 기존 스크립트 의존성 유지를 위해 스크립트만 로드하도록 조정하거나
     // 이미 HTML이 존재하면 스크립트만 실행하도록 합니다.
+    const urlParams = new URLSearchParams(window.location.search);
+    const accessToken = urlParams.get('accessToken');
+    const refreshToken = urlParams.get('refreshToken');
+
+    if (accessToken && refreshToken) {
+        // 1. 토큰을 브라우저에 저장 (이게 핵심!)
+        localStorage.setItem("accessToken", accessToken);
+        localStorage.setItem("refreshToken", refreshToken);
+
+        // 2. URL에서 토큰 파라미터 제거 (주소창 깔끔하게)
+        window.history.replaceState({}, document.title, "/");
+
+        alert("로그인에 성공하였습니다.");
+        location.reload();
+        return; // 토큰 처리 후 중단
+    }
+    
     
     const header = document.querySelector('#header');
     if (header) {

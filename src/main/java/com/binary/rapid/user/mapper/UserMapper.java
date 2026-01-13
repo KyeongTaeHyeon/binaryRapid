@@ -32,7 +32,7 @@ public interface UserMapper {
     // 찜 삭제 (취소)
     int deleteWishlist(@Param("userId") int userId, @Param("shopId") String shopId);
 
-    List<UserMyReqShopDto> selectBoardListByUserId(int userId);
+    List<UserMyReqShopDto> selectBoardListByUserId(@Param("params") Map<String, Object> params);
 
     int deleteUserByPk(Map<String, Object> params);
 

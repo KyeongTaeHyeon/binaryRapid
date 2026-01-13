@@ -1,13 +1,15 @@
 /**
- * userBoardList.js - 작성글 관리 통합 스크립트
+ * userBoardList.js - 전체 통합 버전
+ * 기능: 필터 누적, 카테고리 매핑(A00/B00), 날짜/제목 검색, 페이징(이전/다음), 개수 변경
  */
 
 // 1. 전역 상태 관리
-let allPosts = [];
+let allPosts = []; // 서버에서 받아온 전체 데이터를 저장
 let currentPage = 1;
 let ITEMS_PER_PAGE = 10;
 const MAX_TITLE_LENGTH = 20;
 
+// 검색 조건을 저장할 객체 (필터가 서로 유지되도록 함)
 let filterParams = {
     category: '',
     title: '',
@@ -19,12 +21,13 @@ let filterParams = {
 const formatDate = (dateStr) => dateStr ? dateStr.split('T')[0] : '-';
 const truncateTitle = (title) => (title && title.length > MAX_TITLE_LENGTH) ? title.substring(0, MAX_TITLE_LENGTH) + '...' : title;
 
-// 3. 모듈 스코프 탈출 (window 등록)
+// 3. 페이지 이동 함수 (window 객체에 등록)
 window.goToPage = (page) => {
     currentPage = page;
     showBoardList();
 };
 
+// 4. 게시글 삭제 함수
 window.deleteBoard = async (boardId) => {
     if (!confirm("정말로 이 게시글을 삭제하시겠습니까?")) return;
     try {
@@ -38,7 +41,7 @@ window.deleteBoard = async (boardId) => {
             alert("삭제되었습니다.");
             loadBoardData();
         } else {
-            alert("삭제 권한이 없거나 오류가 발생했습니다.");
+            alert("삭제에 실패했습니다.");
         }
     } catch (error) {
         console.error("삭제 요청 중 오류:", error);
@@ -46,45 +49,38 @@ window.deleteBoard = async (boardId) => {
 };
 
 /**
- * 4. 데이터 로드 함수
+ * 5. 서버 데이터 로드 함수 (API 호출)
  */
 async function loadBoardData() {
     try {
-        const { category, title, startDate, endDate } = filterParams;
-        const query = `category=${category}&title=${encodeURIComponent(title)}&startDate=${startDate}&endDate=${endDate}`;
-        
-        console.log("데이터 요청 중:", query);
-        
-        // authFetch 호출
-        const response = await authFetch(`/user/api/my/filter?${query}`);
+        const params = new URLSearchParams();
+
+        // 유효한 검색 조건만 파라미터에 추가
+        if (filterParams.category) params.append('category', filterParams.category);
+        if (filterParams.title) params.append('title', filterParams.title);
+        if (filterParams.startDate) params.append('startDate', filterParams.startDate);
+        if (filterParams.endDate) params.append('endDate', filterParams.endDate);
+
+        console.log("--- 데이터 요청 시점 ---");
+        const requestUrl = `/user/api/my/filter?${params.toString()}`;
+        console.log("요청 URL:", requestUrl);
+
+        const response = await authFetch(requestUrl);
         if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-        
-        // 서버 응답 로그 확인 (여기서 구조를 확인해야 합니다)
+
         const result = await response.json();
-        console.log("실제 서버 응답값:", result);
-        
-        // 서버 응답 구조가 { data: [...] } 인지 그냥 [...] 인지에 따라 처리
-        if (Array.isArray(result)) {
-            allPosts = result;
-        } else if (result.data && Array.isArray(result.data)) {
-            allPosts = result.data;
-        } else {
-            allPosts = [];
-        }
-        
-        currentPage = 1; 
-        showBoardList();
+        console.log("서버 응답 데이터 개수:", result.length);
+
+        allPosts = Array.isArray(result) ? result : [];
+        currentPage = 1; // 검색 시 항상 1페이지부터
+        showBoardList(); // 화면 렌더링 호출
     } catch (e) {
         console.error('데이터 로드 실패:', e);
-        const userTableBody = document.getElementById('userTableBody');
-        if (userTableBody) {
-            userTableBody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:red;">데이터 로딩 중 오류가 발생했습니다.</td></tr>`;
-        }
     }
 }
 
 /**
- * 5. 렌더링 함수들
+ * 6. 테이블 화면 렌더링
  */
 function renderPosts(posts) {
     const userTableBody = document.getElementById('userTableBody');
@@ -92,16 +88,19 @@ function renderPosts(posts) {
     userTableBody.innerHTML = '';
 
     if (!posts || posts.length === 0) {
-        userTableBody.innerHTML = `<tr><td colspan="5" style="text-align:center;">작성한 게시글이 없습니다.</td></tr>`;
+        userTableBody.innerHTML = `<tr><td colspan="5" style="text-align:center;">조건에 맞는 게시글이 없습니다.</td></tr>`;
         return;
     }
 
     posts.forEach((post, index) => {
         const row = document.createElement('tr');
-        let boardName = '기타';
-        if (post.category === 'B00' || post.category === 'restaurantCert') boardName = '식당인증';
-        else if (post.category === 'A00' || post.category === 'freeBoard') boardName = '자유게시판';
 
+        // DB 코드(A00, B00)를 화면용 한글로 매핑
+        let boardName = '기타';
+        if (post.category === 'A00') boardName = '자유게시판';
+        else if (post.category === 'B00') boardName = '식당인증';
+
+        // 순번 계산
         const displayNum = (currentPage - 1) * ITEMS_PER_PAGE + index + 1;
 
         row.innerHTML = `
@@ -124,6 +123,9 @@ function renderPosts(posts) {
     });
 }
 
+/**
+ * 7. 페이징 계산 및 표시
+ */
 function showBoardList() {
     const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
     const paginatedPosts = allPosts.slice(startIndex, startIndex + ITEMS_PER_PAGE);
@@ -135,35 +137,51 @@ function renderPagination(totalItems) {
     const totalPages = Math.ceil(totalItems / ITEMS_PER_PAGE) || 1;
     const paginationList = document.querySelector('.page-list');
     if (!paginationList) return;
-    
+
     paginationList.innerHTML = '';
+
+    // 이전/다음 버튼 제어
     const prevBtn = document.querySelector('.page-btn.prev');
     const nextBtn = document.querySelector('.page-btn.next');
-    if (prevBtn) prevBtn.disabled = (currentPage === 1);
-    if (nextBtn) nextBtn.disabled = (currentPage === totalPages || totalPages === 0);
 
+    if (prevBtn) {
+        prevBtn.disabled = (currentPage === 1);
+        prevBtn.onclick = () => { if (currentPage > 1) window.goToPage(currentPage - 1); };
+    }
+
+    if (nextBtn) {
+        nextBtn.disabled = (currentPage === totalPages || totalPages === 0);
+        nextBtn.onclick = () => { if (currentPage < totalPages) window.goToPage(currentPage + 1); };
+    }
+
+    // 숫자 버튼 생성
     for (let i = 1; i <= totalPages; i++) {
         const li = document.createElement('li');
         li.className = `page-item ${i === currentPage ? 'active' : ''}`;
-        li.innerHTML = `<button onclick="goToPage(${i})">${i}</button>`;
+        li.innerHTML = `<button onclick="window.goToPage(${i})">${i}</button>`;
         paginationList.appendChild(li);
     }
 }
 
 /**
- * 6. 초기 실행 및 이벤트 바인딩
+ * 8. 이벤트 리스너 설정
  */
 document.addEventListener('DOMContentLoaded', () => {
-    // [검색 버튼들]
+    // [A] 카테고리 필터
     const cateBtn = document.querySelector('.board-search-button');
     if (cateBtn) {
         cateBtn.onclick = (e) => {
             e.preventDefault();
-            filterParams.category = document.getElementById('cate').value;
+            const val = document.getElementById('cate').value;
+            // HTML value -> DB Code 변환
+            if(val === 'freeBoard') filterParams.category = 'A00';
+            else if(val === 'restaurantCert') filterParams.category = 'B00';
+            else filterParams.category = ''; // 전체
             loadBoardData();
         };
     }
 
+    // [B] 제목 검색
     const titleBtn = document.querySelector('.title-search-button');
     if (titleBtn) {
         titleBtn.onclick = (e) => {
@@ -173,6 +191,7 @@ document.addEventListener('DOMContentLoaded', () => {
         };
     }
 
+    // [C] 날짜 검색
     const dateForm = document.getElementById('managerSearchDate');
     if (dateForm) {
         dateForm.onsubmit = (e) => {
@@ -183,7 +202,7 @@ document.addEventListener('DOMContentLoaded', () => {
         };
     }
 
-    // [페이징/개수 설정]
+    // [D] 페이지당 개수 변경
     const itemsPerPageSelect = document.getElementById('sarray_numbers');
     if (itemsPerPageSelect) {
         itemsPerPageSelect.onchange = () => {
@@ -193,5 +212,6 @@ document.addEventListener('DOMContentLoaded', () => {
         };
     }
 
-    loadBoardData(); // 초기 로드
+    // 첫 진입 시 데이터 로드
+    loadBoardData();
 });

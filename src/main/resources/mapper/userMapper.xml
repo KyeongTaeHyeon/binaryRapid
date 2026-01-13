@@ -140,12 +140,25 @@
         WHERE user_id = #{userId} AND shop_id = #{shopId}
     </delete>
 
-    <select id="selectBoardListByUserId" parameterType="int" resultType="UserMyReqShopDto">
+    <select id="selectBoardListByUserId" parameterType="map" resultType="UserMyReqShopDto">
         SELECT
-        id,category, title, contents, user_id AS userId, create_date AS createDate
+        id, category, title, contents, user_id AS userId, create_date AS createDate
         FROM tb_board
-        WHERE user_id = #{userId}
+        WHERE user_id = #{params.userId}
         AND delete_date IS NULL
+        AND category = 'B00'
+
+        <if test="params.title != null and params.title != ''">
+            AND title LIKE CONCAT('%', #{params.title}, '%')
+        </if>
+
+        <if test="params.startDate != null and params.startDate != ''">
+            AND create_date &gt;= STR_TO_DATE(#{params.startDate}, '%Y-%m-%d')
+        </if>
+        <if test="params.endDate != null and params.endDate != ''">
+            AND create_date &lt; STR_TO_DATE(#{params.endDate}, '%Y-%m-%d') + INTERVAL 1 DAY
+        </if>
+
         ORDER BY create_date DESC
     </select>
 
@@ -153,7 +166,7 @@
         UPDATE tb_user
         SET delete_date = NOW()
         WHERE user_id = #{userId}
-        AND password = #{password} 
+        AND password = #{password}
     </update>
 
     <select id="duplicateUserEmail" parameterType="string" resultType="int">
@@ -164,7 +177,7 @@
         SELECT COUNT(*) FROM tb_user WHERE nickname = #{nickName} AND delete_date IS NULL
     </select>
 
-    <select id="selectMyBoardList" resultType="UserMyReqShopDto">
+    <select id="selectMyBoardList" parameterType="map" resultType="UserMyReqShopDto">
         SELECT
         id,
         category,
@@ -173,19 +186,24 @@
         FROM tb_board
         WHERE user_id = #{userId}
         AND delete_date IS NULL
+
         <if test="category != null and category != ''">
             AND category = #{category}
         </if>
+
         <if test="title != null and title != ''">
             AND title LIKE CONCAT('%', #{title}, '%')
         </if>
+
         <if test="startDate != null and startDate != ''">
-            AND create_date &gt;= #{startDate}
+            AND create_date &gt;= STR_TO_DATE(#{startDate}, '%Y-%m-%d')
         </if>
+
         <if test="endDate != null and endDate != ''">
-            AND create_date &lt;= CONCAT(#{endDate}, ' 23:59:59')
+            AND create_date &lt; STR_TO_DATE(#{endDate}, '%Y-%m-%d') + INTERVAL 1 DAY
         </if>
+
         ORDER BY create_date DESC
     </select>
-    
+
 </mapper>
