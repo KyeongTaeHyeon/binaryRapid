@@ -73,4 +73,5 @@ public class RapidController {
     public String managerMainPage() {
         return "manager/managerMain";
     }
+
 }

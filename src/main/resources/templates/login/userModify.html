@@ -27,7 +27,7 @@
 
                         <div class="inputGroup">
                             <label for="userPassword">비밀번호 확인</label>
-                            <input type="password" id="userPassword" name="userPassword" placeholder="현재 비밀번호를 입력하세요" required/>
+                            <input type="password" id="userPassword" name="userPassword" style="width: 100%; box-sizing: border-box;"/>
                         </div>
                         <span class="msg">본인 확인을 위해 비밀번호를 입력해야 변경이 가능합니다.</span>
 
@@ -35,11 +35,13 @@
                             <label for="userEmail">이메일</label>
                             <input type="email" id="userEmail" name="userEmail" placeholder="RaFeed@gmail.com"/>
                         </div>
+                        <span id="emailMsg" class="msg">이메일은 중복될 수 없습니다.</span>
 
                         <div class="inputGroup">
                             <label for="nickName">닉네임</label>
                             <input type="text" id="nickName" name="nickName" required/>
                         </div>
+                        <span id="nickNameMsg" class="msg"></span> 
 
                         <div class="inputGroup">
                             <label>나이</label>

@@ -3,6 +3,7 @@ package com.binary.rapid.board.dto;
 import lombok.Data;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 public class BoardDto {
@@ -16,6 +17,8 @@ public class BoardDto {
     private LocalDateTime deleteDate;
     private String writerName;
 
-
+    /**
+     * 게시글 첨부파일 목록(상세조회 응답에서 사용)
+     */
+    private List<BoardFileDto> files;
 }
-

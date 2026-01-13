@@ -1,14 +1,17 @@
+<!-- boardList.html -->
 <!DOCTYPE html>
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
     <head>
-        <meta charset="UTF-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta charset="UTF-8"/>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+        <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+        <meta name="board" content="boardList"/>
         <title>RaFeed</title>
         <!-- 공통사용 -->
-        <link rel="stylesheet" th:href="@{/css/reset.css}" />
-        <link rel="stylesheet" th:href="@{/css/common.css}" />
+        <link rel="stylesheet" th:href="@{/css/reset.css}"/>
+        <link rel="stylesheet" th:href="@{/css/common.css}"/>
         <!-- 각화면 css 생성하여 사용 -->
-        <link rel="stylesheet" th:href="@{/css/boardList.css}" />
+        <link rel="stylesheet" th:href="@{/css/boardList.css}"/>
     </head>
     <body>
         <div id="wrapper">
@@ -16,15 +19,14 @@
             <header id="header" th:replace="~{fragments/header :: header}"></header>
             <!-- 작업영역 -->
             <main id="main">
-              
+
                 <div id="boardMain">
                     <!-- 필터 -->
-                       <h1 id="gate">게시판</h1>
+                    <h1 id="gate">게시판</h1>
                     <div class="filter">
                         <a href="" class="active"><span>전체</span></a>
                         <a href=""><span>자유게시판</span></a>
                         <a href=""><span>식당인증</span></a>
-                        <a href=""><span>식당신청</span></a>
                     </div>
 
                     <!-- 게시글 리스트 -->
@@ -34,21 +36,21 @@
                     <div id="contentNav">
                         <nav class="pgitagination">
                             <button
-                                class="page-btn prev"
-                                aria-label="이전 페이지"
+                                    class="page-btn prev"
+                                    aria-label="이전 페이지"
                             >
                                 <
                             </button>
                             <ul class="page-list"></ul>
                             <button
-                                class="page-btn next"
-                                aria-label="다음 페이지"
+                                    class="page-btn next"
+                                    aria-label="다음 페이지"
                             >
                                 &gt;
                             </button>
                         </nav>
 
-                        <a class="writing" th:href="@{/board/write}">글쓰기</a>
+                        <a class="writing" th:if="${isLogin}" th:href="@{/board/write}">글쓰기</a>
                     </div>
                 </div>
             </main>
@@ -61,7 +63,7 @@
         <script type="text/javascript">
             function googleTranslateElementInit() {
                 new google.translate.TranslateElement(
-                    { pageLanguage: 'ko', includedLanguages: 'en,ja,zh-CN,ko' },
+                    {pageLanguage: 'ko', includedLanguages: 'en,ja,zh-CN,ko'},
                     'google_translate_element'
                 );
             }
@@ -69,6 +71,12 @@
         <script src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
         <!-- 각화면 js생성하여 사용 -->
         <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+
+        <script th:inline="javascript">
+            window.isLogin = [[${isLogin}]];
+            window.loginUserId = [[${loginUserId}]] ?? null;
+        </script>
+        
         <script th:src="@{/js/boardList.js}"></script>
     </body>
 </html>

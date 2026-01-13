@@ -1,6 +1,8 @@
 package com.binary.rapid.user.global.jwt;
 
 
+import com.binary.rapid.user.constant.TokenExpiration;
+import com.nimbusds.oauth2.sdk.token.AccessToken;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
@@ -18,8 +20,9 @@ public class JwtUtil {
     private String secretKey;
 
     // 만료 시간 설정
-    private static final long ACCESS_TIME = 1000 * 60 * 60; // 1시간
-    private static final long REFRESH_TIME = 1000L * 60 * 60 * 24 * 7; // 7일
+    private static final long ACCESS_TIME = TokenExpiration.ACCESS_TOKEN.getMilliseconds();
+    
+    private static final long REFRESH_TIME = TokenExpiration.REFRESH_TOKEN.getMilliseconds();
 
     private static Key key;
 

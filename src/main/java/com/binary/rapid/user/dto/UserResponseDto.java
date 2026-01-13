@@ -42,6 +42,7 @@ public class UserResponseDto {
 
     // Admin 과 User 구분을 위한 변수
     private UserRole role;
+    
 
     private LocalDateTime createDate;
     private LocalDateTime updateDate;
