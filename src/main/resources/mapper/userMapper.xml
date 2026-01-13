@@ -1,6 +1,6 @@
 <!DOCTYPE mapper
-    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
-    "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.binary.rapid.user.mapper.UserMapper">
 
     <!-- 회원가입 -->
@@ -10,17 +10,17 @@
             keyProperty="userId"
             keyColumn="user_id">
         INSERT INTO tb_user (id, password, nickname, name, taste,
-                             birth, email, social, gender, role)
+        birth, email, social, gender, role)
         VALUES (#{id},
-                #{password},
-                #{nickName},
-                #{name},
-                #{taste},
-                #{birth},
-                #{email},
-                #{social},
-                #{gender},
-                #{role})
+        #{password},
+        #{nickName},
+        #{name},
+        #{taste},
+        #{birth},
+        #{email},
+        #{social},
+        #{gender},
+        #{role})
     </insert>
 
     <!-- 아이디 중복 체크 -->
@@ -35,10 +35,20 @@
     <!-- 아이디로 유저 조회 -->
     <select id="selectUserId"
             parameterType="string"
+            resultType="loginJwtDto">
+        SELECT *
+        FROM tb_user
+        WHERE id = #{id} AND delete_date IS NULL
+    </select>
+
+    <!-- 아이디로 유저 조회 -->
+    <select id="selectUserToUserResponseDto"
+            parameterType="string"
             resultType="UserResponseDto">
         SELECT *
         FROM tb_user
-        WHERE id = #{id}
+        WHERE email = #{email}
+        AND delete_date IS NULL
     </select>
 
     <!-- 유저 id로 게시글 리스트 전체 조회 -->
@@ -48,8 +58,8 @@
         SELECT
         b.*,
         u.user_id AS userId,
-        u.id      AS userLoginId,
-        u.name    AS userName
+        u.id AS userLoginId,
+        u.name AS userName
         FROM tb_board b
         JOIN tb_user u
         ON b.user_id = u.user_id
@@ -57,51 +67,142 @@
         AND b.delete_date IS NULL
         ORDER BY b.create_date DESC
     </select>
-    
+
     <!-- 아이디로 유저 조회 -->
     <select id="updateMyInfo"
             parameterType="UserResponseDto">
         UPDATE tb_user
         SET
-        nickname    = #{nickName},
-        taste       = #{taste},
-        email       = #{email},
+        nickname = #{nickName},
+        taste = #{taste},
+        email = #{email},
+        birth = #{birth},
         update_date = NOW()
         WHERE id = #{id};
     </select>
 
     <select id="selectUserList" resultType="adminDto">
         SELECT user_id
-             , id
-             , password
-             , nickname AS nickName
-             , email
-             , taste
-             , gender
-             , birth
-             , role
-             , create_date
-             , update_date
-             , delete_date
+        , id
+        , password
+        , nickname AS nickName
+        , email
+        , taste
+        , gender
+        , birth
+        , role
+        , create_date
+        , update_date
+        , delete_date
         FROM tb_user
         WHERE delete_date IS NULL
-        
+
         <if test="category != null and category != ''">
             AND taste = #{category}
         </if>
-        
+
         <if test="keyword != null and keyword != ''">
-            AND (nickname LIKE CONCAT('%', #{keyword}, '%') 
-                 OR email LIKE CONCAT('%', #{keyword}, '%'))
+            AND (nickname LIKE CONCAT('%', #{keyword}, '%')
+            OR email LIKE CONCAT('%', #{keyword}, '%'))
         </if>
-        
+
         <if test="startDate != null and startDate != ''">
             AND create_date >= #{startDate}
         </if>
         <if test="endDate != null and endDate != ''">
             AND create_date &lt;= CONCAT(#{endDate}, ' 23:59:59')
         </if>
-        
+
+        ORDER BY create_date DESC
+    </select>
+
+    <select id="selectUserById" resultType="com.binary.rapid.user.dto.SelectUserResponseForJwtDto">
+        SELECT * FROM tb_user WHERE user_id = #{userId} AND delete_date IS NULL
+    </select>
+
+
+    <select id="selectWishlistByUserId" resultType="WishlistResponseDto">
+        SELECT
+        w.user_id AS userId,
+        w.shop_id AS shopId,
+        w.create_date AS createDate,
+        s.name AS shopName,
+        s.address AS shopAddress,
+        s.content AS shopContent,
+        NULL AS imgUrl, NULL AS siteUrl FROM tb_userwishlist w
+        JOIN tb_shop s ON w.shop_id = s.id COLLATE utf8mb4_unicode_ci
+        WHERE w.user_id = #{userId}
+        ORDER BY w.create_date DESC
+    </select>
+
+    <delete id="deleteWishlist">
+        DELETE FROM tb_userwishlist
+        WHERE user_id = #{userId} AND shop_id = #{shopId}
+    </delete>
+
+    <select id="selectBoardListByUserId" parameterType="map" resultType="UserMyReqShopDto">
+        SELECT
+        id, category, title, contents, user_id AS userId, create_date AS createDate
+        FROM tb_board
+        WHERE user_id = #{params.userId}
+        AND delete_date IS NULL
+        AND category = 'B00'
+
+        <if test="params.title != null and params.title != ''">
+            AND title LIKE CONCAT('%', #{params.title}, '%')
+        </if>
+
+        <if test="params.startDate != null and params.startDate != ''">
+            AND create_date &gt;= STR_TO_DATE(#{params.startDate}, '%Y-%m-%d')
+        </if>
+        <if test="params.endDate != null and params.endDate != ''">
+            AND create_date &lt; STR_TO_DATE(#{params.endDate}, '%Y-%m-%d') + INTERVAL 1 DAY
+        </if>
+
+        ORDER BY create_date DESC
+    </select>
+
+    <update id="deleteUserByPk" parameterType="map">
+        UPDATE tb_user
+        SET delete_date = NOW()
+        WHERE user_id = #{userId}
+        AND password = #{password}
+    </update>
+
+    <select id="duplicateUserEmail" parameterType="string" resultType="int">
+        SELECT COUNT(*) FROM tb_user WHERE email = #{email} AND delete_date IS NULL
+    </select>
+
+    <select id="duplicateUserNickName" parameterType="string" resultType="int">
+        SELECT COUNT(*) FROM tb_user WHERE nickname = #{nickName} AND delete_date IS NULL
+    </select>
+
+    <select id="selectMyBoardList" parameterType="map" resultType="UserMyReqShopDto">
+        SELECT
+        id,
+        category,
+        title,
+        create_date as createDate
+        FROM tb_board
+        WHERE user_id = #{userId}
+        AND delete_date IS NULL
+
+        <if test="category != null and category != ''">
+            AND category = #{category}
+        </if>
+
+        <if test="title != null and title != ''">
+            AND title LIKE CONCAT('%', #{title}, '%')
+        </if>
+
+        <if test="startDate != null and startDate != ''">
+            AND create_date &gt;= STR_TO_DATE(#{startDate}, '%Y-%m-%d')
+        </if>
+
+        <if test="endDate != null and endDate != ''">
+            AND create_date &lt; STR_TO_DATE(#{endDate}, '%Y-%m-%d') + INTERVAL 1 DAY
+        </if>
+
         ORDER BY create_date DESC
     </select>
 

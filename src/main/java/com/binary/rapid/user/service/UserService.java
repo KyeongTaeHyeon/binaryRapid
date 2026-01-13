@@ -1,15 +1,16 @@
 package com.binary.rapid.user.service;
 
-import com.binary.rapid.user.dto.UserDto;
-import com.binary.rapid.user.dto.UserResponseDto;
-import com.binary.rapid.user.dto.myBoardDto;
+import com.binary.rapid.user.constant.SocialType;
+import com.binary.rapid.user.dto.*;
 import com.binary.rapid.user.factory.UserCreateFactory;
 import com.binary.rapid.user.form.UserLoginForm;
 import com.binary.rapid.user.form.UserSignUpForm;
+import com.binary.rapid.user.global.jwt.JwtUtil;
 import com.binary.rapid.user.handler.DuplicateEmailException;
 import com.binary.rapid.user.handler.InvalidPasswordException;
 import com.binary.rapid.user.handler.LoginRequiredException;
 import com.binary.rapid.user.handler.UserNotFoundException;
+import com.binary.rapid.user.mapper.RefreshTokenMapper;
 import com.binary.rapid.user.mapper.UserMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -17,7 +18,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @Service
@@ -26,23 +29,19 @@ public class UserService {
 
     private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
+    private final JwtBlacklistService blacklistService;
+    private final RefreshTokenMapper refreshTokenMapper;
+    private final JwtUtil jwtUtil;
 
 
-    // 로컬 회원가입을 위한 메서드
+    // 로컬 회원가입 메서드 수정
     @Transactional
     public int localSignup(UserSignUpForm form) {
 
         int dupleUser = userMapper.duplicateUserId(form.getId());
+        if (dupleUser > 0) throw new DuplicateEmailException();
 
-   /*   
-        둘다 찍히고 결과는 가입시 요청한 아이디와 동일한 값이 있을시 1이 나옴
-        System.out.println("듀플 아이디 정보 프린트: " + dupleUser);
-        log.info("듀플 아이디 정보 로그: "+String.valueOf(dupleUser));*/
-
-        if (dupleUser > 0) {
-            throw new DuplicateEmailException();
-        }
-
+        // 수정 포인트: Factory 메서드에 form.getSocial()을 추가로 전달해야 합니다.
         UserDto user = UserCreateFactory.createLocalUser(
                 form.getId(),
                 passwordEncoder.encode(form.getPassword()),
@@ -51,41 +50,26 @@ public class UserService {
                 form.getTaste(),
                 form.getBirth(),
                 form.getEmail(),
-                form.getGender()
+                form.getGender(),
+                form.getSocial() // <--- 이 부분이 추가되어야 합니다!
         );
 
-        int userSignUpOk = userMapper.insertUser(user);
-
-        // 1이면 insert 성공
-        log.info("인서트 결과값: " + userSignUpOk);
-
-        // 4. insert 실패 방어
-        if (userSignUpOk != 1) {
-            throw new RuntimeException("회원가입 실패");
-        }
-
-        return userSignUpOk;
-
+        int result = userMapper.insertUser(user);
+        if (result != 1) throw new RuntimeException("회원가입 실패");
+        return result;
     }
 
-    public UserResponseDto userLocalsignin(UserLoginForm form) {
+    // 로컬 로그인 검증
+    public SelectUserResponseForJwtDto userLocalsignin(UserLoginForm form) {
+        SelectUserResponseForJwtDto selectUser = userMapper.selectUserId(form.getId());
+        if (selectUser == null) throw new UserNotFoundException();
 
-        UserResponseDto selectUser = userMapper.selectUserId(form.getId());
-
-
-        if (selectUser == null) {
-            throw new UserNotFoundException();
-        }
-
-        log.info("로컬 로그인시 select된 유저 정보 : " + selectUser.toString());
-
-        // 비밀번호 검증
         if (!passwordEncoder.matches(form.getPassword(), selectUser.getPassword())) {
             throw new InvalidPasswordException();
         }
-
         return selectUser;
     }
+    
 
     @Transactional
     // 사이트에 필요한 정보를 포함한 소셜을 통한 회원가입 메서드
@@ -106,7 +90,8 @@ public class UserService {
                 form.getTaste(),
                 form.getBirth(),
                 form.getEmail(),
-                form.getGender()
+                form.getGender(),
+                form.getSocial()
         );
 
         int userSignUpOk = userMapper.insertUser(user);
@@ -137,14 +122,109 @@ public class UserService {
 
 
     @Transactional
-    public UserResponseDto updateMyInfo(UserResponseDto loggerUser) {
-
-        if (loggerUser == null) {
-            throw new LoginRequiredException();
+    public UserResponseDto updateMyInfo(UserResponseDto updateDto) {
+        if (updateDto == null || updateDto.getUserId() == 0) {
+            throw new IllegalArgumentException("수정할 유저 정보가 부족합니다.");
         }
-        
-        userMapper.updateMyInfo(loggerUser);
 
-        return userMapper.selectUserId(loggerUser.getId());
+        // 1. DB에서 현재 유저의 최신 정보 조회 (social 타입 확인을 위해)
+        SelectUserResponseForJwtDto currentUser = userMapper.selectUserById(updateDto.getUserId());
+        if (currentUser == null) throw new UserNotFoundException();
+
+        // 2. [핵심] 로컬 유저일 때만 비밀번호 검증 진행
+        // 소셜 유저(GOOGLE 등)는 비밀번호 검증 로직 자체를 건너뜁니다.
+        if (currentUser.getSocial() == SocialType.LOCAL) {
+            if (updateDto.getPassword() == null || updateDto.getPassword().isEmpty()) {
+                throw new IllegalArgumentException("비밀번호를 입력해주세요.");
+            }
+            if (!passwordEncoder.matches(updateDto.getPassword(), currentUser.getPassword())) {
+                throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
+            }
+        }
+
+        // 3. 정보 업데이트 실행 (Mapper 호출)
+        userMapper.updateMyInfo(updateDto);
+
+        // 4. 업데이트된 결과 반환
+        return userMapper.selectUserToUserResponseDto(updateDto.getEmail());
+    }
+
+    public String getEmailByUserId(int userId) {
+        SelectUserResponseForJwtDto user = userMapper.selectUserById(userId);
+        if (user == null) throw new UserNotFoundException();
+        return user.getEmail();
+    }
+
+    // ✅ 통합 로그아웃 서비스
+    @Transactional
+    public void logout(int userId, String accessToken) {
+        // 1. 리프레시 토큰 삭제
+        refreshTokenMapper.deleteTokenByUserId(userId);
+
+        // 2. 액세스 토큰 블랙리스트 등록
+        long remainingTime = jwtUtil.getRemainingExpiration(accessToken);
+        if (remainingTime > 0) {
+            blacklistService.blacklistToken(accessToken, remainingTime);
+        }
+        log.info("유저 {} 로그아웃 처리 완료 (리프레시 삭제 + 블랙리스트 등록)", userId);
+    }
+
+    public List<WishlistResponseDto> getWishlistByUserId(int userId) {
+        return userMapper.selectWishlistByUserId(userId);
+    }
+
+    public boolean removeWishlist(int userId, String shopId) {
+        return userMapper.deleteWishlist(userId, shopId) > 0;
+    }
+
+    public List<UserMyReqShopDto> getBoardListByUserId(Map<String, Object> params) {
+        // 1. 매퍼 호출 (가방째로 던짐)
+        List<UserMyReqShopDto> list = userMapper.selectBoardListByUserId(params);
+
+        // 2. 디버깅 로그 (리스트가 왜 안 나오는지 확인용)
+        System.out.println("조회된 게시글 수: " + (list != null ? list.size() : 0));
+
+        return list;
+    }
+    
+    @Transactional
+    public boolean deleteUser(int userId, String rawPassword) {
+        // 1. 유저 정보 조회 (SelectUserResponseForJwtDto 등 사용)
+        SelectUserResponseForJwtDto user = userMapper.selectUserById(userId);
+
+        if (user == null) return false;
+
+        // 2. 비밀번호 일치 확인
+        if (passwordEncoder.matches(rawPassword, user.getPassword())) {
+            // 3. 일치하면 탈퇴 처리 (delete_date = NOW())
+            // 주의: 매퍼 XML의 deleteUserByPk가 userId와 password를 모두 필요로 한다면 
+            // Map에 담아 보내거나, XML을 수정하여 userId만 조건으로 사용하세요.
+            Map<String, Object> params = new HashMap<>();
+            params.put("userId", userId);
+            params.put("password", user.getPassword()); // 암호화된 비밀번호 전달
+
+            return userMapper.deleteUserByPk(params) > 0;
+        }
+
+        return false; // 비밀번호 불일치
+    }
+
+
+    public boolean isIdDuplicate(String id) {
+        // 결과가 0보다 크면 중복된 아이디가 존재한다는 뜻
+        return userMapper.duplicateUserId(id) > 0;
+    }
+    
+    public boolean isEmailDuplicate(String email) {
+        return userMapper.duplicateUserEmail(email) > 0;
+    }
+
+
+    public boolean isNickNameDuplicate(String nickName) {
+        return userMapper.duplicateUserNickName(nickName) > 0;
+    }
+
+    public List<UserMyReqShopDto> getMyBoardList(Map<String, Object> params) {
+        return userMapper.selectMyBoardList(params);
     }
 }

@@ -69,11 +69,89 @@ function loadScript(url) {
         document.head.appendChild(script);
     });
 }
+// 인증 헤더가 포함된 공통 요청 함수 (자동 리프레시 포함)
+
+async function authFetch(url, options = {}) {
+    let accessToken = localStorage.getItem("accessToken");
+
+    const headers = {
+        'Authorization': accessToken ? `Bearer ${accessToken}` : '',
+        'Content-Type': 'application/json',
+        ...options.headers
+    };
+
+    let response = await fetch(url, { ...options, headers });
+
+    if (response.status === 401) {
+        console.warn("액세스 토큰 만료됨. 재발급 시도 중...");
+        const isRefreshed = await refreshTokens();
+
+        if (isRefreshed) {
+            accessToken = localStorage.getItem("accessToken");
+            headers['Authorization'] = `Bearer ${accessToken}`;
+            return await fetch(url, { ...options, headers });
+        } else {
+            alert("세션이 만료되었습니다. 다시 로그인해주세요.");
+            localStorage.clear();
+            sessionStorage.clear();
+            location.href = "/login";
+            return response;
+        }
+    }
+    return response;
+}
+
+// 리프레시 토큰으로 액세스 토큰 갱신
+async function refreshTokens() {
+    const refreshToken = localStorage.getItem("refreshToken");
+    // UserController.java에서 요구하는 userId 추출 (캐시된 정보 활용)
+    const cachedUser = JSON.parse(sessionStorage.getItem("cachedUser"));
+    const userId = cachedUser ? cachedUser.userId : null;
+
+    if (!refreshToken || !userId) return false;
+
+    try {
+        const response = await fetch("/user/refresh", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ userId, refreshToken })
+        });
+
+        if (response.ok) {
+            const result = await response.json();
+            if (result.success && result.data.accessToken) {
+                localStorage.setItem("accessToken", result.data.accessToken);
+                return true;
+            }
+        }
+    } catch (e) {
+        console.error("토큰 갱신 에러:", e);
+    }
+    return false;
+}
+
 
 window.addEventListener('DOMContentLoaded', () => {
     // Thymeleaf 사용 시 아래 loadHTML은 불필요할 수 있으나, 
     // 기존 스크립트 의존성 유지를 위해 스크립트만 로드하도록 조정하거나
     // 이미 HTML이 존재하면 스크립트만 실행하도록 합니다.
+    const urlParams = new URLSearchParams(window.location.search);
+    const accessToken = urlParams.get('accessToken');
+    const refreshToken = urlParams.get('refreshToken');
+
+    if (accessToken && refreshToken) {
+        // 1. 토큰을 브라우저에 저장 (이게 핵심!)
+        localStorage.setItem("accessToken", accessToken);
+        localStorage.setItem("refreshToken", refreshToken);
+
+        // 2. URL에서 토큰 파라미터 제거 (주소창 깔끔하게)
+        window.history.replaceState({}, document.title, "/");
+
+        alert("로그인에 성공하였습니다.");
+        location.reload();
+        return; // 토큰 처리 후 중단
+    }
+    
     
     const header = document.querySelector('#header');
     if (header) {

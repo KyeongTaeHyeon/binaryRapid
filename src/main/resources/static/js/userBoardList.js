@@ -1,228 +1,217 @@
-// userBoardList.js
+/**
+ * userBoardList.js - 전체 통합 버전
+ * 기능: 필터 누적, 카테고리 매핑(A00/B00), 날짜/제목 검색, 페이징(이전/다음), 개수 변경
+ */
 
-let allPosts = [];
+// 1. 전역 상태 관리
+let allPosts = []; // 서버에서 받아온 전체 데이터를 저장
 let currentPage = 1;
 let ITEMS_PER_PAGE = 10;
 const MAX_TITLE_LENGTH = 20;
 
-// DOM
-const userTableBody = document.getElementById('userTableBody');
-const paginationList = document.querySelector('.page-list');
-const prevButton = document.querySelector('.page-btn.prev');
-const nextButton = document.querySelector('.page-btn.next');
-const itemsPerPageSelect = document.getElementById('sarray_numbers');
+// 검색 조건을 저장할 객체 (필터가 서로 유지되도록 함)
+let filterParams = {
+    category: '',
+    title: '',
+    startDate: '',
+    endDate: ''
+};
 
-// ----------------- 날짜 포맷터 (yyyy-MM-dd) -----------------
-function formatDate(dateStr) {
-  if (!dateStr) return '-';
-  return dateStr.split('T')[0];
-}
+// 2. 유틸리티 함수
+const formatDate = (dateStr) => dateStr ? dateStr.split('T')[0] : '-';
+const truncateTitle = (title) => (title && title.length > MAX_TITLE_LENGTH) ? title.substring(0, MAX_TITLE_LENGTH) + '...' : title;
 
-// ----------------- 제목 길이 제한 -----------------
-function truncateTitle(title, maxLength = MAX_TITLE_LENGTH) {
-  if (!title) return '';
-  return title.length > maxLength
-    ? title.substring(0, maxLength) + '...'
-    : title;
-}
-
-// ----------------- 게시글 로드 -----------------
-async function loadBoardData() {
-  try {
-    const response = await fetch('/user/api/my/board');
-
-    if (response.status === 401) {
-      alert('로그인이 필요합니다.');
-      location.href = '/';
-      return [];
-    }
-
-    if (!response.ok) {
-      throw new Error(`HTTP error: ${response.status}`);
-    }
-
-    return await response.json();
-  } catch (e) {
-    console.error('게시글 로딩 실패:', e);
-    return [];
-  }
-}
-
-// ----------------- 게시글 삭제 -----------------
-async function deleteBoard(boardId) {
-  if (!confirm('정말 삭제하시겠습니까?')) return;
-
-  try {
-    const response = await fetch(`/board/delete?id=${boardId}`, {
-      method: 'GET',
-    });
-
-    if (!response.ok) {
-      throw new Error('삭제 실패');
-    }
-
-    alert('삭제되었습니다.');
-
-    // 🔥 목록 다시 로드
-    allPosts = await loadBoardData();
-    currentPage = 1;
+// 3. 페이지 이동 함수 (window 객체에 등록)
+window.goToPage = (page) => {
+    currentPage = page;
     showBoardList();
-  } catch (e) {
-    console.error(e);
-    alert('삭제 중 오류가 발생했습니다.');
-  }
+};
+
+// 4. 게시글 삭제 함수
+window.deleteBoard = async (boardId) => {
+    if (!confirm("정말로 이 게시글을 삭제하시겠습니까?")) return;
+    try {
+        const response = await fetch(`/api/board/delete/${boardId}`, {
+            method: 'DELETE',
+            headers: {
+                'Authorization': 'Bearer ' + localStorage.getItem("accessToken")
+            }
+        });
+        if (response.ok) {
+            alert("삭제되었습니다.");
+            loadBoardData();
+        } else {
+            alert("삭제에 실패했습니다.");
+        }
+    } catch (error) {
+        console.error("삭제 요청 중 오류:", error);
+    }
+};
+
+/**
+ * 5. 서버 데이터 로드 함수 (API 호출)
+ */
+async function loadBoardData() {
+    try {
+        const params = new URLSearchParams();
+
+        // 유효한 검색 조건만 파라미터에 추가
+        if (filterParams.category) params.append('category', filterParams.category);
+        if (filterParams.title) params.append('title', filterParams.title);
+        if (filterParams.startDate) params.append('startDate', filterParams.startDate);
+        if (filterParams.endDate) params.append('endDate', filterParams.endDate);
+
+        console.log("--- 데이터 요청 시점 ---");
+        const requestUrl = `/user/api/my/filter?${params.toString()}`;
+        console.log("요청 URL:", requestUrl);
+
+        const response = await authFetch(requestUrl);
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+
+        const result = await response.json();
+        console.log("서버 응답 데이터 개수:", result.length);
+
+        allPosts = Array.isArray(result) ? result : [];
+        currentPage = 1; // 검색 시 항상 1페이지부터
+        showBoardList(); // 화면 렌더링 호출
+    } catch (e) {
+        console.error('데이터 로드 실패:', e);
+    }
 }
 
-// ----------------- 테이블 렌더링 -----------------
+/**
+ * 6. 테이블 화면 렌더링
+ */
 function renderPosts(posts) {
-  userTableBody.innerHTML = '';
+    const userTableBody = document.getElementById('userTableBody');
+    if (!userTableBody) return;
+    userTableBody.innerHTML = '';
 
-  if (posts.length === 0) {
-    userTableBody.innerHTML = `
-      <tr>
-        <td colspan="5" style="text-align:center;">
-          작성한 게시글이 없습니다.
-        </td>
-      </tr>
-    `;
-    return;
-  }
+    if (!posts || posts.length === 0) {
+        userTableBody.innerHTML = `<tr><td colspan="5" style="text-align:center;">조건에 맞는 게시글이 없습니다.</td></tr>`;
+        return;
+    }
 
-  posts.forEach((post, index) => {
-    const row = document.createElement('tr');
+    posts.forEach((post, index) => {
+        const row = document.createElement('tr');
 
-    let boardName = '기타';
-    if (post.type?.startsWith('B')) boardName = '식당인증';
-    else if (post.type?.startsWith('A')) boardName = '자유게시판';
+        // DB 코드(A00, B00)를 화면용 한글로 매핑
+        let boardName = '기타';
+        if (post.category === 'A00') boardName = '자유게시판';
+        else if (post.category === 'B00') boardName = '식당인증';
 
-    const displayId = (currentPage - 1) * ITEMS_PER_PAGE + index + 1;
-    const shortTitle = truncateTitle(post.title);
+        // 순번 계산
+        const displayNum = (currentPage - 1) * ITEMS_PER_PAGE + index + 1;
 
-    row.innerHTML = `
-      <td>${displayId}</td>
-      <td>${boardName}</td>
-      <td>
-        <a href="/board/view?id=${post.id}" title="${post.title}">
-          ${shortTitle}
-        </a>
-      </td>
-      <td>${formatDate(post.createDate)}</td>
-      <td>
-        <button class="delete-btn" data-id="${post.id}">
-          삭제
-        </button>
-      </td>
-    `;
-
-    userTableBody.appendChild(row);
-  });
-
-  // 🔥 삭제 버튼 이벤트 바인딩
-  document.querySelectorAll('.delete-btn').forEach((btn) => {
-    btn.addEventListener('click', () => {
-      const boardId = btn.dataset.id;
-      deleteBoard(boardId);
+        row.innerHTML = `
+            <td>${displayNum}</td>
+            <td>${boardName}</td>
+            <td>
+                <a href="/board/boardList2?id=${post.id}" style="color:inherit; text-decoration:none;">
+                    ${truncateTitle(post.title)}
+                </a>
+            </td>
+            <td>${formatDate(post.createDate)}</td>
+            <td>
+                <button class="delete-btn" onclick="deleteBoard(${post.id})" 
+                        style="color:#ff4d4d; border:1px solid #ff4d4d; background:none; cursor:pointer; padding:2px 6px; border-radius:4px;">
+                    삭제
+                </button>
+            </td>
+        `;
+        userTableBody.appendChild(row);
     });
-  });
 }
 
-// ----------------- 페이지 + 목록 갱신 -----------------
+/**
+ * 7. 페이징 계산 및 표시
+ */
 function showBoardList() {
-  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-  const endIndex = startIndex + ITEMS_PER_PAGE;
-  const paginatedPosts = allPosts.slice(startIndex, endIndex);
-
-  renderPosts(paginatedPosts);
-  renderPaginationButtons(allPosts.length);
+    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+    const paginatedPosts = allPosts.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+    renderPosts(paginatedPosts);
+    renderPagination(allPosts.length);
 }
 
-// ----------------- 페이지네이션 버튼 -----------------
-function renderPaginationButtons(totalItems) {
-  const totalPages = Math.ceil(totalItems / ITEMS_PER_PAGE);
-  paginationList.innerHTML = '';
+function renderPagination(totalItems) {
+    const totalPages = Math.ceil(totalItems / ITEMS_PER_PAGE) || 1;
+    const paginationList = document.querySelector('.page-list');
+    if (!paginationList) return;
 
-  // prev
-  prevButton.onclick = () => {
-    if (currentPage > 1) {
-      currentPage--;
-      showBoardList();
+    paginationList.innerHTML = '';
+
+    // 이전/다음 버튼 제어
+    const prevBtn = document.querySelector('.page-btn.prev');
+    const nextBtn = document.querySelector('.page-btn.next');
+
+    if (prevBtn) {
+        prevBtn.disabled = (currentPage === 1);
+        prevBtn.onclick = () => { if (currentPage > 1) window.goToPage(currentPage - 1); };
     }
-  };
-  prevButton.disabled = currentPage === 1;
 
-  const maxPageButtons = 10;
-  let startPage = Math.max(1, currentPage - Math.floor(maxPageButtons / 2));
-  let endPage = Math.min(totalPages, startPage + maxPageButtons - 1);
-
-  if (endPage - startPage + 1 < maxPageButtons) {
-    startPage = Math.max(1, endPage - maxPageButtons + 1);
-  }
-
-  if (startPage > 1) {
-    paginationList.innerHTML += `
-      <li class="page-item ellipsis"><span>...</span></li>
-    `;
-  }
-
-  for (let i = startPage; i <= endPage; i++) {
-    const li = document.createElement('li');
-    li.classList.add('page-item');
-    if (i === currentPage) li.classList.add('active');
-
-    const btn = document.createElement('button');
-    btn.textContent = i;
-    btn.onclick = () => {
-      currentPage = i;
-      showBoardList();
-    };
-
-    li.appendChild(btn);
-    paginationList.appendChild(li);
-  }
-
-  if (endPage < totalPages) {
-    paginationList.innerHTML += `
-      <li class="page-item ellipsis"><span>...</span></li>
-    `;
-
-    const lastLi = document.createElement('li');
-    lastLi.classList.add('page-item');
-    if (currentPage === totalPages) lastLi.classList.add('active');
-
-    const lastBtn = document.createElement('button');
-    lastBtn.textContent = totalPages;
-    lastBtn.onclick = () => {
-      currentPage = totalPages;
-      showBoardList();
-    };
-
-    lastLi.appendChild(lastBtn);
-    paginationList.appendChild(lastLi);
-  }
-
-  // next
-  nextButton.onclick = () => {
-    if (currentPage < totalPages) {
-      currentPage++;
-      showBoardList();
+    if (nextBtn) {
+        nextBtn.disabled = (currentPage === totalPages || totalPages === 0);
+        nextBtn.onclick = () => { if (currentPage < totalPages) window.goToPage(currentPage + 1); };
     }
-  };
-  nextButton.disabled = currentPage === totalPages;
+
+    // 숫자 버튼 생성
+    for (let i = 1; i <= totalPages; i++) {
+        const li = document.createElement('li');
+        li.className = `page-item ${i === currentPage ? 'active' : ''}`;
+        li.innerHTML = `<button onclick="window.goToPage(${i})">${i}</button>`;
+        paginationList.appendChild(li);
+    }
 }
 
-// ----------------- 초기 로드 -----------------
-document.addEventListener('DOMContentLoaded', async () => {
-  if (itemsPerPageSelect) {
-    ITEMS_PER_PAGE = parseInt(itemsPerPageSelect.value);
+/**
+ * 8. 이벤트 리스너 설정
+ */
+document.addEventListener('DOMContentLoaded', () => {
+    // [A] 카테고리 필터
+    const cateBtn = document.querySelector('.board-search-button');
+    if (cateBtn) {
+        cateBtn.onclick = (e) => {
+            e.preventDefault();
+            const val = document.getElementById('cate').value;
+            // HTML value -> DB Code 변환
+            if(val === 'freeBoard') filterParams.category = 'A00';
+            else if(val === 'restaurantCert') filterParams.category = 'B00';
+            else filterParams.category = ''; // 전체
+            loadBoardData();
+        };
+    }
 
-    itemsPerPageSelect.addEventListener('change', () => {
-      ITEMS_PER_PAGE = parseInt(itemsPerPageSelect.value);
-      currentPage = 1;
-      showBoardList();
-    });
-  }
+    // [B] 제목 검색
+    const titleBtn = document.querySelector('.title-search-button');
+    if (titleBtn) {
+        titleBtn.onclick = (e) => {
+            e.preventDefault();
+            filterParams.title = document.getElementById('searchInput').value;
+            loadBoardData();
+        };
+    }
 
-  allPosts = await loadBoardData();
-  currentPage = 1;
-  showBoardList();
+    // [C] 날짜 검색
+    const dateForm = document.getElementById('managerSearchDate');
+    if (dateForm) {
+        dateForm.onsubmit = (e) => {
+            e.preventDefault();
+            filterParams.startDate = document.getElementById('start').value;
+            filterParams.endDate = document.getElementById('end').value;
+            loadBoardData();
+        };
+    }
+
+    // [D] 페이지당 개수 변경
+    const itemsPerPageSelect = document.getElementById('sarray_numbers');
+    if (itemsPerPageSelect) {
+        itemsPerPageSelect.onchange = () => {
+            ITEMS_PER_PAGE = parseInt(itemsPerPageSelect.value);
+            currentPage = 1;
+            showBoardList();
+        };
+    }
+
+    // 첫 진입 시 데이터 로드
+    loadBoardData();
 });

@@ -1,6 +1,7 @@
 package com.binary.rapid;
 
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 
 @Controller
@@ -29,33 +30,32 @@ public class RapidController {
         return "board/news";
     }
 
-    @GetMapping("/board/boardList")
-    public String boardListPage() {
-        return "board/boardList";
-    }
-
-    @GetMapping("/board/boardList2")
-    public String boardList2Page(){ return "board/boardList2";}
-
     @GetMapping("/login/register")
     public String registerPage() {
         return "login/register";
     }
 
-    @GetMapping("/login/userBoardList")
-    public String userBoardListPage() {
+    @GetMapping("/login/user/boardList")
+    public String userBoardListPage(Model model) {
+        model.addAttribute("pageName", "board");
         return "login/userBoardList";
     }
-    @GetMapping("/login/modify")
-    public String userInfoModify() {
+
+    @GetMapping("/login/user/modify")
+    public String userInfoModify(Model model) {
+        model.addAttribute("pageName", "modify");
         return "login/userModify";
     }
-    @GetMapping("/login/mywish")
-    public String userMywish() {
+
+    @GetMapping("/login/user/mywish")
+    public String userMywish(Model model) {
+        model.addAttribute("pageName", "wish");
         return "login/userMywish";
     }
-    @GetMapping("/login/requestShop")
-    public String userRequestShop() {
+
+    @GetMapping("/login/user/requestShop")
+    public String userRequestShop(Model model) {
+        model.addAttribute("pageName", "request");
         return "login/userRequestShop";
     }
 

@@ -7,7 +7,7 @@ import com.binary.rapid.user.dto.UserDto;
 
 public class UserCreateFactory {
 
-    public static UserDto createLocalUser(String id, String encodedPassword, String nickname, String name, String taste, String birth, String email, String gender) {
+    public static UserDto createLocalUser(String id, String encodedPassword, String nickname, String name, String taste, String birth, String email, String gender, SocialType social) {
 
         UserDto user = new UserDto();
 
@@ -18,7 +18,7 @@ public class UserCreateFactory {
         user.setTaste(taste);
         user.setBirth(birth);
         user.setEmail(email);
-        user.setSocial(SocialType.LOCAL);
+        user.setSocial(social);
         user.setGender(gender);
         user.setRole(UserRole.USER);
 

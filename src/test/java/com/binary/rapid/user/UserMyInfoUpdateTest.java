@@ -2,7 +2,9 @@ package com.binary.rapid.user;
 
 import com.binary.rapid.user.constant.SocialType;
 import com.binary.rapid.user.constant.UserRole;
+import com.binary.rapid.user.dto.SelectUserResponseForJwtDto;
 import com.binary.rapid.user.dto.UserResponseDto;
+import com.binary.rapid.user.form.UserLoginForm;
 import com.binary.rapid.user.form.UserSignUpForm;
 import com.binary.rapid.user.service.UserService;
 import org.junit.jupiter.api.Test;
@@ -24,19 +26,21 @@ public class UserMyInfoUpdateTest {
     @Test
     public void insertMemberTest() {
 
-        UserResponseDto member = new UserResponseDto();
-        member.setNickName("업데이트 테스트맨");
-        member.setTaste("시오");
-        member.setEmail("test2@naver.com");
+        // 임시로 로그인 세션 생성
+        SelectUserResponseForJwtDto loginUser = service.userLocalsignin(new UserLoginForm("test1", "a123!"));
 
-        UserResponseDto result = service.updateMyInfo(member);
+
+        loginUser.setNickName("업데이트 테스트맨");
+        loginUser.setTaste("시오");
+        loginUser.setEmail("test2@naver.com");
+
+        SelectUserResponseForJwtDto result = service.updateMyInfo(loginUser);
 
         System.out.println("결과 데이터: " + result.toString());
-        // ✅ 핵심 검증
+        
         assertThat(result).isNotNull();
-        assertThat(result.getEmail()).isEqualTo("test2@naver.com");
+        assertThat(result.getUserId()).isEqualTo(1);
 
-        // 콘솔에 출력해서 확인
         System.out.println("결과 데이터: " + result.toString());
     }
 

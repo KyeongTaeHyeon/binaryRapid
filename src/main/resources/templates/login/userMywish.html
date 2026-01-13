@@ -175,20 +175,7 @@
     <main id="main">
         <h2>찜 목록</h2>
         <div id="inner">
-            <div id="managerLeft">
-                <div th:if="${session.loginUser != null and session.loginUser.role.name() == 'USER'}"
-                     id="managerLeftInner">
-                    <span th:text="${session.loginUser.nickName + '님 안녕하세요'}"></span>
-                    <ul>
-                        <li>
-                            <a href="/login/modify">내 정보 변경</a>
-                        </li>
-                        <li><a href="/login/userBoardList">작성글 관리</a></li>
-                        <li  class="on"><a href="/login/mywish">찜 목록</a></li>
-                        <li><a href="/login/requestShop">등록 신청 관리</a></li>
-                    </ul>
-                </div>
-            </div>
+            <div th:replace="~{fragments/userSidebar :: sideBar(menuName=${pageName})}"></div>
             <div id="managerRight">
                 <div id="contentList"></div>
 

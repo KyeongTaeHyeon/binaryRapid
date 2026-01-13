@@ -1,0 +1,72 @@
+<!-- boardWrite.html -->
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+    <head>
+        <meta charset="UTF-8"/>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+        <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+        <meta name="board" content="boardWrite"/>
+        <title>RaFeed - 글쓰기</title>
+        <link rel="stylesheet" th:href="@{/css/reset.css}"/>
+        <link rel="stylesheet" th:href="@{/css/common.css}"/>
+        <link rel="stylesheet" th:href="@{/css/boardList.css}"/>
+    </head>
+    <body>
+        <div id="wrapper">
+            <header id="header" th:replace="~{fragments/header :: header}"></header>
+
+            <main id="main">
+                <div id="boardcreat">
+                    <div class="id creatPost">
+                        <div class="title"><h1>새 게시글 작성</h1></div>
+
+                        <div class="store-form">
+                            <div class="form-row">
+                                <label for="boardCategory">게시판 선택</label>
+                                <select id="boardCategory">
+                                    <option value="A00">자유게시판</option>
+                                    <option value="B00">식당인증</option>
+                                </select>
+                            </div>
+                            <div class="form-row" style="margin-top: 15px;">
+                                <label for="postTitle">제목</label>
+                                <input type="text" id="postTitle" placeholder="제목을 입력하세요"/>
+                            </div>
+                        </div>
+
+                        <div class="contentPost" style="margin-top: 20px;">
+                    <textarea id="postContent" placeholder="내용을 입력해주세요..."
+                              style="width: 100%; height: 100%; border: none; outline: none; resize: none; font-size: 16px;"></textarea>
+                        </div>
+
+                        <div class="form-row" style="margin-top: 15px; padding: 0 20px;">
+                            <label for="fileInput">파일 첨부</label>
+                            <input type="file" id="fileInput" multiple accept="image/*"/>
+                        </div>
+
+                        <!-- [추가] 첨부 이미지 미리보기 영역 -->
+                        <div id="filePreviewArea" class="file-preview-area" style="padding: 0 20px;">
+                            <div class="file-preview-header">
+                                <span class="file-preview-title">첨부 이미지 미리보기</span>
+                                <button type="button" id="clearFilesBtn" class="btn file-preview-clear">전체삭제</button>
+                            </div>
+                            <div id="filePreviewList" class="file-preview-list" aria-live="polite"></div>
+                            <p id="filePreviewHelp" class="file-preview-help">이미지를 선택하면 여기에 미리보기가 표시됩니다. (썸네일의 X 버튼으로 개별
+                                삭제 가능)</p>
+                        </div>
+
+                        <div id="bTn" style="justify-content: center; margin-top: 30px;">
+                            <button type="button" onclick="location.href='/board/boardList'">취소</button>
+                            <button type="button" id="submitPostBtn">등록</button>
+                        </div>
+                    </div>
+                </div>
+            </main>
+            <footer id="footer" th:replace="~{fragments/footer :: footer}"></footer>
+        </div>
+
+        <script th:src="@{/js/common.js}"></script>
+        <script th:src="@{/js/boardList.js}"></script>
+        <script th:src="@{/js/boardWrite.js}"></script>
+    </body>
+</html>
