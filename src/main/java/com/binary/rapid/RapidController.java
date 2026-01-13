@@ -36,7 +36,9 @@ public class RapidController {
     }
 
     @GetMapping("/board/boardList2")
-    public String boardList2Page(){ return "board/boardList2";}
+    public String boardList2Page() {
+        return "board/boardList2";
+    }
 
     @GetMapping("/login/register")
     public String registerPage() {
@@ -71,17 +73,4 @@ public class RapidController {
     public String managerMainPage() {
         return "manager/managerMain";
     }
-
-    // 1. 리스트 페이지 (보안 우회를 위해 /login 붙임)
-    @GetMapping("/approvalList")
-    public String approvalListPage() {
-        return "approval/approvalList";
-    }
-
-    // 2. 상세 페이지 (오타 수정 및 보안 우회)
-    @GetMapping("/approvalDetail")
-    public String approvalDetailPage() { // 메서드 이름과 몸통({ })이 반드시 있어야 합니다!
-        return "approval/approvalDetail";
-    }
-
 }

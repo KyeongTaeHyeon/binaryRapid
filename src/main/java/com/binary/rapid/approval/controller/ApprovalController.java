@@ -6,14 +6,21 @@ import com.binary.rapid.approval.service.ApprovalService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
 import java.util.List; // 추가
 
 @RestController
-@RequestMapping("/api/approval")
+@RequestMapping("/approval")
 @RequiredArgsConstructor
 public class ApprovalController {
 
     private final ApprovalService approvalService;
+
+    // 1. 리스트 페이지 (보안 우회를 위해 /login 붙임)
+    @GetMapping("")
+    public String approvalListPage() {
+        return "approval/approvalList";
+    }
 
     // ✅ 목록 조회 API 추가 (이게 없어서 404가 떴던 것입니다!)
     @GetMapping("/list")
