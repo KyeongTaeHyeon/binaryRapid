@@ -59,15 +59,16 @@
     </update>
 
     <select id="selectCommentList" parameterType="int" resultType="com.binary.rapid.board.dto.BoardCommentDto">
-        SELECT id          AS id,
-               comment_seq AS commentSeq,
-               comment     AS comment,
-               user_id     AS userId,
-               create_date AS createDate
-        FROM tb_boardComment
-        WHERE id = #{id}
-          AND delete_date IS NULL
-        ORDER BY comment_seq ASC
+        SELECT c.id          AS id,
+               c.comment_seq AS commentSeq,
+               c.comment     AS comment,
+               c.user_id     AS userId,
+               u.nickname    AS userName,  c.create_date AS createDate
+        FROM tb_boardComment c
+                 LEFT JOIN tb_user u ON c.user_id = u.user_id
+        WHERE c.id = #{id}
+          AND c.delete_date IS NULL
+        ORDER BY c.comment_seq ASC
     </select>
 
     <insert id="insertComment" parameterType="com.binary.rapid.board.dto.BoardCommentDto">

@@ -1,505 +1,232 @@
-// boardDetail.js
+// ✅ 1. 전역 변수 및 세션 로직
+let currentUserId = null;
+const isLogin = localStorage.getItem("isLoggedIn") === "true";
 
-let currentPage = 1;
-const itemsPerPage = 10;
-let allPosts = [];
-let filteredPosts = [];
-let currentCategory = "전체";
-
-// ✅ 4단계: Thymeleaf에서 주입한 전역값 사용
-const isLogin = window.isLogin === true;
-const currentUserId = window.loginUserId ?? null; // 로그인 안 했으면 null
-
-function requireLogin() {
-    if (!isLogin || !currentUserId) {
-        alert("로그인이 필요합니다.");
-        return false;
+try {
+    const sessionData = sessionStorage.getItem("cachedUser");
+    if (sessionData) {
+        const currentUser = JSON.parse(sessionData);
+        currentUserId = currentUser.userId;
     }
-    return true;
+} catch (e) {
+    console.error("세션 데이터 파싱 실패:", e);
 }
 
 document.addEventListener("DOMContentLoaded", function () {
-    const path = window.location.pathname;
     const urlParams = new URLSearchParams(window.location.search);
-    const categoryFromUrl = urlParams.get("category");
+    const postId = urlParams.get("id");
 
-    console.log("현재 경로:", path);
+    // UI 제어 (로그인 여부에 따른 댓글창 노출)
+    const commentInputSection = document.getElementById("commentInputSection");
+    const loginMessage = document.getElementById("loginMessage");
 
-    // 1. 게시판 목록 페이지 로드 체크 (목록 페이지일 경우 실행)
-    const postContainer = document.getElementById("postNumber");
-    if (postContainer) {
-        loadAndRenderList().then(() => {
-            if (categoryFromUrl) {
-                applyFilter(categoryFromUrl);
-                const filterLinks = document.querySelectorAll(".filter a");
-                filterLinks.forEach(link => {
-                    const spanText = link.querySelector("span").innerText;
-                    link.classList.toggle("active", spanText === categoryFromUrl);
-                });
-            }
-        });
+    if (isLogin && currentUserId) {
+        if (commentInputSection) commentInputSection.style.setProperty("display", "flex", "important");
+        if (loginMessage) loginMessage.style.display = "none";
     }
 
-    // 필터 클릭 이벤트
-    const filterLinks = document.querySelectorAll(".filter a");
-    filterLinks.forEach(link => {
-        link.addEventListener("click", (event) => {
-            event.preventDefault();
-            const selectedCategory = link.querySelector("span").innerText;
+    // --- 페이지 구분 및 초기화 ---
+    const updatePostBtn = document.getElementById('updatePostBtn');
 
-            if (path.includes("boardList3")) {
-                if (selectedCategory !== "식당신청") {
-                    location.href = `/board/boardList?category=${encodeURIComponent(selectedCategory)}`;
-                }
-            } else {
-                filterLinks.forEach(l => l.classList.remove("active"));
-                link.classList.add("active");
-                applyFilter(selectedCategory);
-            }
-        });
-    });
-
-    // 2. 상세 페이지 로드 (경로 체크)
-    if (path.includes("boardList2") || path.includes("/board/detail") || path.includes("boardDetail")) {
-        initDetailPage();
+    if (updatePostBtn) {
+        // [수정 페이지 로직]
+        if (postId) loadPostDataForEdit(postId);
+        updatePostBtn.onclick = (e) => {
+            e.preventDefault();
+            handlePostUpdate(postId);
+        };
+    } else if (postId) {
+        // [상세 페이지 로직]
+        initDetailPage(postId);
     }
 
-    // 4. 댓글 등록 버튼
+    // 댓글 등록 버튼 이벤트
     const commentSubmitBtn = document.getElementById("commentSubmit");
     if (commentSubmitBtn) {
         commentSubmitBtn.onclick = saveComment;
     }
-
-    // 5. 목록으로 이동 버튼
-    const goListBtn = document.getElementById("goListBtn");
-    if (goListBtn) {
-        goListBtn.onclick = () => {
-            location.href = "/board/boardList";
-        };
-    }
-
-    // 6. 게시글 수정 버튼 (boardEdit.html 전용)
-    const updatePostBtn = document.getElementById('updatePostBtn');
-    if (updatePostBtn) {
-        updatePostBtn.addEventListener('click', (event) => {
-            event.preventDefault();
-            const urlParams = new URLSearchParams(window.location.search);
-            const postId = urlParams.get("id");
-            if (postId) {
-                handlePostUpdate(postId);
-            } else {
-                alert("게시글 ID를 찾을 수 없습니다.");
-            }
-        });
-    }
-
-    // 7. 상세페이지 내의 수정/삭제 버튼 연결
-    const editBtn = document.getElementById("editBtn");
-    if (editBtn) {
-        editBtn.onclick = () => {
-            const urlParams = new URLSearchParams(window.location.search);
-            goToEditPage(urlParams.get("id"));
-        };
-    }
-
-    const deleteBtn = document.getElementById("deleteBtn");
-    if (deleteBtn) {
-        deleteBtn.onclick = () => {
-            const urlParams = new URLSearchParams(window.location.search);
-            deleteBoard(urlParams.get("id"));
-        };
-    }
-
-    // 식당신청(boardList3) 페이지용 카테고리 로드 로직 유지
-    if (path.includes("boardList3")) {
-        initCategorySelects();
-    }
-
-    // 모달 바깥 배경 클릭 시 닫기 기능
-    window.onclick = function (event) {
-        const modal = document.getElementById("imageModal");
-        if (event.target === modal) {
-            modal.classList.remove("is-open");
-        }
-    }
 });
 
-/* ================= 게시글 관련 함수 ================= */
-
-async function initDetailPage() {
-    const urlParams = new URLSearchParams(window.location.search);
-    const postId = urlParams.get("id");
-    if (!postId) return;
-
+/* ================= 게시글 상세보기 및 삭제 로직 ================= */
+async function initDetailPage(postId) {
     try {
         const response = await fetch(`/api/board/detail/${postId}`);
+        if (!response.ok) return;
         const post = await response.json();
 
-        if (post) {
-            const label = (post.category === "A00") ? "자유게시판" : "식당인증";
+        const isOwner = currentUserId && String(post.userId) === String(currentUserId);
 
-            // 텍스트 주입
-            if (document.getElementById("mainCategoryTitle")) document.getElementById("mainCategoryTitle").innerText = label;
-            if (document.getElementById("detailCategory")) document.getElementById("detailCategory").innerText = label;
-            if (document.getElementById("detailTitle")) document.getElementById("detailTitle").innerText = post.title;
+        // 데이터 바인딩
+        if (document.getElementById("detailTitle")) document.getElementById("detailTitle").innerText = post.title;
+        if (document.getElementById("detailContent")) document.getElementById("detailContent").innerText = post.contents;
+        if (document.getElementById("detailWriter")) document.getElementById("detailWriter").innerText = post.writerName || `사용자(${post.userId})`;
+        if (document.getElementById("detailDate")) {
+            document.getElementById("detailDate").innerText = post.createDate ? post.createDate.substring(0, 10) : 'YYYY-MM-DD';
+        }
 
-            const contentEl = document.getElementById("detailContent");
-            if (contentEl) {
-                contentEl.innerText = post.contents;
+        // 수정/삭제 버튼 제어
+        const editBtn = document.getElementById("editBtn");
+        const deleteBtn = document.getElementById("deleteBtn");
+
+        if (editBtn) {
+            if (isOwner) {
+                editBtn.style.display = "inline-flex";
+                editBtn.onclick = () => location.href = `/board/boardEdit?id=${postId}`;
+            } else {
+                editBtn.style.display = "none";
             }
-
-            if (document.getElementById("detailWriter")) document.getElementById("detailWriter").innerText = post.writerName || `사용자(${post.userId})`;
-            if (document.getElementById("detailDate")) document.getElementById("detailDate").innerText = post.createDate ? post.createDate.substring(0, 10) : '';
-
-            // 파일 렌더링
-            if (post.files && post.files.length > 0) renderFiles(post.files);
-
-            // 댓글 로드
-            fetchCommentList(postId);
-
-            // 작성자 본인 확인 후 버튼 표시
-            const isOwner = String(post.userId) === String(currentUserId);
-            const editBtn = document.getElementById("editBtn");
-            const deleteBtn = document.getElementById("deleteBtn");
-
-            // inline-flex 유지
-            if (editBtn) editBtn.style.display = isOwner ? "inline-flex" : "none";
-            if (deleteBtn) deleteBtn.style.display = isOwner ? "inline-flex" : "none";
         }
-    } catch (error) {
-        console.error("상세 로드 실패:", error);
-    }
-}
 
-function renderFiles(files) {
-    const galleryArea = document.getElementById("galleryArea");
-    if (!galleryArea) return;
+        if (deleteBtn) {
+            if (isOwner) {
+                deleteBtn.style.display = "inline-flex";
+                deleteBtn.onclick = () => deleteBoard(postId);
+            } else {
+                deleteBtn.style.display = "none";
+            }
+        }
 
-    galleryArea.innerHTML = "";
-
-    files.forEach(file => {
-        const img = document.createElement("img");
-        const imgSrc = `/api/board/file/display?path=${encodeURIComponent(file.fileAddr)}`;
-
-        img.src = imgSrc;
-        img.className = "gallery-item";
-        img.alt = "첨부이미지";
-
-        img.onclick = function () {
-            openImageModal(imgSrc);
-        };
-
-        galleryArea.appendChild(img);
-    });
-}
-
-function openImageModal(src) {
-    const modal = document.getElementById("imageModal");
-    const modalImg = document.getElementById("modalImage");
-
-    if (modal && modalImg) {
-        modal.classList.add("is-open");
-        modal.style.zIndex = 199999999;
-        modalImg.src = src;
-    }
-}
-
-function closeImageModal() {
-    const modal = document.getElementById("imageModal");
-    if (modal) {
-        modal.classList.remove("is-open");
-    }
-}
-
-/* ================= 리스트 및 필터 (상세페이지에서는 미사용되나 유지) ================= */
-
-async function loadAndRenderList() {
-    try {
-        const response = await fetch("/api/board/list");
-        allPosts = await response.json();
-        applyFilter(currentCategory);
+        fetchCommentList(postId);
     } catch (e) {
-        console.error("목록 로드 에러:", e);
+        console.error("데이터 로드 오류:", e);
     }
 }
 
-function renderList(page) {
-    const container = document.getElementById("postNumber");
-    if (!container) return;
-
-    const startIndex = (page - 1) * itemsPerPage;
-    const pagePosts = filteredPosts.slice(startIndex, startIndex + itemsPerPage);
-
-    if (pagePosts.length > 0) {
-        container.innerHTML = pagePosts.map(post => {
-            let label = post.category === "B00" ? "식당인증" : "자유게시판";
-            return `
-            <div class="post">
-                <div class="name">
-                    <span class="tage">${label}</span>
-                    <a href="/board/boardDetail?id=${post.id}">${post.title}</a>
-                </div>
-                <div class="user">${post.writerName || '익명'}</div>
-                <div class="userTime">${post.createDate ? post.createDate.substring(0, 10) : ''}</div>
-            </div>`;
-        }).join('');
-    } else {
-        container.innerHTML = "<p>게시글이 없습니다.</p>";
-    }
-}
-
-function renderPagination() {
-    const pageList = document.querySelector(".page-list");
-    if (!pageList) return;
-
-    const totalPages = Math.ceil(filteredPosts.length / itemsPerPage) || 1;
-    const pageGroupSize = 10;
-    const startPage = (Math.ceil(currentPage / pageGroupSize) - 1) * pageGroupSize + 1;
-    let endPage = startPage + pageGroupSize - 1;
-
-    if (endPage > totalPages) {
-        endPage = totalPages;
-    }
-
-    let html = "";
-    if (startPage > 1) {
-        html += `<li class="page-item prev"><button type="button" onclick="goToPage(${startPage - 1})">&lt;</button></li>`;
-    }
-    for (let i = startPage; i <= endPage; i++) {
-        html += `<li class="page-item ${i === currentPage ? 'active' : ''}"><button type="button" onclick="goToPage(${i})">${i}</button></li>`;
-    }
-    if (endPage < totalPages) {
-        html += `<li class="page-item next"><button type="button" onclick="goToPage(${endPage + 1})">&gt;</button></li>`;
-    }
-    pageList.innerHTML = html;
-}
-
-function goToPage(page) {
-    currentPage = page;
-    renderList(currentPage);
-    renderPagination();
-}
-
-function applyFilter(category) {
-    if (category === "식당신청") {
-        location.href = "/boardList3";
-        return;
-    }
-
-    currentCategory = category;
-    currentPage = 1;
-
-    if (currentCategory === "전체") {
-        filteredPosts = allPosts;
-    } else {
-        const code = (currentCategory === "자유게시판") ? "A00" : "B00";
-        filteredPosts = allPosts.filter(p => p.category === code);
-    }
-
-    renderList(currentPage);
-    renderPagination();
-}
-
-/* ================= 수정/삭제/댓글 ================= */
-
-async function handlePostUpdate(postId) {
-    if (!requireLogin()) return;
-
-    const title = document.getElementById("postTitle")?.value ?? "";
-    const contents = document.getElementById("postContent")?.value ?? "";
-    const category = document.getElementById("boardCategory")?.value ?? "";
-
-    const updateData = {
-        id: parseInt(postId, 10),
-        title,
-        contents,
-        category,
-        userId: currentUserId // ✅ 여기 반드시 currentUserId
-    };
+// ✅ 게시글 삭제 (서버 DELETE 메서드 대응)
+async function deleteBoard(postId) {
+    if (!confirm("정말로 이 게시글을 삭제하시겠습니까?")) return;
 
     try {
-        const response = await fetch("/api/board/update", {
-            method: "POST",
-            headers: {"Content-Type": "application/json"},
-            body: JSON.stringify(updateData)
+        const response = await fetch(`/api/board/delete/${postId}`, {
+            method: 'DELETE'
         });
 
         if (response.ok) {
-            alert("수정 완료");
-            location.href = "/board/boardList";
+            alert("게시글이 삭제되었습니다.");
+            location.href = '/board/boardList';
+        } else {
+            alert("삭제에 실패했습니다.");
         }
     } catch (e) {
-        console.error(e);
+        console.error("삭제 통신 오류:", e);
     }
 }
 
-async function deleteBoard(id) {
-    if (!requireLogin()) return;
-    if (!confirm("삭제하시겠습니까?")) return;
-
-    try {
-        const response = await fetch(`/api/board/delete/${id}`, {method: "DELETE"});
-        if (response.ok) {
-            alert("삭제되었습니다.");
-            location.href = "/board/boardList";
-        }
-    } catch (e) {
-        console.error(e);
-    }
-}
-
-function goToEditPage(id) {
-    location.href = `/board/boardEdit?id=${id}`;
-}
-
-async function fetchCommentList(postId) {
-    try {
-        const response = await fetch(`/api/board/comment/list/${postId}`);
-        if (response.ok) {
-            const comments = await response.json();
-            renderComments(comments);
-        }
-    } catch (e) {
-        console.error(e);
-    }
-}
-
-async function saveComment() {
-    if (!requireLogin()) return;
-
-    const urlParams = new URLSearchParams(window.location.search);
-    const postId = urlParams.get("id");
-    const commentInput = document.getElementById("commentInput");
-
-    if (!commentInput?.value.trim()) {
-        alert("내용을 입력해주세요.");
-        return;
-    }
-
-    const commentDto = {
-        id: parseInt(postId, 10),
-        comment: commentInput.value,
-        userId: currentUserId
-    };
-
-    try {
-        const response = await fetch("/api/board/comment/write", {
-            method: "POST",
-            headers: {"Content-Type": "application/json"},
-            body: JSON.stringify(commentDto)
-        });
-
-        if (response.ok) {
-            alert("댓글 등록 완료");
-            commentInput.value = "";
-            fetchCommentList(postId);
-        }
-    } catch (e) {
-        console.error(e);
-    }
-}
-
+/* ================= 댓글 렌더링 (디자인 보정 버전) ================= */
 function renderComments(comments) {
     const container = document.getElementById("detailCommentList");
     if (!container) return;
 
-    if (!comments || comments.length === 0) {
-        container.innerHTML = `<div style="color:#999; padding:20px; text-align:center;">등록된 댓글이 없습니다.</div>`;
-        return;
-    }
-
     container.innerHTML = comments.map(c => {
-        const isOwner = String(c.userId) === String(currentUserId);
+        const isCommentOwner = currentUserId && String(c.userId) === String(currentUserId);
+        const commentDate = c.createDate ? c.createDate.substring(0, 10) : '';
 
         return `
-        <div class="comment-item">
-            <div class="comment-left">
-                <span class="comment-author">작성자${c.userId}</span>
-                <span class="comment-divider">:</span>
-                <span class="comment-text">${c.comment}</span>
+        <div class="comment-item" style="border-bottom: 1px solid #eee; padding: 20px 0; display: block;">
+            <div style="margin-bottom: 8px;">
+                <strong style="font-size: 14px; color: #333;">${c.userName || '익명'}</strong>
+                <span style="font-size: 12px; color: #999; margin-left: 10px;">${commentDate}</span>
             </div>
-            <div class="comment-right">
-                <span class="comment-date">${c.createDate ? c.createDate.substring(0, 10) : ''}</span>
-                <div class="comment-btns">
-                    ${isOwner ? `
-                        <button class="editBtn" onclick="updateComment(${c.id}, ${c.commentSeq})">수정</button>
-                        <button class="deleteBtn" onclick="deleteComment(${c.id}, ${c.commentSeq})">삭제</button>
-                    ` : ''}
+            <div style="display: flex; justify-content: space-between; align-items: flex-end;">
+                <div id="text-view-${c.commentSeq}" style="font-size: 14px; color: #444; flex: 1; white-space: pre-line;">
+                    ${c.comment}
+                </div>
+                ${isCommentOwner ? `
+                    <div id="action-btns-${c.commentSeq}" style="margin-left: 20px; white-space: nowrap; display: flex; gap: 10px;">
+                        <button onclick="showEditForm(${c.commentSeq})" style="color: #6aa9d6; border: none; background: none; cursor: pointer; font-size: 13px;">수정</button>
+                        <button onclick="deleteComment(${c.id}, ${c.commentSeq})" style="color: #e57373; border: none; background: none; cursor: pointer; font-size: 13px;">삭제</button>
+                    </div>
+                ` : ''}
+            </div>
+            <div id="edit-view-${c.commentSeq}" style="display: none; margin-top: 10px;">
+                <div style="border: 1px solid #a3cfe5; border-radius: 4px; padding: 10px;">
+                    <textarea id="input-${c.commentSeq}" style="width: 100%; min-height: 60px; border: none; outline: none; resize: none; font-size: 14px;">${c.comment}</textarea>
+                </div>
+                <div style="text-align: right; margin-top: 8px;">
+                    <button onclick="submitEdit(${c.id}, ${c.commentSeq})" style="background: #a3cfe5; color: white; border: none; padding: 5px 15px; border-radius: 4px; cursor: pointer;">완료</button>
+                    <button onclick="cancelEdit(${c.commentSeq})" style="background: #ccc; color: white; border: none; padding: 5px 15px; border-radius: 4px; cursor: pointer; margin-left: 5px;">취소</button>
                 </div>
             </div>
         </div>`;
     }).join('');
 }
 
-async function updateComment(id, seq) {
-    if (!requireLogin()) return;
+/* ================= 댓글 로직 ================= */
+async function saveComment() {
+    const postId = new URLSearchParams(window.location.search).get("id");
+    const content = document.getElementById("commentInput").value;
+    if (!content.trim()) return;
 
-    const newComment = prompt("수정할 내용을 입력하세요.");
-    if (!newComment || !newComment.trim()) return;
-
-    const updateDto = {
-        id,
-        commentSeq: seq,
-        comment: newComment,
-        userId: currentUserId
-    };
-
-    try {
-        const response = await fetch("/api/board/comment/update", {
-            method: "POST",
-            headers: {"Content-Type": "application/json"},
-            body: JSON.stringify(updateDto)
-        });
-
-        if (response.ok) {
-            alert("댓글수정 완료");
-            location.reload();
-        }
-    } catch (e) {
-        console.error(e);
+    const response = await fetch("/api/board/comment/write", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({ id: postId, comment: content, userId: currentUserId })
+    });
+    if (response.ok) {
+        document.getElementById("commentInput").value = "";
+        fetchCommentList(postId);
     }
+}
+
+async function fetchCommentList(postId) {
+    const response = await fetch(`/api/board/comment/list/${postId}`);
+    if (response.ok) renderComments(await response.json());
+}
+
+function showEditForm(seq) {
+    document.getElementById(`text-view-${seq}`).style.display = "none";
+    document.getElementById(`action-btns-${seq}`).style.display = "none";
+    document.getElementById(`edit-view-${seq}`).style.display = "block";
+}
+
+function cancelEdit(seq) {
+    document.getElementById(`text-view-${seq}`).style.display = "block";
+    document.getElementById(`action-btns-${seq}`).style.display = "flex";
+    document.getElementById(`edit-view-${seq}`).style.display = "none";
+}
+
+async function submitEdit(id, seq) {
+    const newComment = document.getElementById(`input-${seq}`).value;
+    const response = await fetch("/api/board/comment/update", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({ id: id, commentSeq: seq, comment: newComment, userId: currentUserId })
+    });
+    if (response.ok) fetchCommentList(id);
 }
 
 async function deleteComment(id, seq) {
-    if (!requireLogin()) return;
     if (!confirm("댓글을 삭제하시겠습니까?")) return;
+    const response = await fetch(`/api/board/comment/delete?id=${id}&commentSeq=${seq}`, { method: "POST" });
+    if (response.ok) fetchCommentList(id);
+}
 
-    try {
-        const response = await fetch(`/api/board/comment/delete?id=${id}&commentSeq=${seq}`, {method: "POST"});
-        if (response.ok) {
-            alert("삭제되었습니다.");
-            location.reload();
-        }
-    } catch (e) {
-        console.error(e);
+/* ================= 게시글 수정 로직 ================= */
+async function loadPostDataForEdit(postId) {
+    const response = await fetch(`/api/board/detail/${postId}`);
+    if (response.ok) {
+        const post = await response.json();
+        if (document.getElementById("boardCategory")) document.getElementById("boardCategory").value = post.category;
+        if (document.getElementById("postTitle")) document.getElementById("postTitle").value = post.title;
+        if (document.getElementById("postContent")) document.getElementById("postContent").value = post.contents;
     }
 }
 
-async function initCategorySelects() {
-    try {
-        const response = await fetch("/api/category/map");
-        const categoryMap = await response.json();
-
-        const config = {
-            "category1": "region", "category2": "category", "category3": "shape",
-            "category4": "thickness", "category5": "style", "category6": "kind",
-            "category7": "rich", "category8": "richness"
-        };
-
-        Object.entries(config).forEach(([selectId, groupId]) => {
-            const selectElement = document.getElementById(selectId);
-            const items = categoryMap[groupId];
-
-            if (selectElement && items) {
-                items.forEach(item => {
-                    const option = document.createElement("option");
-                    option.value = item.id;
-                    option.textContent = item.name;
-                    selectElement.appendChild(option);
-                });
-            }
-        });
-    } catch (error) {
-        console.error("카테고리 데이터 실패:", error);
+async function handlePostUpdate(postId) {
+    const updateDto = {
+        id: parseInt(postId),
+        title: document.getElementById("postTitle").value,
+        contents: document.getElementById("postContent").value,
+        category: document.getElementById("boardCategory").value,
+        userId: currentUserId
+    };
+    const response = await fetch("/api/board/update", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(updateDto)
+    });
+    if (response.ok) {
+        alert("게시글이 수정되었습니다.");
+        location.href = `/board/boardDetail?id=${postId}`;
     }
 }

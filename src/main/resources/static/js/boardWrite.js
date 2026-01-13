@@ -2,6 +2,10 @@
 
 // [추가] 서버에서 가져온 용량 제한을 저장할 변수 (기본값: 안전하게 1MB로 시작)
 let serverMaxFileSize = 1 * 1024 * 1024;
+const sessionData = sessionStorage.getItem("cachedUser");
+const loginUser = sessionData ? JSON.parse(sessionData) : null;
+
+console.log(loginUser.userId);
 
 document.addEventListener("DOMContentLoaded", function () {
 
@@ -43,7 +47,7 @@ document.addEventListener("DOMContentLoaded", function () {
             formData.append("category", category);
             formData.append("title", title);
             formData.append("contents", content);
-            // formData.append("userId", currentUserId);
+            formData.append("userId", loginUser.userId);
 
             // 4. 파일 용량 체크 (서버에서 가져온 값 사용)
             if (fileInput.files.length > 0) {
