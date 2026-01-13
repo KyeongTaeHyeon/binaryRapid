@@ -46,16 +46,14 @@ public class SecurityConfig {
                                 "/shop/**",
                                 "/board/**",
                                 "/api/board/**",
-                                "/css/**", "/js/**", "/images/**", "/fragments/**", "/img/**","/favicon.ico",
-                                "/error",
-                                "/approvalList",      // 추가
-                                "/approvalDetail",    // 추가
-                                "/api/approval/**"
+                                "/approval/**",
+                                "/css/**", "/js/**", "/images/**", "/fragments/**", "/img/**", "/favicon.ico",
+                                "/error"
                         ).permitAll()
 
                         // 로그아웃, 토큰 갱신 등은 '인증된 사용자'만 접근 가능하도록 설정
                         // 이렇게 해야 @AuthenticationPrincipal에 데이터가 들어옵니다.
-                        .requestMatchers("/user/logout","/user/me","/user/api/my/**").authenticated()
+                        .requestMatchers("/user/logout", "/user/me", "/user/api/my/**").authenticated()
 
                         // 그 외 모든 요청은 인증 필요
                         .anyRequest().authenticated()
@@ -69,5 +67,5 @@ public class SecurityConfig {
 
         return http.build();
     }
-    
+
 }
