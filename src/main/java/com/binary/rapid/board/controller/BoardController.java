@@ -5,6 +5,7 @@ import com.binary.rapid.board.dto.BoardCommentDto;
 import com.binary.rapid.board.dto.BoardDto;
 import com.binary.rapid.board.service.BoardService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.unit.DataSize;
@@ -14,6 +15,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
 import java.util.Map;
 
+@Log4j2
 @RestController
 @RequestMapping("/api/board")
 @RequiredArgsConstructor
@@ -55,9 +57,9 @@ public class BoardController {
             @ModelAttribute BoardDto boardDto,
             @RequestParam(value = "files", required = false) List<MultipartFile> files) {
 
+
+        log.info("write Controller로 넘어오는 작성자 데이터 확인: " + boardDto.toString());
         try {
-            // (임시) 로그인 유저 ID 1번 강제 주입
-            boardDto.setUserId(1);
             boardService.writeBoard(boardDto, files);
             return ResponseEntity.ok("성공");
 
@@ -70,6 +72,7 @@ public class BoardController {
     @PostMapping("/update")
     public ResponseEntity<String> updateBoard(@RequestBody BoardDto boardDto) {
         System.out.println("수정 요청 데이터: " + boardDto.toString());
+        log.info("수정 요청 데이터: " + boardDto.toString());
         boardService.updateBoard(boardDto);
         return ResponseEntity.ok("success");
     }

@@ -56,14 +56,15 @@
                     <section class="comment-section">
                         <h3 class="section-title">댓글</h3>
 
-                        <div class="comment-input-wrapper" th:if="${isLogin}">
+                        <div id="commentInputSection" class="comment-input-wrapper" style="display: none;">
                             <input type="text" id="commentInput" placeholder="댓글을 입력하시오"/>
                             <button type="button" id="commentSubmit" class="btn"
                                     style="background:#87ceeb; color:white; border:none; padding:0 20px; border-radius:5px;">
                                 댓글등록
                             </button>
                         </div>
-                        <div th:unless="${isLogin}" style="margin-top:10px; color:#999;">
+
+                        <div id="loginMessage" style="margin-top:10px; color:#999; display: none;">
                             로그인 후 댓글을 작성할 수 있습니다.
                         </div>
 
