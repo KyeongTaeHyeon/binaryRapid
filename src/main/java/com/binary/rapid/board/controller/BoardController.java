@@ -9,6 +9,7 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.unit.DataSize;
+import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -23,14 +24,25 @@ public class BoardController {
 
     private final BoardService boardService;
 
+    @InitBinder
+    public void initBinder(WebDataBinder binder) {
+        binder.setDisallowedFields("files");
+    }
+
     // yml에 설정된 파일 용량 제한 값을 가져옵니다.
     @Value("${spring.servlet.multipart.max-file-size}")
     private DataSize maxFileSize;
 
+    @Value("${spring.servlet.multipart.max-request-size}")
+    private DataSize maxRequestSize;
+
     // 프론트엔드(JS)가 용량 제한을 물어보면 알려주는 API
     @GetMapping("/config")
     public ResponseEntity<Map<String, Long>> getBoardConfig() {
-        return ResponseEntity.ok(Map.of("maxFileSize", maxFileSize.toBytes()));
+        return ResponseEntity.ok(Map.of(
+                "maxFileSize", maxFileSize.toBytes(),
+                "maxRequestSize", maxRequestSize.toBytes()
+        ));
     }
 
     // --- 게시글 관련 ---
@@ -53,19 +65,25 @@ public class BoardController {
     }
 
     @PostMapping("/write")
-    public ResponseEntity<String> writeBoard(
+    public ResponseEntity<Map<String, Object>> writeBoard(
             @ModelAttribute BoardDto boardDto,
             @RequestParam(value = "files", required = false) List<MultipartFile> files) {
 
-
-        log.info("write Controller로 넘어오는 작성자 데이터 확인: " + boardDto.toString());
         try {
             boardService.writeBoard(boardDto, files);
-            return ResponseEntity.ok("성공");
+
+            // ✅ multipart 객체(files)를 절대 응답에 포함하지 않음 (Jackson 직렬화 에러 방지)
+            return ResponseEntity.ok(Map.of(
+                    "success", true,
+                    "id", boardDto.getId()
+            ));
 
         } catch (Exception e) {
-            e.printStackTrace();
-            return ResponseEntity.status(500).body("실패");
+            log.error("writeBoard failed", e);
+            return ResponseEntity.status(500).body(Map.of(
+                    "success", false,
+                    "message", "실패"
+            ));
         }
     }
 

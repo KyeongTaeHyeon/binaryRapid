@@ -7,7 +7,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.binary.rapid.user.global.security.CustomUserDetails;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -22,25 +21,23 @@ public class ApprovalService {
 
     private final ApprovalMapper approvalMapper;
 
-    private boolean isAdmin(CustomUserDetails principal) {
+    // ✅ 작성자 여부 확인 (상세 화면에서 수정/삭제 버튼 노출용)
+    @Transactional(readOnly = true)
+    public boolean isOwner(String id, CustomUserDetails principal) {
         if (principal == null) return false;
-        try {
-            for (GrantedAuthority a : principal.getAuthorities()) {
-                if (a != null && "ROLE_ADMIN".equals(a.getAuthority())) return true;
-            }
-        } catch (Exception ignored) {
-        }
-        return false;
+        Integer ownerUserId = approvalMapper.selectShopOwnerUserId(id);
+        if (ownerUserId == null) return false;
+        return ownerUserId == principal.getUserId();
     }
 
-    private void assertOwnerOrAdmin(String shopId, CustomUserDetails principal) {
+    private void assertOwner(String shopId, CustomUserDetails principal) {
         if (principal == null) throw new IllegalStateException("UNAUTHORIZED");
 
         Integer ownerUserId = approvalMapper.selectShopOwnerUserId(shopId);
         if (ownerUserId == null) throw new IllegalStateException("NOT_FOUND");
 
         int me = principal.getUserId();
-        if (ownerUserId != me && !isAdmin(principal)) {
+        if (ownerUserId != me) {
             throw new AccessDeniedException("FORBIDDEN");
         }
     }
@@ -164,8 +161,8 @@ public class ApprovalService {
             com.binary.rapid.user.global.security.CustomUserDetails principal
     ) {
         if (principal == null) throw new IllegalStateException("UNAUTHORIZED");
-        // ✅ 작성자 또는 관리자만 수정 가능
-        assertOwnerOrAdmin(id, principal);
+        // ✅ 작성자만 수정 가능
+        assertOwner(id, principal);
 
         // 1) tb_shop 업데이트
         approvalMapper.updateShop(id, name, address, content);
@@ -250,8 +247,8 @@ public class ApprovalService {
     @Transactional
     public void deleteApproval(String id, CustomUserDetails principal) {
         if (principal == null) throw new IllegalStateException("UNAUTHORIZED");
-        // ✅ 작성자 또는 관리자만 삭제 가능
-        assertOwnerOrAdmin(id, principal);
+        // ✅ 작성자만 삭제 가능
+        assertOwner(id, principal);
 
         approvalMapper.deleteShopDetail(id);
         approvalMapper.deleteShopImg(id);

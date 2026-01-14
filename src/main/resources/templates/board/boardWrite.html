@@ -69,6 +69,10 @@
 </div>
 
 <script th:src="@{/js/common.js}"></script>
+<script th:inline="javascript">
+    window.isLogin = [[${isLogin}]];
+    window.loginUserId = [[${loginUserId}]] ?? null;
+</script>
 <script th:src="@{/js/boardWrite.js}"></script>
 </body>
 </html>

@@ -1,54 +1,73 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8" />
-    <title>Login</title>
-    <link rel="stylesheet" th:href="@{/css/reset.css}" />
-    <link rel="stylesheet" th:href="@{/css/common.css}" />
-    <link rel="stylesheet" th:href="@{/css/login.css}" />
-</head>
-<body>
-<div id="wrapper">
-    <header id="header" th:replace="~{fragments/header :: header}"></header>
-    <main id="main">
-        <div id="loginWrapper">
-            <h1>로그인</h1>
-            <div id="loginFormContainer" style="width: 100%;">
-                <div class="inputWrapper">
-                    <div class="inputGroup">
-                        <label for="userName">아이디</label>
-                        <input type="text" id="userName" name="userName" placeholder="아이디를 입력하세요" required />
+    <head>
+        <meta charset="UTF-8"/>
+        <title>Login</title>
+        <link rel="stylesheet" th:href="@{/css/reset.css}"/>
+        <link rel="stylesheet" th:href="@{/css/common.css}"/>
+        <link rel="stylesheet" th:href="@{/css/login.css}"/>
+    </head>
+    <body>
+        <div id="wrapper">
+            <header id="header" th:replace="~{fragments/header :: header}"></header>
+            <main id="main">
+                <div id="loginWrapper">
+                    <h1>로그인</h1>
+                    <div id="loginFormContainer" style="width: 100%;">
+                        <div class="inputWrapper">
+                            <div class="inputGroup">
+                                <label for="userName">아이디</label>
+                                <input type="text" id="userName" name="userName" placeholder="아이디를 입력하세요" required/>
+                            </div>
+                            <div class="inputGroup">
+                                <label for="password">비밀번호</label>
+                                <input type="password" id="password" name="password" placeholder="비밀번호를 입력하세요"
+                                       required/>
+                            </div>
+                        </div>
+                        <p id="loginErrorMsg"
+                           class="loginErrorMsg"
+                           style="display:none;"
+                           th:text="${param.msg != null ? param.msg[0] : (loginMessage != null ? loginMessage : '')}"></p>
+
+                        <script th:inline="javascript">
+                            document.addEventListener('DOMContentLoaded', () => {
+                                const el = document.getElementById('loginErrorMsg');
+                                if (!el) return;
+
+                                // 서버에서 내려준 초기 메시지(redirect query msg 또는 flash loginMessage)
+                                const initialText = (el.textContent || '').trim();
+                                if (initialText.length > 0) {
+                                    el.style.display = 'block';
+                                }
+                            });
+                        </script>
+
+                        <div class="buttonWrapper">
+                            <button type="button" id="btnLogin" class="button">로그인</button>
+                            <button type="button" id="btnNew" class="button">
+                                <a th:href="@{/login/register}">회원가입</a>
+                            </button>
+                        </div>
                     </div>
-                    <div class="inputGroup">
-                        <label for="password">비밀번호</label>
-                        <input type="password" id="password" name="password" placeholder="비밀번호를 입력하세요" required />
+
+                    <h2 class="socialLogin_title">소셜 로그인</h2>
+                    <div class="social-login-buttons">
+                        <a th:href="@{/oauth2/authorization/google}" class="google-login-btn">
+                            <div class="google-icon-wrapper">
+                                <img class="google-icon"
+                                     src="https://www.gstatic.com/images/branding/product/2x/googleg_48dp.png"
+                                     alt="Google Logo"/>
+                            </div>
+                            <span class="btn-text">Google 계정으로 로그인</span>
+                        </a>
                     </div>
                 </div>
-                <p id="loginErrorMsg" class="loginErrorMsg" style="display:none;"></p>
-
-                <div class="buttonWrapper">
-                    <button type="button" id="btnLogin" class="button">로그인</button>
-                    <button type="button" id="btnNew" class="button">
-                        <a th:href="@{/login/register}">회원가입</a>
-                    </button>
-                </div>
-            </div>
-
-            <h2 class="socialLogin_title">소셜 로그인</h2>
-            <div class="social-login-buttons">
-                <a th:href="@{/oauth2/authorization/google}" class="google-login-btn">
-                    <div class="google-icon-wrapper">
-                        <img class="google-icon" src="https://www.gstatic.com/images/branding/product/2x/googleg_48dp.png" alt="Google Logo" />
-                    </div>
-                    <span class="btn-text">Google 계정으로 로그인</span>
-                </a>
-            </div>
+            </main>
+            <footer id="footer" th:replace="~{fragments/footer :: footer}"></footer>
         </div>
-    </main>
-    <footer id="footer" th:replace="~{fragments/footer :: footer}"></footer>
-</div>
 
-<script th:src="@{/js/common.js}"></script>
-<script th:src="@{/js/login.js}"></script>
-</body>
+        <script th:src="@{/js/common.js}"></script>
+        <script th:src="@{/js/login.js}"></script>
+    </body>
 </html>

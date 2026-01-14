@@ -144,6 +144,19 @@ async function loadApprovalDetail(id) {
             updateThumbNavAndDots();
         });
 
+        // --- 작성자 여부 확인: owner 체크 API 호출 (수정/삭제 버튼 노출)
+        const ownerRes = await fetch(`/api/approval/owner/${encodeURIComponent(id)}`, {
+            method: "GET",
+            headers: buildAuthHeaders(),
+        });
+        if (ownerRes.ok) {
+            const ownerData = await ownerRes.json();
+            if (ownerData && ownerData.isOwner) {
+                const actions = document.getElementById("detailActions");
+                if (actions) actions.style.display = "";
+            }
+        }
+
         function setMainByIndex(idx) {
             if (!images[idx]) return;
             currentIndex = idx;

@@ -14,13 +14,15 @@
         </div>
         <div class="headerContent">
             <div id="user">
-                <div id="guestBox" class="userBox" style="display: none;">
+                <div id="guestBox" class="userBox"
+                     th:if="${!#authorization.expression('isAuthenticated()')}">
                     <p><a th:href="@{/login}">로그인</a></p>
                     <span>|</span>
                     <p><a th:href="@{/login/register}">회원가입</a></p>
                 </div>
-                <div id="loginBox" class="userBox" style="display: none;">
-                    <p><span id="userNickname"></span>님 안녕하세요</p>
+                <div id="loginBox" class="userBox"
+                     th:if="${#authorization.expression('isAuthenticated()')}">
+                    <p><span id="userNickname" th:text="${#authentication?.principal?.nickname}"></span>님 안녕하세요</p>
                     <span>|</span>
                     <p><a id="mypageLink" href="#">마이 페이지</a></p>
                     <span>|</span>
@@ -35,4 +37,27 @@
             </div>
         </div>
     </div>
+
+    <script>
+        (function syncAccessTokenCookie() {
+            try {
+                const token = localStorage.getItem('accessToken');
+                if (!token) return;
+
+                const hasCookie = document.cookie.split(';').some(c => c.trim().startsWith('accessToken='));
+                if (!hasCookie) {
+                    document.cookie = `accessToken=${token}; Path=/`;
+
+                    // 최초 1회만 새로고침해서 서버 렌더링(isAuthenticated)이 반영되게 함
+                    const reloaded = sessionStorage.getItem('tokenCookieSynced');
+                    if (!reloaded) {
+                        sessionStorage.setItem('tokenCookieSynced', '1');
+                        location.reload();
+                    }
+                }
+            } catch (e) {
+                // ignore
+            }
+        })();
+    </script>
 </header>

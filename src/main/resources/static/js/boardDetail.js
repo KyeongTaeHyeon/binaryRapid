@@ -1,15 +1,25 @@
 // ✅ 1. 전역 변수 및 세션 로직
+// 우선순위: 서버 렌더링(Thymeleaf)에서 내려준 값(window.isLogin / window.loginUserId)
+// 이유: localStorage/sessionStorage는 로그아웃/계정 전환 시 stale 값이 남아 다른 사용자로 표시되는 문제가 발생할 수 있음
 let currentUserId = null;
-const isLogin = localStorage.getItem("isLoggedIn") === "true";
+const isLogin = (typeof window !== "undefined" && typeof window.isLogin === "boolean")
+    ? window.isLogin
+    : (localStorage.getItem("isLoggedIn") === "true");
 
-try {
-    const sessionData = sessionStorage.getItem("cachedUser");
-    if (sessionData) {
-        const currentUser = JSON.parse(sessionData);
-        currentUserId = currentUser.userId;
+// 1) 서버에서 내려준 loginUserId가 있으면 그 값을 최우선으로 사용
+if (typeof window !== "undefined" && window.loginUserId != null && window.loginUserId !== 0) {
+    currentUserId = window.loginUserId;
+} else {
+    // 2) fallback: 세션에 cachedUser가 있으면 그 값을 사용(기존 로직 유지)
+    try {
+        const sessionData = sessionStorage.getItem("cachedUser");
+        if (sessionData) {
+            const currentUser = JSON.parse(sessionData);
+            currentUserId = currentUser.userId;
+        }
+    } catch (e) {
+        console.error("세션 데이터 파싱 실패:", e);
     }
-} catch (e) {
-    console.error("세션 데이터 파싱 실패:", e);
 }
 
 document.addEventListener("DOMContentLoaded", function () {
@@ -27,6 +37,13 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // --- 페이지 구분 및 초기화 ---
     const updatePostBtn = document.getElementById('updatePostBtn');
+    // [목록으로 버튼 이동]
+    const goListBtn = document.getElementById("goListBtn");
+    if (goListBtn) {
+        goListBtn.onclick = () => {
+            location.href = "/board/boardList";
+        };
+    }
 
     if (updatePostBtn) {
         // [수정 페이지 로직]
@@ -63,6 +80,8 @@ async function initDetailPage(postId) {
         if (document.getElementById("detailDate")) {
             document.getElementById("detailDate").innerText = post.createDate ? post.createDate.substring(0, 10) : 'YYYY-MM-DD';
         }
+
+        renderGallery(post.files || []);
 
         // 수정/삭제 버튼 제어
         const editBtn = document.getElementById("editBtn");
@@ -160,7 +179,7 @@ async function saveComment() {
     const response = await fetch("/api/board/comment/write", {
         method: "POST",
         headers: {"Content-Type": "application/json"},
-        body: JSON.stringify({ id: postId, comment: content, userId: currentUserId })
+        body: JSON.stringify({id: postId, comment: content, userId: currentUserId})
     });
     if (response.ok) {
         document.getElementById("commentInput").value = "";
@@ -190,14 +209,14 @@ async function submitEdit(id, seq) {
     const response = await fetch("/api/board/comment/update", {
         method: "POST",
         headers: {"Content-Type": "application/json"},
-        body: JSON.stringify({ id: id, commentSeq: seq, comment: newComment, userId: currentUserId })
+        body: JSON.stringify({id: id, commentSeq: seq, comment: newComment, userId: currentUserId})
     });
     if (response.ok) fetchCommentList(id);
 }
 
 async function deleteComment(id, seq) {
     if (!confirm("댓글을 삭제하시겠습니까?")) return;
-    const response = await fetch(`/api/board/comment/delete?id=${id}&commentSeq=${seq}`, { method: "POST" });
+    const response = await fetch(`/api/board/comment/delete?id=${id}&commentSeq=${seq}`, {method: "POST"});
     if (response.ok) fetchCommentList(id);
 }
 
@@ -222,11 +241,71 @@ async function handlePostUpdate(postId) {
     };
     const response = await fetch("/api/board/update", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {"Content-Type": "application/json"},
         body: JSON.stringify(updateDto)
     });
     if (response.ok) {
         alert("게시글이 수정되었습니다.");
         location.href = `/board/boardDetail?id=${postId}`;
     }
+}
+
+function renderGallery(files) {
+    const gallery = document.getElementById("galleryArea") || document.getElementById("gallerayArea");
+    if (!gallery) return;
+
+    if (!Array.isArray(files) || files.length === 0) {
+        gallery.innerHTML = "";
+        gallery.style.display = "none";
+        return;
+    }
+
+    gallery.style.display = "grid";
+    gallery.innerHTML = "";
+
+    files.forEach(f => {
+        const addr = f?.fileAddr;
+        if (!addr) return;
+
+        // addr가 '/upload/...' 처럼 '/'로 시작하면 그대로 사용
+        // 아니면 display API로 감싸서 사용
+        const src = (typeof addr === "string" && addr.startsWith("/"))
+            ? addr
+            : `/api/board/file/display?path=${encodeURIComponent(addr)}`;
+
+        const img = document.createElement("img");
+        img.className = "gallery-item";
+        img.src = src;
+        img.alt = "첨부 이미지";
+        img.loading = "lazy";
+
+        img.addEventListener("click", () => openImageModal(src));
+        gallery.appendChild(img);
+    });
+}
+
+function openImageModal(src) {
+    const modal = document.getElementById("imageModal");
+    const modalImg = document.getElementById("modalImage");
+    if (!modal || !modalImg) return;
+
+    modalImg.src = src;
+    modal.classList.add("is-open");
+
+    // ✅ 배경(오버레이) 클릭 시 닫히도록 추가
+    modal.onclick = (e) => {
+        // 이미지 자체를 클릭한 게 아니면 닫기
+        if (e.target === modal) {
+            closeImageModal();
+        }
+    };
+}
+
+function closeImageModal() {
+    const modal = document.getElementById("imageModal");
+    const modalImg = document.getElementById("modalImage");
+    if (!modal || !modalImg) return;
+
+    modal.classList.remove("is-open");
+    modalImg.src = "";
 }

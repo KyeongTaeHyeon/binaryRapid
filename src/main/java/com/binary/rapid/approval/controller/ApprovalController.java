@@ -135,4 +135,15 @@ public class ApprovalController {
             throw e;
         }
     }
+
+    // ✅ 작성자 여부 확인 (상세 화면에서 수정/삭제 버튼 노출용)
+    @GetMapping("/owner/{id}")
+    public ResponseEntity<Map<String, Object>> isOwner(
+            @PathVariable String id,
+            @AuthenticationPrincipal CustomUserDetails principal
+    ) {
+        Map<String, Object> res = new HashMap<>();
+        res.put("isOwner", approvalService.isOwner(id, principal));
+        return ResponseEntity.ok(res);
+    }
 }
