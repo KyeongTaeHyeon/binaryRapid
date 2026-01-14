@@ -44,8 +44,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         boolean isApiRequest = path.startsWith("/api/") || (accept != null && accept.contains("application/json"));
 
 // ✅ 정적 리소스/메인/에러는 토큰과 무관하게 항상 통과
-        if (path.equals("/") ||
-                path.equals("/favicon.ico") ||
+        if (path.equals("/favicon.ico") ||
                 path.equals("/error") ||
                 path.startsWith("/css/") ||
                 path.startsWith("/js/") ||

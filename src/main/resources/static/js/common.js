@@ -69,6 +69,16 @@ function loadScript(url) {
         document.head.appendChild(script);
     });
 }
+
+// ✅ accessToken을 Authorization 헤더로 붙이는 공통 함수 (multipart/FormData에서도 사용)
+function buildAuthHeaders(extra = {}) {
+    const accessToken = localStorage.getItem("accessToken");
+    return {
+        ...(accessToken ? {"Authorization": `Bearer ${accessToken}`} : {}),
+        ...extra
+    };
+}
+
 // 인증 헤더가 포함된 공통 요청 함수 (자동 리프레시 포함)
 
 async function authFetch(url, options = {}) {
@@ -80,7 +90,7 @@ async function authFetch(url, options = {}) {
         ...options.headers
     };
 
-    let response = await fetch(url, { ...options, headers });
+    let response = await fetch(url, {...options, headers});
 
     if (response.status === 401) {
         console.warn("액세스 토큰 만료됨. 재발급 시도 중...");
@@ -89,7 +99,7 @@ async function authFetch(url, options = {}) {
         if (isRefreshed) {
             accessToken = localStorage.getItem("accessToken");
             headers['Authorization'] = `Bearer ${accessToken}`;
-            return await fetch(url, { ...options, headers });
+            return await fetch(url, {...options, headers});
         } else {
             alert("세션이 만료되었습니다. 다시 로그인해주세요.");
             localStorage.clear();
@@ -113,8 +123,8 @@ async function refreshTokens() {
     try {
         const response = await fetch("/user/refresh", {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ userId, refreshToken })
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify({userId, refreshToken})
         });
 
         if (response.ok) {
@@ -132,6 +142,29 @@ async function refreshTokens() {
 
 
 window.addEventListener('DOMContentLoaded', () => {
+    // ✅ localStorage(accessToken) → cookie(accessToken) 동기화
+    // header를 fetch로 innerHTML 주입하면 header.html 내부 <script>는 실행되지 않아서 common.js에서 처리한다.
+    (function syncAccessTokenCookie() {
+        try {
+            const token = localStorage.getItem('accessToken');
+            if (!token) return;
+
+            const hasCookie = document.cookie.split(';').some(c => c.trim().startsWith('accessToken='));
+            if (!hasCookie) {
+                document.cookie = `accessToken=${token}; Path=/`;
+
+                // 최초 1회만 새로고침해서 서버 렌더링(isAuthenticated)이 반영되게 함
+                const reloaded = sessionStorage.getItem('tokenCookieSynced');
+                if (!reloaded) {
+                    sessionStorage.setItem('tokenCookieSynced', '1');
+                    location.reload();
+                }
+            }
+        } catch (e) {
+            // ignore
+        }
+    })();
+
     // Thymeleaf 사용 시 아래 loadHTML은 불필요할 수 있으나, 
     // 기존 스크립트 의존성 유지를 위해 스크립트만 로드하도록 조정하거나
     // 이미 HTML이 존재하면 스크립트만 실행하도록 합니다.
@@ -151,8 +184,7 @@ window.addEventListener('DOMContentLoaded', () => {
         location.reload();
         return; // 토큰 처리 후 중단
     }
-    
-    
+
     const header = document.querySelector('#header');
     if (header) {
         if (!header.innerHTML.trim()) {
@@ -161,12 +193,14 @@ window.addEventListener('DOMContentLoaded', () => {
                 .then(() => loadScript('/js/header.js'))
                 .then(() => {
                     if (typeof initHeader === 'function') initHeader();
+                    bindHeaderActions();
                     if (typeof initSearch === 'function') initSearch();
                 });
         } else {
             // 이미 서버에서 렌더링된 경우
             loadScript('/js/header.js').then(() => {
                 if (typeof initHeader === 'function') initHeader();
+                bindHeaderActions();
                 if (typeof initSearch === 'function') initSearch();
             });
         }
@@ -225,3 +259,44 @@ document.addEventListener('change', (e) => {
         setTimeout(hideGoogleTranslateText, 1000);
     }
 });
+
+// ✅ header fragment 로딩 방식(Thymeleaf 렌더/innerHTML 삽입)과 무관하게 마이페이지/로그아웃이 동작하도록 보장
+function bindHeaderActions() {
+    const logoutBtn = document.getElementById('logoutBtn');
+    if (logoutBtn && !logoutBtn.dataset.bound) {
+        logoutBtn.dataset.bound = '1';
+        logoutBtn.addEventListener('click', async (e) => {
+            e.preventDefault();
+
+            // 서버 로그아웃 API가 있으면 호출(없어도 프론트 정리는 진행)
+            try {
+                await fetch('/user/logout', {
+                    method: 'POST',
+                    headers: buildAuthHeaders(),
+                    credentials: 'include'
+                });
+            } catch (_) {
+                // ignore
+            }
+
+            // 프론트 토큰/세션 정리
+            try {
+                localStorage.removeItem('accessToken');
+                localStorage.removeItem('refreshToken');
+                localStorage.removeItem('isLoggedIn');
+            } catch (_) {
+            }
+            try {
+                sessionStorage.removeItem('cachedUser');
+                sessionStorage.removeItem('tokenCookieSynced');
+            } catch (_) {
+            }
+
+            // 쿠키 만료
+            document.cookie = 'accessToken=; Path=/; Max-Age=0';
+
+            alert('로그아웃 되었습니다.');
+            location.href = '/';
+        });
+    }
+}
