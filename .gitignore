@@ -16,6 +16,7 @@ build/
 .springBeans
 .sts4-cache
 .editorconfig
+Dockerfile
 bin/
 !**/src/main/**/bin/
 !**/src/test/**/bin/
