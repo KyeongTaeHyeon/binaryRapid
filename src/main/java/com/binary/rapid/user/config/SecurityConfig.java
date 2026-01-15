@@ -44,6 +44,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
                                 "/",
+                                "/origin",
                                 "/user/LocalSignin",
                                 "/login/register",
                                 "/user/refresh",
