@@ -63,7 +63,8 @@
                c.comment_seq AS commentSeq,
                c.comment     AS comment,
                c.user_id     AS userId,
-               u.nickname    AS userName,  c.create_date AS createDate
+               u.nickname    AS userName,
+               c.create_date AS createDate
         FROM tb_boardComment c
                  LEFT JOIN tb_user u ON c.user_id = u.user_id
         WHERE c.id = #{id}
@@ -108,7 +109,57 @@
                create_date AS createDate
         FROM tb_boardFile
         WHERE id = #{id}
+          AND delete_date IS NULL
         ORDER BY file_seq ASC
     </select>
+
+    <select id="selectBoardFile" resultType="com.binary.rapid.board.dto.BoardFileDto">
+        SELECT id          AS id,
+               file_seq    AS fileSeq,
+               file_addr   AS fileAddr,
+               user_id     AS userId,
+               create_date AS createDate
+        FROM tb_boardFile
+        WHERE id = #{id}
+          AND file_seq = #{fileSeq}
+          AND delete_date IS NULL
+        LIMIT 1
+    </select>
+
+    <update id="deleteBoardFile">
+        UPDATE tb_boardFile
+        SET delete_date = NOW(),
+            update_date = NOW()
+        WHERE id = #{id}
+          AND file_seq = #{fileSeq}
+          AND delete_date IS NULL
+    </update>
+
+    <select id="selectMaxFileSeq" resultType="int">
+        SELECT IFNULL(MAX(file_seq), 0)
+        FROM tb_boardFile
+        WHERE id = #{id}
+          AND delete_date IS NULL
+    </select>
+
+    <select id="selectAllFileList" parameterType="int" resultType="com.binary.rapid.board.dto.BoardFileDto">
+        SELECT id          AS id,
+               file_seq    AS fileSeq,
+               file_addr   AS fileAddr,
+               user_id     AS userId,
+               create_date AS createDate,
+               delete_date AS deleteDate
+        FROM tb_boardFile
+        WHERE id = #{id}
+        ORDER BY file_seq ASC
+    </select>
+
+    <update id="deleteBoardFilesByBoardId" parameterType="int">
+        UPDATE tb_boardFile
+        SET delete_date = NOW(),
+            update_date = NOW()
+        WHERE id = #{id}
+          AND delete_date IS NULL
+    </update>
 
 </mapper>

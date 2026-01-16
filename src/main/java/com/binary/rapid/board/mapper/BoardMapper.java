@@ -26,6 +26,16 @@ public interface BoardMapper {
 
     List<BoardFileDto> selectFileList(int id);
 
+    List<BoardFileDto> selectAllFileList(int id);
+
+    BoardFileDto selectBoardFile(@Param("id") int id, @Param("fileSeq") int fileSeq);
+
+    void deleteBoardFile(@Param("id") int id, @Param("fileSeq") int fileSeq);
+
+    void deleteBoardFilesByBoardId(int id);
+
+    int selectMaxFileSeq(int id);
+
     // 댓글
     List<BoardCommentDto> selectCommentList(int id);
 
@@ -34,6 +44,6 @@ public interface BoardMapper {
     void updateComment(BoardCommentDto commentDto);
 
     void deleteComment(@Param("id") int id, @Param("commentSeq") int commentSeq);
-    
+
     void deleteCommentsByBoardId(int id);
 }

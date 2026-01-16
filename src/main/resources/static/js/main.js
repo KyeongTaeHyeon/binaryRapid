@@ -10,8 +10,10 @@ gsap.registerPlugin(ScrollTrigger);
 let mainSwiper;
 
 document.addEventListener('DOMContentLoaded', function () {
-    // 히어로 영역
     const heroSlideList = document.getElementById('heroSlideList');
+    if (!heroSlideList) return;
+
+    // 히어로 영역
     LoadData('/api/ramen/hero')
         .then((data) => {
             data.forEach((item) => {
@@ -19,7 +21,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 slide.className = 'swiper-slide';
 
                 const img = document.createElement('img');
-                img.src = item.image;
+                img.src = (item.image && item.image.startsWith('/')) ? item.image : `/${(item.image || '').replace(/^\/?/, '')}`;
                 img.alt = item.name;
 
                 const slideTextDiv = document.createElement('div');

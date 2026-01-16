@@ -260,18 +260,32 @@ function renderGallery(files) {
         return;
     }
 
+    const postId = new URLSearchParams(window.location.search).get("id");
+
     gallery.style.display = "grid";
     gallery.innerHTML = "";
 
     files.forEach(f => {
+        const seq = f?.fileSeq;
         const addr = f?.fileAddr;
-        if (!addr) return;
+        if (!seq && !addr) return;
 
-        // addr가 '/upload/...' 처럼 '/'로 시작하면 그대로 사용
-        // 아니면 display API로 감싸서 사용
-        const src = (typeof addr === "string" && addr.startsWith("/"))
-            ? addr
-            : `/api/board/file/display?path=${encodeURIComponent(addr)}`;
+        // 신버전(옵션B): API로 제공
+        // 구버전(정적경로): /img/... 형태면 그대로 접근
+        let src;
+        if (typeof addr === "string" && addr.startsWith("/img/")) {
+            src = addr;
+        } else if (postId && seq) {
+            src = `/api/board/file/${encodeURIComponent(postId)}/${encodeURIComponent(seq)}`;
+        } else if (typeof addr === "string" && addr.startsWith("/")) {
+            // 혹시라도 절대경로가 들어온 경우
+            src = addr;
+        } else if (typeof addr === "string" && addr.length > 0) {
+            // 마지막 fallback: 기존 display API
+            src = `/api/board/file/display?path=${encodeURIComponent(addr)}`;
+        } else {
+            return;
+        }
 
         const img = document.createElement("img");
         img.className = "gallery-item";

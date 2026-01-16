@@ -107,7 +107,7 @@ function renderPosts(posts) {
             <td>${displayNum}</td>
             <td>${boardName}</td>
             <td>
-                <a href="/board/boardList2?id=${post.id}" style="color:inherit; text-decoration:none;">
+                <a href="/board/boardDetail?id=${post.id}" style="color:inherit; text-decoration:none;">
                     ${truncateTitle(post.title)}
                 </a>
             </td>
@@ -146,12 +146,16 @@ function renderPagination(totalItems) {
 
     if (prevBtn) {
         prevBtn.disabled = (currentPage === 1);
-        prevBtn.onclick = () => { if (currentPage > 1) window.goToPage(currentPage - 1); };
+        prevBtn.onclick = () => {
+            if (currentPage > 1) window.goToPage(currentPage - 1);
+        };
     }
 
     if (nextBtn) {
         nextBtn.disabled = (currentPage === totalPages || totalPages === 0);
-        nextBtn.onclick = () => { if (currentPage < totalPages) window.goToPage(currentPage + 1); };
+        nextBtn.onclick = () => {
+            if (currentPage < totalPages) window.goToPage(currentPage + 1);
+        };
     }
 
     // 숫자 버튼 생성
@@ -174,8 +178,8 @@ document.addEventListener('DOMContentLoaded', () => {
             e.preventDefault();
             const val = document.getElementById('cate').value;
             // HTML value -> DB Code 변환
-            if(val === 'freeBoard') filterParams.category = 'A00';
-            else if(val === 'restaurantCert') filterParams.category = 'B00';
+            if (val === 'freeBoard') filterParams.category = 'A00';
+            else if (val === 'restaurantCert') filterParams.category = 'B00';
             else filterParams.category = ''; // 전체
             loadBoardData();
         };

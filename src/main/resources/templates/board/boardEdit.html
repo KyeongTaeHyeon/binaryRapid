@@ -1,75 +1,105 @@
 <!DOCTYPE html>
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8"/>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>RaFeed - 게시글 수정</title>
-    <link rel="stylesheet" th:href="@{/css/reset.css}"/>
-    <link rel="stylesheet" th:href="@{/css/common.css}"/>
-    <link rel="stylesheet" th:href="@{/css/boardList.css}"/>
-    <link rel="stylesheet" th:href="@{/css/boardDetail.css}"/> </head>
-<body>
-<div id="wrapper">
-    <header id="header" th:replace="~{fragments/header :: header}"></header>
+    <head>
+        <meta charset="UTF-8"/>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+        <title>RaFeed - 게시글 수정</title>
+        <link rel="stylesheet" th:href="@{/css/reset.css}"/>
+        <link rel="stylesheet" th:href="@{/css/common.css}"/>
+        <link rel="stylesheet" th:href="@{/css/boardList.css}"/>
+        <link rel="stylesheet" th:href="@{/css/boardDetail.css}"/>
+    </head>
+    <body>
+        <div id="wrapper">
+            <header id="header" th:replace="~{fragments/header :: header}"></header>
 
-    <main id="main">
-        <div class="board-container">
-            <div class="post-card">
-                <div class="post-header">
-                    <h1 class="post-title">게시글 수정</h1>
-                </div>
+            <main id="main">
+                <div class="board-container">
+                    <div class="post-card">
+                        <div class="post-header">
+                            <h1 class="post-title">게시글 수정</h1>
+                        </div>
 
-                <div class="divider"></div>
+                        <div class="divider"></div>
 
-                <div class="store-form">
-                    <div class="form-row">
-                        <label for="boardCategory" style="display:block; font-weight:700; margin-bottom:10px;">게시판 선택</label>
-                        <select id="boardCategory" style="width:100%; padding:10px; border:1px solid var(--border-color); border-radius:8px;">
-                            <option value="A00">자유게시판</option>
-                            <option value="B00">식당인증</option>
-                        </select>
+                        <div class="store-form">
+                            <div class="form-row">
+                                <label for="boardCategory" style="display:block; font-weight:700; margin-bottom:10px;">게시판
+                                    선택</label>
+                                <select id="boardCategory"
+                                        style="width:100%; padding:10px; border:1px solid var(--border-color); border-radius:8px;">
+                                    <option value="A00">자유게시판</option>
+                                    <option value="B00">식당인증</option>
+                                </select>
+                            </div>
+
+                            <div class="form-row" style="margin-top: 20px;">
+                                <label for="postTitle"
+                                       style="display:block; font-weight:700; margin-bottom:10px;">제목</label>
+                                <input type="text" id="postTitle" placeholder="제목을 입력하세요"
+                                       style="width:100%; padding:12px; border:1px solid var(--border-color); border-radius:8px;"/>
+                            </div>
+                        </div>
+
+                        <div class="post-body" style="margin-top: 20px;">
+                            <label for="postContent" style="display:none;">내용</label>
+                            <textarea id="postContent" placeholder="내용을 입력해주세요..."
+                                      style="width:100%; min-height:400px; padding:15px; border:1px solid var(--border-color); border-radius:8px; outline:none; resize:none; font-size:16px;"></textarea>
+                        </div>
+
+                        <div class="form-row" style="margin-top: 20px;">
+                            <label for="fileInput" style="display:block; font-weight:700; margin-bottom:10px;">파일 추가
+                                (이미지)</label>
+                            <input type="file" id="fileInput" multiple accept="image/*"
+                                   style="width:100%; padding:10px; border:1px solid var(--border-color); border-radius:8px; background:var(--bg-light);"/>
+                        </div>
+
+                        <div id="filePreviewArea" class="comment-section" style="margin-top: 20px; padding: 25px;">
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+                                <span style="font-weight:700; font-size:16px;">수정 시 첨부 이미지 미리보기</span>
+                                <button type="button" id="clearFilesBtn" class="btn-danger"
+                                        style="padding:5px 12px; border-radius:6px; font-size:13px; cursor:pointer;">
+                                    전체삭제
+                                </button>
+                            </div>
+                            <div id="filePreviewList" class="image-gallery"
+                                 style="border-top:none; padding-top:0;"></div>
+                            <p id="filePreviewHelp" style="font-size:13px; color:var(--gray-text); margin-top:10px;">
+                                새로 선택한 이미지가 여기에 표시됩니다.
+                            </p>
+                        </div>
+
+                        <!-- ✅ 기존 첨부 이미지(삭제 가능) -->
+                        <div id="existingFileArea" class="comment-section" style="margin-top: 20px; padding: 25px;">
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+                                <span style="font-weight:700; font-size:16px;">기존 첨부 이미지</span>
+                                <span style="font-size:13px; color:var(--gray-text);">삭제 버튼을 누르면 저장 시 반영됩니다.</span>
+                            </div>
+                            <div id="existingFileList" class="image-gallery"
+                                 style="border-top:none; padding-top:0;"></div>
+                        </div>
+
+                        <div class="action-bar" style="margin-top: 50px; justify-content: center; gap: 20px;">
+                            <button type="button" id="updatePostBtn" class="btn btn-primary" style="width:150px;">수정
+                                완료
+                            </button>
+                            <button type="button" class="btn btn-outline" onclick="location.href='/board/boardList'"
+                                    style="width:150px;">취소
+                            </button>
+                        </div>
                     </div>
-
-                    <div class="form-row" style="margin-top: 20px;">
-                        <label for="postTitle" style="display:block; font-weight:700; margin-bottom:10px;">제목</label>
-                        <input type="text" id="postTitle" placeholder="제목을 입력하세요"
-                               style="width:100%; padding:12px; border:1px solid var(--border-color); border-radius:8px;"/>
-                    </div>
                 </div>
+            </main>
 
-                <div class="post-body" style="margin-top: 20px;">
-                        <textarea id="postContent" placeholder="내용을 입력해주세요..."
-                                  style="width:100%; min-height:400px; padding:15px; border:1px solid var(--border-color); border-radius:8px; outline:none; resize:none; font-size:16px;"></textarea>
-                </div>
-
-                <div class="form-row" style="margin-top: 20px;">
-                    <label for="fileInput" style="display:block; font-weight:700; margin-bottom:10px;">파일 추가 (이미지)</label>
-                    <input type="file" id="fileInput" multiple accept="image/*"
-                           style="width:100%; padding:10px; border:1px solid var(--border-color); border-radius:8px; background:var(--bg-light);"/>
-                </div>
-
-                <div id="filePreviewArea" class="comment-section" style="margin-top: 20px; padding: 25px;">
-                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
-                        <span style="font-weight:700; font-size:16px;">수정 시 첨부 이미지 미리보기</span>
-                        <button type="button" id="clearFilesBtn" class="btn-danger" style="padding:5px 12px; border-radius:6px; font-size:13px; cursor:pointer;">전체삭제</button>
-                    </div>
-                    <div id="filePreviewList" class="image-gallery" style="border-top:none; padding-top:0;"></div>
-                    <p id="filePreviewHelp" style="font-size:13px; color:var(--gray-text); margin-top:10px;">
-                        새로 선택한 이미지가 여기에 표시됩니다.
-                    </p>
-                </div>
-
-                <div class="action-bar" style="margin-top: 50px; justify-content: center; gap: 20px;">
-                    <button type="button" id="updatePostBtn" class="btn btn-primary" style="width:150px;">수정 완료</button>
-                    <button type="button" class="btn btn-outline" onclick="location.href='/board/boardList'" style="width:150px;">취소</button>
-                </div>
-            </div>
+            <footer id="footer" th:replace="~{fragments/footer :: footer}"></footer>
         </div>
-    </main>
 
-    <footer id="footer" th:replace="~{fragments/footer :: footer}"></footer>
-</div>
-
-<script th:src="@{/js/common.js}"></script>
-<script th:src="@{/js/boardDetail.js}"></script> </body>
+        <script th:src="@{/js/common.js}"></script>
+        <script th:inline="javascript">
+            window.isLogin = /*[[${isLogin}]]*/ false;
+            window.loginUserId = /*[[${loginUserId}]]*/ null;
+        </script>
+        <script th:src="@{/js/boardDetail.js}"></script>
+        <script th:src="@{/js/boardEdit.js}"></script>
+    </body>
 </html>

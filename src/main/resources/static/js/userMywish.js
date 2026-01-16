@@ -59,7 +59,7 @@ function renderCards(shops) {
         // 1. 기본 텍스트 매핑
         item.querySelector(".contentNumber").textContent = `${displayId}.`;
         item.querySelector(".contentDescription").textContent = shop.shopContent || "설명 없음";
-        item.querySelector(".contentImageWrapper img").src = shop.imgUrl || "/img/default-image.png";
+        item.querySelector(".contentImageWrapper img").src = shop.imgUrl || "/img/raFeed_Logo-Photoroom.png";
 
         // 2. [변경] 가게 제목 클릭 시 상세 페이지 이동 링크 설정
         const titleElement = item.querySelector(".contentTitle");
@@ -107,7 +107,10 @@ function renderPaginationButtons(totalItems) {
         li.className = `page-item ${i === currentPage ? 'active' : ''}`;
         const btn = document.createElement("button");
         btn.textContent = i;
-        btn.onclick = () => { currentPage = i; updateUI(); };
+        btn.onclick = () => {
+            currentPage = i;
+            updateUI();
+        };
         li.appendChild(btn);
         paginationList.appendChild(li);
     }

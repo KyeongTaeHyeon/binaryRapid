@@ -141,6 +141,41 @@ async function refreshTokens() {
 }
 
 
+// ✅ 로그인 리다이렉트(URL 파라미터)로 토큰이 넘어오는 경우,
+// header.js 초기화(DOMContentLoaded)보다 먼저 토큰을 저장해야 헤더가 즉시 로그인 상태로 렌더링됩니다.
+(function captureTokensFromUrlEarly() {
+    try {
+        const urlParams = new URLSearchParams(window.location.search);
+        const accessToken = urlParams.get('accessToken');
+        const refreshToken = urlParams.get('refreshToken');
+
+        if (accessToken && refreshToken) {
+            // 1) 토큰 저장
+            localStorage.setItem('accessToken', accessToken);
+            localStorage.setItem('refreshToken', refreshToken);
+            localStorage.setItem('isLoggedIn', 'true');
+
+            // 2) cookie 동기화(서버 렌더링 isAuthenticated 반영 목적)
+            document.cookie = `accessToken=${accessToken}; Path=/`;
+
+            // 3) URL에서 토큰 파라미터 제거(현재 경로 유지)
+            const cleanUrl = window.location.pathname + window.location.hash;
+            window.history.replaceState({}, document.title, cleanUrl);
+
+            // 4) 토큰 저장 직후 헤더 즉시 갱신(두 번째 로그인 필요 현상 제거)
+            try {
+                if (typeof window.initHeader === 'function') {
+                    // header fragment가 이미 렌더되어 있거나 로딩 직후라면 바로 반영
+                    window.initHeader();
+                }
+            } catch (_) {
+            }
+        }
+    } catch (e) {
+        // ignore
+    }
+})();
+
 window.addEventListener('DOMContentLoaded', () => {
     // ✅ localStorage(accessToken) → cookie(accessToken) 동기화
     // header를 fetch로 innerHTML 주입하면 header.html 내부 <script>는 실행되지 않아서 common.js에서 처리한다.
@@ -168,22 +203,6 @@ window.addEventListener('DOMContentLoaded', () => {
     // Thymeleaf 사용 시 아래 loadHTML은 불필요할 수 있으나, 
     // 기존 스크립트 의존성 유지를 위해 스크립트만 로드하도록 조정하거나
     // 이미 HTML이 존재하면 스크립트만 실행하도록 합니다.
-    const urlParams = new URLSearchParams(window.location.search);
-    const accessToken = urlParams.get('accessToken');
-    const refreshToken = urlParams.get('refreshToken');
-
-    if (accessToken && refreshToken) {
-        // 1. 토큰을 브라우저에 저장 (이게 핵심!)
-        localStorage.setItem("accessToken", accessToken);
-        localStorage.setItem("refreshToken", refreshToken);
-
-        // 2. URL에서 토큰 파라미터 제거 (주소창 깔끔하게)
-        window.history.replaceState({}, document.title, "/");
-
-        alert("로그인에 성공하였습니다.");
-        location.reload();
-        return; // 토큰 처리 후 중단
-    }
 
     const header = document.querySelector('#header');
     if (header) {
@@ -299,4 +318,14 @@ function bindHeaderActions() {
             location.href = '/';
         });
     }
+}
+
+// ✅ 전역 유틸 노출(페이지별 module/일반 script 혼용 시 ReferenceError 방지)
+try {
+    if (typeof authFetch === 'function') window.authFetch = authFetch;
+} catch (_) {
+}
+try {
+    if (typeof buildAuthHeaders === 'function') window.buildAuthHeaders = buildAuthHeaders;
+} catch (_) {
 }
