@@ -55,9 +55,6 @@ public class SecurityConfig {
                                 "/shop/**",
                                 "/board/**",
                                 "/api/board/**",
-                                "/admin/users",
-                                "/admin/notices",
-                                "/admin/categories",
                                 "/user/check-duplicate",
                                 "/user/LocalSignup",
                                 "/css/**", "/js/**", "/images/**", "/fragments/**", "/img/**", "/favicon.ico", "/error",
@@ -81,6 +78,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/approval/**").authenticated()
                         .requestMatchers(HttpMethod.PUT, "/api/approval/**").authenticated()
                         .requestMatchers(HttpMethod.DELETE, "/api/approval/**").authenticated()
+                        .requestMatchers("/admin/**").hasAuthority("ADMIN")
                         .requestMatchers("/admin/api/**").hasAuthority("ADMIN")
                         // 로그아웃, 토큰 갱신 등은 '인증된 사용자'만 접근 가능하도록 설정
                         // 이렇게 해야 @AuthenticationPrincipal에 데이터가 들어옵니다.

@@ -6,6 +6,8 @@ import com.binary.rapid.user.form.UserLoginForm;
 import com.binary.rapid.user.form.UserSignUpForm;
 import com.binary.rapid.user.global.common.ApiResponse;
 import com.binary.rapid.user.global.jwt.JwtUtil;
+import com.binary.rapid.user.handler.UserNotFoundException;
+import org.springframework.http.HttpStatus;
 import com.binary.rapid.user.global.security.CustomUserDetails;
 import com.binary.rapid.user.mapper.RefreshTokenMapper;
 import com.binary.rapid.user.service.UserService;
@@ -49,32 +51,48 @@ public class UserController {
             @RequestBody UserLoginForm form,
             HttpServletResponse response
     ) {
-        SelectUserResponseForJwtDto loginUser = service.userLocalsignin(form);
+        try {
+            SelectUserResponseForJwtDto loginUser = service.userLocalsignin(form);
 
-        String accessToken = JwtUtil.createAccessToken(loginUser.getEmail());
-        String refreshToken = JwtUtil.createRefreshToken();
+            String accessToken = JwtUtil.createAccessToken(loginUser.getEmail());
+            String refreshToken = JwtUtil.createRefreshToken();
 
-        // 리프레시 토큰 저장
-        refreshTokenMapper.saveRefreshToken(
-                loginUser.getUserId(),
-                refreshToken,
-                LocalDateTime.now().plusDays(7)
-        );
+            // 리프레시 토큰 저장
+            refreshTokenMapper.saveRefreshToken(
+                    loginUser.getUserId(),
+                    refreshToken,
+                    LocalDateTime.now().plusDays(7)
+            );
 
-        // ✅ 핵심: accessToken을 HttpOnly 쿠키로 저장 (페이지 이동/Thymeleaf에서도 인증 가능)
-        ResponseCookie accessCookie = ResponseCookie.from("accessToken", accessToken)
-                .httpOnly(true)
-                .path("/")
-                .sameSite("Lax")
-                .secure(false)        // HTTPS면 true
-                .maxAge(60 * 60)      // 1시간 (원하는 값으로 조절)
-                .build();
+            // ✅ accessToken을 HttpOnly 쿠키로 저장
+            ResponseCookie accessCookie = ResponseCookie.from("accessToken", accessToken)
+                    .httpOnly(true)
+                    .path("/")
+                    .sameSite("Lax")
+                    .secure(false)        // HTTPS면 true
+                    .maxAge(60 * 60)      // 1시간
+                    .build();
 
-        response.addHeader("Set-Cookie", accessCookie.toString());
+            response.addHeader("Set-Cookie", accessCookie.toString());
 
-        // 기존 응답(JSON)도 유지 (프론트 localStorage 방식도 당장 깨지지 않게)
-        UserLoginJWT responseBody = new UserLoginJWT(accessToken, refreshToken, loginUser);
-        return ResponseEntity.ok(ApiResponse.success(responseBody));
+            // 기존 응답(JSON)
+            UserLoginJWT responseBody = new UserLoginJWT(accessToken, refreshToken, loginUser);
+            return ResponseEntity.ok(ApiResponse.success(responseBody));
+
+        } catch (UserNotFoundException e) {
+            // ❗프론트가 response.json()을 호출해도 깨지지 않도록 반드시 JSON으로 내려줌
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(ApiResponse.fail("404", e.getMessage()));
+
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(ApiResponse.fail("400", e.getMessage()));
+
+        } catch (Exception e) {
+            log.error("LocalSignin failed", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(ApiResponse.fail("500", "로그인 처리 중 오류가 발생했습니다."));
+        }
     }
 
     // 소셜 회원가입
