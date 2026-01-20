@@ -18,6 +18,15 @@ document.addEventListener('DOMContentLoaded', async () => {
             const nick = nickInput.value.trim();
             if (!nick) return;
 
+            // 현재 내 닉네임과 같으면 중복 체크 패스
+            const currentNick = document.getElementById('nickName').defaultValue;
+            if (nick === currentNick) {
+                isNickOk = true;
+                msgNick.textContent = "현재 사용 중인 닉네임입니다.";
+                msgNick.style.color = "green";
+                return;
+            }
+
             const response = await fetch(`/user/check-duplicate?nickName=${nick}`);
             const result = await response.json();
 
@@ -49,7 +58,11 @@ async function fetchUserInfo() {
             // 필드 채우기
             document.getElementById('userId').value = user.id || '';
             document.getElementById('userEmail').value = user.email || '';
-            document.getElementById('nickName').value = user.nickName || '';
+            
+            const nickField = document.getElementById('nickName');
+            nickField.value = user.nickName || '';
+            nickField.defaultValue = user.nickName || ''; // 초기값 저장 (중복체크 예외용)
+
             document.getElementById('selAge').value = user.birth || '';
             document.getElementById('selPreference').value = user.taste || '';
 
@@ -85,7 +98,7 @@ async function handleUpdate(e) {
     const updateData = {
         userId: userPk,
         id: document.getElementById('userId').value,
-        password: userSocialType === "LOCAL" ? document.getElementById('userPassword').value : "",
+        password: userSocialType === "LOCAL" ? document.getElementById('userPassword').value : null, // 빈 문자열 대신 null 전송
         email: document.getElementById('userEmail').value,
         nickName: document.getElementById('nickName').value,
         gender: currentGender, // "M" 또는 "F"
@@ -106,8 +119,14 @@ async function handleUpdate(e) {
             alert("수정 완료");
             location.reload(); // 새로고침하여 반영 확인
         } else {
-            const errorResult = await response.json();
-            alert("수정 실패: " + (errorResult.message || "알 수 없는 오류"));
+            // JSON 파싱 실패 방어 로직
+            try {
+                const errorResult = await response.json();
+                alert("수정 실패: " + (errorResult.message || "알 수 없는 오류"));
+            } catch (err) {
+                const text = await response.text();
+                alert("수정 실패(서버 오류): " + text);
+            }
         }
     }
 }
