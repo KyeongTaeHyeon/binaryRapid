@@ -89,6 +89,7 @@
                                     required
                                 />
                             </div>
+                            <span id="nickNameMsg" class="msg"></span>
                             <div class="inputGroup">
                                 <label>나이</label>
                                 <select name="selAge" id="selAge">
@@ -125,10 +126,10 @@
                                     >
                                         취향을 선택하세요
                                     </option>
-                                    <option value="">돈코츠</option>
-                                    <option value="">시오</option>
-                                    <option value="">미소</option>
-                                    <option value="">쇼유</option>
+                                    <option value="돈코츠">돈코츠</option>
+                                    <option value="시오">시오</option>
+                                    <option value="미소">미소</option>
+                                    <option value="쇼유">쇼유</option>
                                 </select>
                             </div>
                         </div>
@@ -160,9 +161,5 @@
         <script src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
         <!-- 각화면 js생성하여 사용 -->
         <script th:src="@{/js/register.js}"></script>
-        <!-- submit버튼 이벤트 -->
-        <script th:src="@{/js/registerSubmit.js}"></script>
-        <!-- 중복 확인버튼 이벤트 -->
-        <script th:src="@{/js/regCheckDuplicate.js}"></script>
     </body>
 </html>

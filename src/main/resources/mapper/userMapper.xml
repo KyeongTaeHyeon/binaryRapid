@@ -64,7 +64,20 @@
     <select id="selectUserId"
             parameterType="string"
             resultType="loginJwtDto">
-        SELECT *
+        SELECT user_id,
+               id,
+               password,
+               nickname as nickName,
+               name,
+               taste,
+               birth,
+               email,
+               social,
+               gender,
+               role,
+               create_date,
+               update_date,
+               delete_date
         FROM tb_user
         WHERE id = #{id}
           AND delete_date IS NULL
@@ -74,7 +87,20 @@
     <select id="selectUserToUserResponseDto"
             parameterType="string"
             resultType="UserResponseDto">
-        SELECT *
+        SELECT user_id,
+               id,
+               password,
+               nickname as nickName,
+               name,
+               taste,
+               birth,
+               email,
+               social,
+               gender,
+               role,
+               create_date,
+               update_date,
+               delete_date
         FROM tb_user
         WHERE email = #{email}
           AND delete_date IS NULL
@@ -83,7 +109,20 @@
     <!-- PK로 유저 조회 -->
     <select id="selectUserById"
             resultType="com.binary.rapid.user.dto.SelectUserResponseForJwtDto">
-        SELECT *
+        SELECT user_id,
+               id,
+               password,
+               nickname as nickName,
+               name,
+               taste,
+               birth,
+               email,
+               social,
+               gender,
+               role,
+               create_date,
+               update_date,
+               delete_date
         FROM tb_user
         WHERE user_id = #{userId}
           AND delete_date IS NULL

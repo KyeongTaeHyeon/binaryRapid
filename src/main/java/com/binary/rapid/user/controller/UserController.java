@@ -6,6 +6,7 @@ import com.binary.rapid.user.form.UserLoginForm;
 import com.binary.rapid.user.form.UserSignUpForm;
 import com.binary.rapid.user.global.common.ApiResponse;
 import com.binary.rapid.user.global.jwt.JwtUtil;
+import com.binary.rapid.user.handler.InvalidPasswordException;
 import com.binary.rapid.user.handler.UserNotFoundException;
 import org.springframework.http.HttpStatus;
 import com.binary.rapid.user.global.security.CustomUserDetails;
@@ -84,6 +85,10 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(ApiResponse.fail("404", e.getMessage()));
 
+        } catch (InvalidPasswordException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(ApiResponse.fail("401", e.getMessage()));
+
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(ApiResponse.fail("400", e.getMessage()));
@@ -134,18 +139,43 @@ public class UserController {
     @PostMapping("/logout")
     public ResponseEntity<ApiResponse<String>> logout(
             @AuthenticationPrincipal CustomUserDetails userDetails,
-            HttpServletRequest request
+            HttpServletRequest request,
+            HttpServletResponse response
     ) {
         String authHeader = request.getHeader("Authorization");
+        String accessToken = null;
 
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
-            String accessToken = authHeader.substring(7);
-            service.logout(userDetails.getUser().getUserId(), accessToken);
-            return ResponseEntity.ok(ApiResponse.success("로그아웃 성공"));
+            accessToken = authHeader.substring(7);
+        } else {
+            // Authorization 헤더가 없으면 쿠키에서 accessToken 확인
+            if (request.getCookies() != null) {
+                for (jakarta.servlet.http.Cookie c : request.getCookies()) {
+                    if ("accessToken".equals(c.getName())) {
+                        accessToken = c.getValue();
+                        break;
+                    }
+                }
+            }
         }
 
-        return ResponseEntity.badRequest().body(ApiResponse.fail("400", "잘못된 요청입니다."));
+        // userDetails는 SecurityContext에 의해 설정되어 있어야 함(설정상 authenticated 요구)
+        int userId = userDetails != null && userDetails.getUser() != null ? userDetails.getUser().getUserId() : 0;
+
+        // 서비스에 로그아웃 처리 위임 (accessToken이 null이어도 리프레시 토큰 삭제는 수행되도록 처리됨)
+        service.logout(userId, accessToken);
+
+        // accessToken 쿠키 만료 응답
+        ResponseCookie expired = ResponseCookie.from("accessToken", "")
+                .httpOnly(true)
+                .path("/")
+                .maxAge(0)
+                .build();
+        response.addHeader("Set-Cookie", expired.toString());
+
+        return ResponseEntity.ok(ApiResponse.success("로그아웃 성공"));
     }
+
 
     @GetMapping("/me")
     public ResponseEntity<ApiResponse<SelectUserResponseForJwtDto>> getMyInfo(

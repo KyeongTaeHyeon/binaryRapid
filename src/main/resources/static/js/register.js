@@ -88,6 +88,28 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // [B] 아이디 실시간 중복 확인 (일반 가입 시 blur)
     if (idInput && !isSocialMode) {
+        // 중복 확인 버튼 클릭 시
+        if (idBtn) {
+            idBtn.addEventListener('click', async () => {
+                const uid = idInput.value.trim();
+                if (!reUid.test(uid)) {
+                    msgUid.textContent = "아이디 형식이 올바르지 않습니다.";
+                    msgUid.style.color = "red";
+                    return;
+                }
+                const isDuplicate = await fetchDuplicate('id', uid);
+                if (isDuplicate) {
+                    isIdChecked = false;
+                    msgUid.textContent = '이미 사용 중인 아이디입니다.';
+                    msgUid.style.color = 'red';
+                } else {
+                    isIdChecked = true;
+                    msgUid.textContent = '사용 가능한 아이디입니다.';
+                    msgUid.style.color = 'green';
+                }
+            });
+        }
+        
         idInput.addEventListener('blur', async () => {
             const uid = idInput.value.trim();
             if (!reUid.test(uid)) {
@@ -95,16 +117,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 msgUid.style.color = "red";
                 return;
             }
-            const isDuplicate = await fetchDuplicate('id', uid);
-            if (isDuplicate) {
-                isIdChecked = false;
-                msgUid.textContent = '이미 사용 중인 아이디입니다.';
-                msgUid.style.color = 'red';
-            } else {
-                isIdChecked = true;
-                msgUid.textContent = '사용 가능한 아이디입니다.';
-                msgUid.style.color = 'green';
-            }
+            // blur 시에는 중복체크를 강제하지 않고, 버튼 클릭을 유도하거나 자동 체크
+        });
+        
+        idInput.addEventListener('input', () => {
+            isIdChecked = false;
+            msgUid.textContent = '';
         });
     }
 
@@ -153,6 +171,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 msgEmail.style.color = 'green';
             }
         });
+        
+        emailInput.addEventListener('input', () => {
+            isEmailOk = false;
+            if (msgEmail) {
+                msgEmail.textContent = '';
+            }
+        });
     }
 
     // [E] 닉네임 실시간 중복 확인 (blur)
@@ -189,9 +214,41 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (!isIdChecked) return alert("아이디 중복 확인을 해주세요.");
             if (!isPassOk) return alert("비밀번호를 확인해주세요.");
-            if (!isEmailOk) return alert("이메일을 확인해주세요.");
-            if (!isNickNameOk) return alert("닉네임 중복 확인을 해주세요.");
-// register.js 내 제출 로직
+            
+            // [수정] 이메일 자동 체크
+            if (!isEmailOk && !isSocialMode) {
+                const email = emailInput.value.trim();
+                if (!email || !reEmail.test(email)) return alert("유효한 이메일을 입력해주세요.");
+                
+                const isDuplicate = await fetchDuplicate('email', email);
+                if (isDuplicate) {
+                    msgEmail.textContent = '이미 등록된 이메일입니다.';
+                    msgEmail.style.color = 'red';
+                    return alert("이미 등록된 이메일입니다.");
+                } else {
+                    isEmailOk = true;
+                    msgEmail.textContent = '사용 가능한 이메일입니다.';
+                    msgEmail.style.color = 'green';
+                }
+            }
+
+            // [수정] 닉네임 자동 체크
+            if (!isNickNameOk) {
+                const nick = nickInput.value.trim();
+                if (!nick) return alert("닉네임을 입력해주세요.");
+                
+                const isDuplicate = await fetchDuplicate('nickName', nick);
+                if (isDuplicate) {
+                    msgNick.textContent = '이미 사용 중인 닉네임입니다.';
+                    msgNick.style.color = 'red';
+                    return alert("이미 사용 중인 닉네임입니다.");
+                } else {
+                    isNickNameOk = true;
+                    msgNick.textContent = '사용 가능한 닉네임입니다.';
+                    msgNick.style.color = 'green';
+                }
+            }
+
             const socialParam = urlParams.get('social'); // "GOOGLE"
 
             const formData = {
@@ -204,14 +261,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 gender: document.querySelector('#selGender').value,
                 taste: document.querySelector('#selPreference').value,
                 role: 'USER',
-                // 이 부분이 핵심입니다. 
-                // console.log로 찍었을 때 이 키가 반드시 존재해야 합니다.
                 social: isSocialMode ? (socialParam ? socialParam.toUpperCase() : 'GOOGLE') : 'LOCAL'
             };
 
-            console.log("최종 전송 데이터:", JSON.stringify(formData, null, 2)); // 전체 데이터를 예쁘게 출력
-
-            console.log("전송 데이터 확인:", formData); // 콘솔에서 social 값이 GOOGLE인지 확인하세요!
+            console.log("최종 전송 데이터:", JSON.stringify(formData, null, 2));
             
             if (!confirm("가입하시겠습니까?")) return;
 

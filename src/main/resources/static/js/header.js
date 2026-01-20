@@ -116,17 +116,41 @@
         if (logoutBtn) {
             // 기존에 할당된 모든 이벤트를 무효화 (null 처리 후 할당)
             logoutBtn.onclick = null;
-            logoutBtn.onclick = function (e) {
+            logoutBtn.onclick = async function (e) {
                 e.preventDefault();
-                e.stopImmediatePropagation(); // 다른 스크립트의 간섭을 즉시 중단시킴
+                // e.stopImmediatePropagation(); // 다른 스크립트의 간섭을 즉시 중단시킴 (제거: 중복 바인딩 대신 dataset로 제어)
 
                 if (confirm("로그아웃 하시겠습니까?")) {
-                    localStorage.removeItem("accessToken");
-                    sessionStorage.removeItem("cachedUser");
+                    try {
+                        // 서버 로그아웃 호출 (쿠키 기반 인증 사용)
+                        await fetch('/user/logout', {
+                            method: 'POST',
+                            credentials: 'include'
+                        });
+                    } catch (err) {
+                        console.warn('서버 로그아웃 호출 실패:', err);
+                    }
+
+                    // 로컬 정리
+                    try {
+                        localStorage.removeItem('accessToken');
+                    } catch (_) {
+                    }
+                    try {
+                        localStorage.removeItem('refreshToken');
+                    } catch (_) {
+                    }
+                    try {
+                        sessionStorage.removeItem('cachedUser');
+                    } catch (_) {
+                    }
+
                     // 메인 페이지로 이동하면서 새로고침 효과
                     window.location.href = "/";
                 }
             };
+            // mark as bound so other common binding won't attach
+            logoutBtn.dataset.bound = '1';
         }
 
         guestBox.style.display = "none";

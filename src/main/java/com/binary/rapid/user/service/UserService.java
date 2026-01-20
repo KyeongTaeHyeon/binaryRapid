@@ -69,7 +69,7 @@ public class UserService {
         }
         return selectUser;
     }
-    
+
 
     @Transactional
     // 사이트에 필요한 정보를 포함한 소셜을 통한 회원가입 메서드
@@ -159,12 +159,21 @@ public class UserService {
     @Transactional
     public void logout(int userId, String accessToken) {
         // 1. 리프레시 토큰 삭제
-        refreshTokenMapper.deleteTokenByUserId(userId);
+        if (userId > 0) {
+            refreshTokenMapper.deleteTokenByUserId(userId);
+        } else {
+            // userId가 없을 경우에도 로그아웃 요청이라면(방어), 가능한 범위 내에서 로그아웃 처리 시도
+            log.warn("logout called without valid userId; only attempting to delete refresh tokens if any mapping exists.");
+        }
 
         // 2. 액세스 토큰 블랙리스트 등록
-        long remainingTime = jwtUtil.getRemainingExpiration(accessToken);
-        if (remainingTime > 0) {
-            blacklistService.blacklistToken(accessToken, remainingTime);
+        if (accessToken != null && !accessToken.isEmpty()) {
+            long remainingTime = jwtUtil.getRemainingExpiration(accessToken);
+            if (remainingTime > 0) {
+                blacklistService.blacklistToken(accessToken, remainingTime);
+            }
+        } else {
+            log.info("No accessToken provided for blacklist registration during logout.");
         }
         log.info("유저 {} 로그아웃 처리 완료 (리프레시 삭제 + 블랙리스트 등록)", userId);
     }
@@ -186,7 +195,7 @@ public class UserService {
 
         return list;
     }
-    
+
     @Transactional
     public boolean deleteUser(int userId, String rawPassword) {
         // 1. 유저 정보 조회 (SelectUserResponseForJwtDto 등 사용)
@@ -214,7 +223,7 @@ public class UserService {
         // 결과가 0보다 크면 중복된 아이디가 존재한다는 뜻
         return userMapper.duplicateUserId(id) > 0;
     }
-    
+
     public boolean isEmailDuplicate(String email) {
         return userMapper.duplicateUserEmail(email) > 0;
     }

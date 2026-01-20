@@ -121,6 +121,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
                         authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                         SecurityContextHolder.getContext().setAuthentication(authentication);
+
+                        // ✅ [핵심 수정] Thymeleaf(session.loginUser) 및 Controller 호환을 위해 세션에 유저 정보 저장
+                        request.getSession().setAttribute("loginUser", user);
                     }
                 }
             } else {

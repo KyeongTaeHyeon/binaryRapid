@@ -132,7 +132,13 @@ async function loadPostForEdit() {
     if (!res.ok) return;
     const post = await res.json();
 
-    document.getElementById("boardCategory").value = post.category;
+    // ✅ 카테고리 값 설정 (select는 disabled, hidden에 값 저장)
+    const categorySelect = document.getElementById("boardCategory");
+    const categoryHidden = document.getElementById("boardCategoryHidden");
+    
+    if (categorySelect) categorySelect.value = post.category;
+    if (categoryHidden) categoryHidden.value = post.category;
+
     document.getElementById("postTitle").value = post.title;
     document.getElementById("postContent").value = post.contents;
 
@@ -160,7 +166,8 @@ async function submitUpdate() {
         return;
     }
 
-    const category = document.getElementById('boardCategory').value;
+    // ✅ 수정: disabled된 select 대신 hidden input 값 사용
+    const category = document.getElementById('boardCategoryHidden').value;
     const title = document.getElementById('postTitle').value;
     const content = document.getElementById('postContent').value;
 
@@ -260,4 +267,3 @@ document.addEventListener("DOMContentLoaded", async () => {
         });
     }
 });
-

@@ -26,11 +26,14 @@
                             <div class="form-row">
                                 <label for="boardCategory" style="display:block; font-weight:700; margin-bottom:10px;">게시판
                                     선택</label>
-                                <select id="boardCategory"
-                                        style="width:100%; padding:10px; border:1px solid var(--border-color); border-radius:8px;">
+                                <!-- ✅ disabled 처리하여 수정 불가하게 변경 -->
+                                <select id="boardCategory" disabled
+                                        style="width:100%; padding:10px; border:1px solid var(--border-color); border-radius:8px; background-color: #f0f0f0; color: #666;">
                                     <option value="A00">자유게시판</option>
                                     <option value="B00">식당인증</option>
                                 </select>
+                                <!-- ✅ 실제 전송용 hidden input 추가 -->
+                                <input type="hidden" id="boardCategoryHidden" />
                             </div>
 
                             <div class="form-row" style="margin-top: 20px;">
