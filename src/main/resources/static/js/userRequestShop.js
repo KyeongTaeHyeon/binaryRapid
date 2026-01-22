@@ -44,22 +44,28 @@ function renderReqUI() {
     }
 
     pagedData.forEach((post, i) => {
+        // 디버깅용 로그: 실제 reqType 값 확인
+        console.log(`Post ID: ${post.id}, reqType: '${post.reqType}'`);
+
         const tr = document.createElement('tr');
 
-        // reqType: Y(승인), N(반려), D(대기, null포함)
-        const reqType = post.reqType === null ? 'D' : post.reqType;
+        // reqType: Y(승인), N(반려), D(대기, null포함), P(보류)
+        // 주의: null 체크를 먼저 하고, 그 외에는 문자열 비교
+        const reqType = post.reqType; 
         let statusContent = '';
 
-        if (reqType === 'D') {
+        if (reqType === null || reqType === 'D') {
             // 승인 대기 상태일 때만 삭제 버튼 표시
             statusContent = `<button type="button" onclick="deleteReqShop('${post.id}')" 
                                      style="background-color: #dc3545; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 14px;">
                                      삭제
                              </button>`;
         } else if (reqType === 'Y') {
-            statusContent = '<span style="color: green; font-weight: bold;">등록완료</span>';
+            statusContent = '<span style="color: green; font-weight: bold;">완료</span>';
         } else if (reqType === 'N') {
-            statusContent = '<span style="color: red; font-weight: bold;">등록반려</span>';
+            statusContent = '<span style="color: red; font-weight: bold;">반려</span>';
+        } else if (reqType === 'P') {
+            statusContent = '<span style="color: gray; font-weight: bold;">보류</span>';
         } else {
             statusContent = '-';
         }
