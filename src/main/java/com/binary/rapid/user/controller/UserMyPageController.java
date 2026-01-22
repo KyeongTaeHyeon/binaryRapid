@@ -68,7 +68,8 @@ public class UserMyPageController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("message", e.getMessage()));
         } catch (Exception e) {
             log.error("수정 중 서버 오류: ", e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("수정 중 오류가 발생했습니다.");
+            // 에러 메시지를 상세하게 반환하여 디버깅 돕기
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("수정 중 오류가 발생했습니다: " + e.getMessage());
         }
     }
     // 찜 목록 가져오기

@@ -21,7 +21,8 @@ public interface UserMapper {
     
     List<myBoardDto> selectBoardsByUserId(int id);
 
-    UserResponseDto updateMyInfo(UserResponseDto loggerUser);
+    // 수정: UPDATE 쿼리는 int를 반환해야 함
+    int updateMyInfo(UserResponseDto loggerUser);
 
     UserResponseDto selectUserToUserResponseDto(String email);
     

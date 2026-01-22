@@ -11,6 +11,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const nickInput = document.getElementById('nickName');
     const msgNick = document.getElementById('nickNameMsg');
+    const passInput = document.getElementById('userPassword');
+    const msgPass = document.getElementById('passwordMsg');
 
     // 2. 닉네임 실시간 중복 체크
     if (nickInput) {
@@ -42,7 +44,23 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
+    // 3. 비밀번호 입력 시 메시지 초기화
+    if (passInput) {
+        passInput.addEventListener('input', () => {
+            if (msgPass) {
+                msgPass.textContent = "본인 확인을 위해 비밀번호를 입력해야 변경이 가능합니다.";
+                msgPass.style.color = ""; // 기본 색상으로 복구
+            }
+        });
+    }
+
     document.getElementById('registerForm').addEventListener('submit', handleUpdate);
+    
+    // 탈퇴 버튼 이벤트 연결
+    const btnDelete = document.getElementById('btnDelete');
+    if(btnDelete) {
+        btnDelete.addEventListener('click', handleDelete);
+    }
 });
 
 async function fetchUserInfo() {
@@ -92,13 +110,29 @@ async function handleUpdate(e) {
     e.preventDefault();
     if (!isNickOk) return alert("닉네임 중복 여부를 확인해주세요.");
 
+    const passInput = document.getElementById('userPassword');
+    const msgPass = document.getElementById('passwordMsg');
+    
+    // 로컬 유저인 경우 비밀번호 공란 체크
+    if (userSocialType === "LOCAL") {
+        const password = passInput.value.trim();
+        if (!password) {
+            if (msgPass) {
+                msgPass.textContent = "비밀번호를 입력해주세요.";
+                msgPass.style.color = "red";
+            }
+            passInput.focus();
+            return;
+        }
+    }
+
     // 현재 선택된 성별 값을 직접 가져옴 (M 또는 F)
     const currentGender = document.getElementById('selGender').value;
 
     const updateData = {
         userId: userPk,
         id: document.getElementById('userId').value,
-        password: userSocialType === "LOCAL" ? document.getElementById('userPassword').value : null, // 빈 문자열 대신 null 전송
+        password: userSocialType === "LOCAL" ? passInput.value : null, // 빈 문자열 대신 null 전송
         email: document.getElementById('userEmail').value,
         nickName: document.getElementById('nickName').value,
         gender: currentGender, // "M" 또는 "F"
@@ -119,13 +153,27 @@ async function handleUpdate(e) {
             alert("수정 완료");
             location.reload(); // 새로고침하여 반영 확인
         } else {
-            // JSON 파싱 실패 방어 로직
+            // 응답 본문을 텍스트로 먼저 읽음
+            const text = await response.text();
+            let errorMsg = "알 수 없는 오류";
+            
             try {
-                const errorResult = await response.json();
-                alert("수정 실패: " + (errorResult.message || "알 수 없는 오류"));
+                // JSON 파싱 시도
+                const errorResult = JSON.parse(text);
+                errorMsg = errorResult.message || errorMsg;
             } catch (err) {
-                const text = await response.text();
-                alert("수정 실패(서버 오류): " + text);
+                errorMsg = text.length > 100 ? text.substring(0, 100) + "..." : text;
+            }
+
+            // 에러 메시지에 따라 처리 분기
+            if (errorMsg.includes("비밀번호")) {
+                if (msgPass) {
+                    msgPass.textContent = errorMsg; // "비밀번호가 일치하지 않습니다." 등
+                    msgPass.style.color = "red";
+                }
+                passInput.focus();
+            } else {
+                alert("수정 실패: " + errorMsg);
             }
         }
     }

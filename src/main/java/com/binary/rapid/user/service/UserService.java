@@ -142,11 +142,49 @@ public class UserService {
             }
         }
 
-        // 3. 정보 업데이트 실행 (Mapper 호출)
+        // 3. 중복 체크 (본인 정보 제외)
+        // 닉네임 변경 시 중복 체크
+        if (updateDto.getNickName() != null && !updateDto.getNickName().equals(currentUser.getNickName())) {
+            if (userMapper.duplicateUserNickName(updateDto.getNickName()) > 0) {
+                throw new IllegalArgumentException("이미 사용 중인 닉네임입니다.");
+            }
+        }
+        // 이메일 변경 시 중복 체크
+        if (updateDto.getEmail() != null && !updateDto.getEmail().equals(currentUser.getEmail())) {
+            if (userMapper.duplicateUserEmail(updateDto.getEmail()) > 0) {
+                throw new IllegalArgumentException("이미 사용 중인 이메일입니다.");
+            }
+        }
+
+        // 4. 데이터 유효성 검사 (Gender 길이 체크)
+        if (updateDto.getGender() != null && updateDto.getGender().length() > 1) {
+            // "Male" -> "M", "Female" -> "F" 등으로 변환하거나 에러 처리
+            // 여기서는 첫 글자만 따오도록 처리 (안전장치)
+            String safeGender = updateDto.getGender().substring(0, 1).toUpperCase();
+            updateDto.setGender(safeGender);
+        }
+
+        // 5. 정보 업데이트 실행 (Mapper 호출)
+        log.info("Updating user info for userId: {}", updateDto.getUserId());
         userMapper.updateMyInfo(updateDto);
 
-        // 4. 업데이트된 결과 반환
-        return userMapper.selectUserToUserResponseDto(updateDto.getEmail());
+        // 6. 업데이트된 결과 반환 (매핑 오류 방지를 위해 selectUserById 사용 후 변환)
+        SelectUserResponseForJwtDto updatedUser = userMapper.selectUserById(updateDto.getUserId());
+        
+        return UserResponseDto.builder()
+                .userId(updatedUser.getUserId())
+                .id(updatedUser.getId())
+                .nickName(updatedUser.getNickName())
+                .name(updatedUser.getName())
+                .email(updatedUser.getEmail())
+                .taste(updatedUser.getTaste())
+                .birth(updatedUser.getBirth())
+                .gender(updatedUser.getGender())
+                .social(updatedUser.getSocial())
+                .role(updatedUser.getRole())
+                .createDate(updatedUser.getCreateDate())
+                .updateDate(updatedUser.getUpdateDate())
+                .build();
     }
 
     public String getEmailByUserId(int userId) {
