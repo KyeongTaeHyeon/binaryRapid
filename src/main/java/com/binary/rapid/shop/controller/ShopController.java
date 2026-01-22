@@ -137,7 +137,7 @@ public class ShopController {
     }
 
     /**
-     * [3] 상세 페이지
+     * [3] 상세 페이지 (HTML 렌더링)
      */
     @GetMapping("/{id}")
     public String shopDetailList(@PathVariable("id") String shopId, Model model, HttpSession session) {

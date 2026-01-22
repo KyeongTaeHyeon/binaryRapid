@@ -10,11 +10,12 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class UserMyReqShopDto {
-    private String id;       
+    private String id;
     private String category;
     private String title;
     private String contents;
     private int userId;
     private LocalDateTime createDate;
     private String writerName;
+    private String reqType; // reqType 필드 추가
 }

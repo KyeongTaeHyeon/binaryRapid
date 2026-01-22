@@ -31,20 +31,26 @@ window.goToPage = (page) => {
 window.deleteBoard = async (boardId) => {
     if (!confirm("정말로 이 게시글을 삭제하시겠습니까?")) return;
     try {
-        const response = await fetch(`/api/board/delete/${boardId}`, {
-            method: 'DELETE',
-            headers: {
-                'Authorization': 'Bearer ' + localStorage.getItem("accessToken")
-            }
+        // authFetch 사용으로 변경 (토큰 자동 갱신 및 헤더 자동 설정)
+        const response = await authFetch(`/api/board/delete/${boardId}`, {
+            method: 'DELETE'
         });
+        
         if (response.ok) {
             alert("삭제되었습니다.");
             loadBoardData();
         } else {
-            alert("삭제에 실패했습니다.");
+            let msg = "삭제에 실패했습니다.";
+            try {
+                // 서버에서 에러 메시지를 보내주는 경우 처리
+                const text = await response.text();
+                if(text) msg = text;
+            } catch(e) {}
+            alert(msg);
         }
     } catch (error) {
         console.error("삭제 요청 중 오류:", error);
+        alert("오류가 발생했습니다.");
     }
 };
 

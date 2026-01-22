@@ -4,7 +4,6 @@
 let reqPosts = [];
 let REQ_PER_PAGE = 10;
 let reqPage = 1;
-let reqUserId = null;
 
 let reqFilters = { title: '', start: '', end: '' };
 
@@ -14,18 +13,13 @@ const reqList = document.querySelector(".page-list");
 // 1. 초기 데이터 로드
 async function initReqPage() {
     try {
-        if (!reqUserId) {
-            const res = await authFetch('/user/me');
-            const json = await res.json();
-            reqUserId = json.data.userId;
-        }
         await fetchReqData();
     } catch (e) { console.error("초기화 실패", e); }
 }
 
 // 2. 서버 통신
 async function fetchReqData() {
-    const url = `/user/api/my/reqShopList?userId=${reqUserId}&title=${reqFilters.title}&startDate=${reqFilters.start}&endDate=${reqFilters.end}`;
+    const url = `/user/api/my/reqShopList?title=${reqFilters.title}&startDate=${reqFilters.start}&endDate=${reqFilters.end}`;
     const res = await authFetch(url);
     if (res.ok) {
         reqPosts = await res.json();
@@ -43,33 +37,76 @@ function renderReqUI() {
     const pagedData = reqPosts.slice(startIdx, startIdx + REQ_PER_PAGE);
 
     if (pagedData.length === 0) {
-        // 컬럼이 4개로 줄었으므로 colspan을 4로 수정
-        reqTable.innerHTML = '<tr><td colspan="4" style="text-align:center;">데이터가 없습니다.</td></tr>';
+        reqTable.innerHTML = '<tr><td colspan="5" style="text-align:center;">데이터가 없습니다.</td></tr>';
         return;
     }
 
     pagedData.forEach((post, i) => {
         const tr = document.createElement('tr');
-        // 지역(post.category === 'B00' 등)과 작성자(본인) td 제거
+        
+        // reqType: Y(승인), N(반려), D(대기, null포함)
+        const reqType = post.reqType === null ? 'D' : post.reqType;
+        let statusContent = '';
+
+        if (reqType === 'D') {
+            // 승인 대기 상태일 때만 삭제 버튼 표시
+            statusContent = `<button type="button" onclick="deleteReqShop('${post.id}')" 
+                                     style="background-color: #dc3545; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 14px;">
+                                     삭제
+                             </button>`;
+        } else {
+            // 그 외(승인, 반려 등)에는 아무것도 표시하지 않음
+            statusContent = '';
+        }
+
         tr.innerHTML = `
             <td>${startIdx + i + 1}</td>
-            <td style="cursor:pointer; color:#007bff;" onclick="location.href='/board/boardDetail?id=${post.id}'">${post.title}</td>
+            <td style="cursor:pointer; color:#007bff;" onclick="location.href='/approval/detail?id=${post.id}'">${post.title}</td>
             <td>식당신청</td>
             <td>${post.createDate ? post.createDate.split('T')[0] : '-'}</td>
+            <td>${statusContent}</td>
         `;
         reqTable.appendChild(tr);
     });
     renderReqPager();
 }
 
-// 4. 페이지네이션 (기존과 동일)
+// 삭제 기능 함수
+async function deleteReqShop(shopId) {
+    if (!confirm("가게 삭제 시 모든 정보가 삭제됩니다.\n정말 삭제하시겠습니까?")) return;
+
+    try {
+        const res = await authFetch(`/user/api/my/reqShop/${shopId}`, {
+            method: 'DELETE'
+        });
+        
+        if (res.ok) {
+            alert("삭제되었습니다.");
+            fetchReqData(); // 목록 새로고침
+        } else {
+            let msg = "삭제 실패";
+            try {
+                msg = await res.text();
+            } catch(e) {}
+            alert(msg);
+        }
+    } catch (e) {
+        console.error("삭제 중 오류 발생", e);
+        alert("오류가 발생했습니다.");
+    }
+}
+
+// 4. 페이지네이션
 function renderReqPager() {
     if (!reqList) return;
     const total = Math.ceil(reqPosts.length / REQ_PER_PAGE) || 1;
     reqList.innerHTML = "";
 
-    document.querySelector(".page-btn.prev").onclick = () => { if(reqPage > 1) { reqPage--; renderReqUI(); }};
-    document.querySelector(".page-btn.next").onclick = () => { if(reqPage < total) { reqPage++; renderReqUI(); }};
+    const prevBtn = document.querySelector(".page-btn.prev");
+    const nextBtn = document.querySelector(".page-btn.next");
+
+    if(prevBtn) prevBtn.onclick = () => { if(reqPage > 1) { reqPage--; renderReqUI(); }};
+    if(nextBtn) nextBtn.onclick = () => { if(reqPage < total) { reqPage++; renderReqUI(); }};
 
     for (let i = 1; i <= total; i++) {
         const li = document.createElement("li");
@@ -80,7 +117,7 @@ function renderReqPager() {
     }
 }
 
-// 5. 이벤트 바인딩 (기존과 동일)
+// 5. 이벤트 바인딩
 document.addEventListener('DOMContentLoaded', () => {
     const sBtn = document.getElementById('reqSearchBtn');
     const sInput = document.getElementById('reqSearchInput');

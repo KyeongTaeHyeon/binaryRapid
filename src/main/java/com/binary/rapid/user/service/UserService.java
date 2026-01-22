@@ -236,4 +236,21 @@ public class UserService {
     public List<UserMyReqShopDto> getMyBoardList(Map<String, Object> params) {
         return userMapper.selectMyBoardList(params);
     }
+
+    // 식당 신청 내역 삭제 (Hard Delete)
+    @Transactional
+    public boolean deleteRequestedShop(int userId, String shopId) {
+        // 1. 권한 및 상태 확인
+        int count = userMapper.countRequestedShop(userId, shopId);
+        if (count == 0) {
+            return false; // 권한이 없거나 삭제 가능한 상태가 아님
+        }
+
+        // 2. 자식 데이터 삭제 (Physical Delete)
+        userMapper.deleteRequestedShopDetail(shopId);
+        userMapper.deleteRequestedShopImg(shopId);
+
+        // 3. 부모 데이터 삭제 (Hard Delete)
+        return userMapper.deleteRequestedShop(shopId) > 0;
+    }
 }

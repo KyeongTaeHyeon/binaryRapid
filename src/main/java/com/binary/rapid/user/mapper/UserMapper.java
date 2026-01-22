@@ -37,4 +37,16 @@ public interface UserMapper {
     int deleteUserByPk(Map<String, Object> params);
 
     List<UserMyReqShopDto> selectMyBoardList(Map<String, Object> params);
+
+    // 식당 신청 내역 권한 및 상태 확인
+    int countRequestedShop(@Param("userId") int userId, @Param("shopId") String shopId);
+
+    // 식당 신청 내역 삭제 (tb_shop - Hard Delete)
+    int deleteRequestedShop(@Param("shopId") String shopId);
+
+    // 식당 상세 정보 삭제 (tb_shopdetail - Physical Delete)
+    int deleteRequestedShopDetail(@Param("shopId") String shopId);
+
+    // 식당 이미지 삭제 (tb_shopimg - Physical Delete)
+    int deleteRequestedShopImg(@Param("shopId") String shopId);
 }

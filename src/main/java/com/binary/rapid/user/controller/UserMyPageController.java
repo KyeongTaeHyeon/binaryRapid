@@ -87,10 +87,15 @@ public class UserMyPageController {
 
     @GetMapping("/reqShopList")
     public ResponseEntity<List<UserMyReqShopDto>> getMyRequestShopList(
-            @RequestParam("userId") int userId,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
             @RequestParam(required = false) String title,
             @RequestParam(required = false) String startDate,
             @RequestParam(required = false) String endDate) {
+
+        if (userDetails == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        int userId = userDetails.getUserId();
 
         Map<String, Object> params = new HashMap<>();
         params.put("userId", userId);
@@ -101,6 +106,26 @@ public class UserMyPageController {
         List<UserMyReqShopDto> list = service.getBoardListByUserId(params);
         return ResponseEntity.ok(list);
     }
+
+    // 식당 신청 내역 삭제 API
+    @DeleteMapping("/reqShop/{shopId}")
+    public ResponseEntity<String> deleteRequestedShop(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @PathVariable("shopId") String shopId) {
+
+        if (userDetails == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("로그인이 필요합니다.");
+        }
+
+        boolean deleted = service.deleteRequestedShop(userDetails.getUserId(), shopId);
+
+        if (deleted) {
+            return ResponseEntity.ok("신청 내역이 성공적으로 삭제되었습니다.");
+        } else {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("신청 내역 삭제에 실패했습니다. 권한이 없거나 이미 처리된 내역일 수 있습니다.");
+        }
+    }
+
 
     @PostMapping("/delete")
     public ResponseEntity<String> deleteUser(

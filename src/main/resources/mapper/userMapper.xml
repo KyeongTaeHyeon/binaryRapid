@@ -232,35 +232,36 @@
           AND shop_id = #{shopId}
     </delete>
 
-    <!-- 유저가 신청한 식당(게시글 B00) 목록 조회 -->
+    <!-- 유저가 신청한 식당(게시글 B00) 목록 조회 (tb_shop 테이블 사용) -->
     <select id="selectBoardListByUserId"
             parameterType="map"
             resultType="UserMyReqShopDto">
         SELECT
             id,
-            category,
-            title,
-            contents,
-            user_id     AS userId,
-            create_date AS createDate
-        FROM tb_board
-        WHERE user_id = #{params.userId}
-          AND delete_date IS NULL
-          AND category = 'B00'
+            name AS title,
+            content AS contents,
+            user_id AS userId,
+            create_date AS createDate,
+            req_type AS reqType,
+            'B00' AS category,
+            NULL AS writerName
+        FROM
+            tb_shop
+        WHERE
+            user_id = #{params.userId}
+            AND delete_date IS NULL
 
-        <if test="params.title != null and params.title != ''">
-            AND title LIKE CONCAT('%', #{params.title}, '%')
-        </if>
-
-        <if test="params.startDate != null and params.startDate != ''">
-            AND create_date &gt;= STR_TO_DATE(#{params.startDate}, '%Y-%m-%d')
-        </if>
-
-        <if test="params.endDate != null and params.endDate != ''">
-            AND create_date &lt; STR_TO_DATE(#{params.endDate}, '%Y-%m-%d') + INTERVAL 1 DAY
-        </if>
-
-        ORDER BY create_date DESC
+            <if test="params.title != null and params.title != ''">
+                AND name LIKE CONCAT('%', #{params.title}, '%')
+            </if>
+            <if test="params.startDate != null and params.startDate != ''">
+                AND create_date &gt;= STR_TO_DATE(#{params.startDate}, '%Y-%m-%d')
+            </if>
+            <if test="params.endDate != null and params.endDate != ''">
+                AND create_date &lt; STR_TO_DATE(#{params.endDate}, '%Y-%m-%d') + INTERVAL 1 DAY
+            </if>
+        ORDER BY
+            create_date DESC
     </select>
 
     <!-- 회원 탈퇴(soft delete) -->
@@ -303,5 +304,32 @@
 
         ORDER BY create_date DESC
     </select>
+
+    <!-- 식당 신청 내역 권한 및 상태 확인 -->
+    <select id="countRequestedShop" resultType="int">
+        SELECT COUNT(*)
+        FROM tb_shop
+        WHERE id = #{shopId}
+          AND user_id = #{userId}
+          AND (req_type IS NULL OR req_type = 'D')
+    </select>
+
+    <!-- 식당 신청 내역 삭제 (Hard Delete) -->
+    <delete id="deleteRequestedShop">
+        DELETE FROM tb_shop
+        WHERE id = #{shopId}
+    </delete>
+
+    <!-- 식당 상세 정보 삭제 (Physical Delete) -->
+    <delete id="deleteRequestedShopDetail">
+        DELETE FROM tb_shopdetail
+        WHERE id = #{shopId}
+    </delete>
+
+    <!-- 식당 이미지 삭제 (Physical Delete) -->
+    <delete id="deleteRequestedShopImg">
+        DELETE FROM tb_shopimg
+        WHERE id = #{shopId}
+    </delete>
 
 </mapper>
