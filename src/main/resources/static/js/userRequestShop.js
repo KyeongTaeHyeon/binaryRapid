@@ -5,7 +5,7 @@ let reqPosts = [];
 let REQ_PER_PAGE = 10;
 let reqPage = 1;
 
-let reqFilters = { title: '', start: '', end: '' };
+let reqFilters = {title: '', start: '', end: ''};
 
 const reqTable = document.querySelector('#userRequestMain');
 const reqList = document.querySelector(".page-list");
@@ -14,7 +14,9 @@ const reqList = document.querySelector(".page-list");
 async function initReqPage() {
     try {
         await fetchReqData();
-    } catch (e) { console.error("초기화 실패", e); }
+    } catch (e) {
+        console.error("초기화 실패", e);
+    }
 }
 
 // 2. 서버 통신
@@ -43,7 +45,7 @@ function renderReqUI() {
 
     pagedData.forEach((post, i) => {
         const tr = document.createElement('tr');
-        
+
         // reqType: Y(승인), N(반려), D(대기, null포함)
         const reqType = post.reqType === null ? 'D' : post.reqType;
         let statusContent = '';
@@ -54,9 +56,12 @@ function renderReqUI() {
                                      style="background-color: #dc3545; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 14px;">
                                      삭제
                              </button>`;
+        } else if (reqType === 'Y') {
+            statusContent = '<span style="color: green; font-weight: bold;">등록완료</span>';
+        } else if (reqType === 'N') {
+            statusContent = '<span style="color: red; font-weight: bold;">등록반려</span>';
         } else {
-            // 그 외(승인, 반려 등)에는 아무것도 표시하지 않음
-            statusContent = '';
+            statusContent = '-';
         }
 
         tr.innerHTML = `
@@ -79,7 +84,7 @@ async function deleteReqShop(shopId) {
         const res = await authFetch(`/user/api/my/reqShop/${shopId}`, {
             method: 'DELETE'
         });
-        
+
         if (res.ok) {
             alert("삭제되었습니다.");
             fetchReqData(); // 목록 새로고침
@@ -87,7 +92,8 @@ async function deleteReqShop(shopId) {
             let msg = "삭제 실패";
             try {
                 msg = await res.text();
-            } catch(e) {}
+            } catch (e) {
+            }
             alert(msg);
         }
     } catch (e) {
@@ -105,14 +111,27 @@ function renderReqPager() {
     const prevBtn = document.querySelector(".page-btn.prev");
     const nextBtn = document.querySelector(".page-btn.next");
 
-    if(prevBtn) prevBtn.onclick = () => { if(reqPage > 1) { reqPage--; renderReqUI(); }};
-    if(nextBtn) nextBtn.onclick = () => { if(reqPage < total) { reqPage++; renderReqUI(); }};
+    if (prevBtn) prevBtn.onclick = () => {
+        if (reqPage > 1) {
+            reqPage--;
+            renderReqUI();
+        }
+    };
+    if (nextBtn) nextBtn.onclick = () => {
+        if (reqPage < total) {
+            reqPage++;
+            renderReqUI();
+        }
+    };
 
     for (let i = 1; i <= total; i++) {
         const li = document.createElement("li");
         li.className = `page-item ${i === reqPage ? 'active' : ''}`;
         li.innerHTML = `<button>${i}</button>`;
-        li.onclick = () => { reqPage = i; renderReqUI(); };
+        li.onclick = () => {
+            reqPage = i;
+            renderReqUI();
+        };
         reqList.appendChild(li);
     }
 }
@@ -121,20 +140,29 @@ function renderReqPager() {
 document.addEventListener('DOMContentLoaded', () => {
     const sBtn = document.getElementById('reqSearchBtn');
     const sInput = document.getElementById('reqSearchInput');
-    const doSearch = () => { reqFilters.title = sInput.value.trim(); fetchReqData(); };
+    const doSearch = () => {
+        reqFilters.title = sInput.value.trim();
+        fetchReqData();
+    };
 
-    if(sBtn) sBtn.onclick = doSearch;
-    if(sInput) sInput.onkeydown = (e) => { if(e.key === 'Enter') doSearch(); };
+    if (sBtn) sBtn.onclick = doSearch;
+    if (sInput) sInput.onkeydown = (e) => {
+        if (e.key === 'Enter') doSearch();
+    };
 
     const dBtn = document.getElementById('reqDateBtn');
-    if(dBtn) dBtn.onclick = () => {
+    if (dBtn) dBtn.onclick = () => {
         reqFilters.start = document.getElementById('reqStart').value;
         reqFilters.end = document.getElementById('reqEnd').value;
         fetchReqData();
     };
 
     const sel = document.getElementById('req_sarray_numbers');
-    if(sel) sel.onchange = () => { REQ_PER_PAGE = parseInt(sel.value); reqPage = 1; renderReqUI(); };
+    if (sel) sel.onchange = () => {
+        REQ_PER_PAGE = parseInt(sel.value);
+        reqPage = 1;
+        renderReqUI();
+    };
 
     initReqPage();
 });
