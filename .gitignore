@@ -6,8 +6,6 @@ build/
 !gradle/wrapper/gradle-wrapper.jar
 !**/src/main/**/build/
 !**/src/test/**/build/
-*.yaml
-*.yml
 
 ### STS ###
 .apt_generated
@@ -45,5 +43,12 @@ out/
 ### macOS ###
 .DS_Store
 
-### Security ###
+### Security & Configuration ###
 secret.properties
+src/main/resources/secret.properties
+application-*.yaml
+application-*.yml
+!application.yaml.example
+!application.yml.example
+
+### Build files ###

@@ -1,0 +1,46 @@
+spring:
+  config:
+    import: "optional:classpath:secret.properties"
+  application:
+    name: rapid
+  datasource:
+    driver-class-name: net.sf.log4jdbc.sql.jdbcapi.DriverSpy
+    url: jdbc:log4jdbc:mysql://YOUR_HOST:YOUR_PORT/rapid?serverTimezone=UTC&useUnicode=true&characterEncoding=utf-8
+    username: ${db.username}
+    password: ${db.password}
+  
+  servlet:
+    multipart:
+      max-file-size: 5MB
+      max-request-size: 20MB
+
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: ${google.client-id}
+            client-secret: ${google.client-secret}
+            redirect-uri: ${google.redirect-uri}
+            scope:
+              - profile
+              - email
+        provider:
+          google:
+            authorization-uri: https://accounts.google.com/o/oauth2/v2/auth
+            token-uri: https://oauth2.googleapis.com/token
+            user-info-uri: https://www.googleapis.com/oauth2/v3/userinfo
+            user-name-attribute: sub
+
+jwt:
+  secret: ${jwt.secret}
+  access-token-expire-time: 1800000   # 30분
+  refresh-token-expire-time: 1209600000 # 14일
+
+mybatis:
+  mapper-locations: classpath:mapper/**/*.xml
+  config-location: classpath:mybatis-config.xml
+
+app:
+  upload:
+    root: ${UPLOAD_ROOT:${user.home}/rapid-uploads}
