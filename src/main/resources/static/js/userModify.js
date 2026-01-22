@@ -140,7 +140,6 @@ async function handleUpdate(e) {
         birth: document.getElementById('selAge').value
     };
 
-    console.log("전송 데이터:", updateData); // 개발자 도구 콘솔에서 전송 직전 데이터 확인용
 
     if (confirm("정보를 수정하시겠습니까?")) {
         const response = await authFetch("/user/api/my/update", {
@@ -215,7 +214,6 @@ async function handleDelete() {
             alert("탈퇴 실패: " + errorMsg);
         }
     } catch (e) {
-        console.error("탈퇴 요청 중 에러:", e);
         alert("탈퇴 처리 중 오류가 발생했습니다.");
     }
 }

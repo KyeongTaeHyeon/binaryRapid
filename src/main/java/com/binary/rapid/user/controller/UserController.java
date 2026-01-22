@@ -81,7 +81,7 @@ public class UserController {
             return ResponseEntity.ok(ApiResponse.success(responseBody));
 
         } catch (UserNotFoundException e) {
-            // ❗프론트가 response.json()을 호출해도 깨지지 않도록 반드시 JSON으로 내려줌
+            // 프론트가 response.json()을 호출해도 깨지지 않도록 반드시 JSON으로 내려줌
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(ApiResponse.fail("404", e.getMessage()));
 
@@ -131,7 +131,6 @@ public class UserController {
         Map<String, String> tokens = new HashMap<>();
         tokens.put("accessToken", newAccessToken);
 
-        log.info("유저 {} 토큰 재발급 성공", userId);
         return ResponseEntity.ok(ApiResponse.success(tokens));
     }
 

@@ -23,7 +23,7 @@ body {
 /* ================= 전체 레이아웃 ================= */
 #boardMain {
     width: 90%;
-    max-width: 1200px; /* 리스트형은 너무 넓으면 보기가 힘들어 1200px로 조정 */
+    max-width: 1200px; 
     margin: 0 auto;
     text-align: center;
 }

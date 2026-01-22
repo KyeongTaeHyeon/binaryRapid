@@ -49,7 +49,6 @@ window.deleteBoard = async (boardId) => {
             alert(msg);
         }
     } catch (error) {
-        console.error("삭제 요청 중 오류:", error);
         alert("오류가 발생했습니다.");
     }
 };
@@ -67,15 +66,12 @@ async function loadBoardData() {
         if (filterParams.startDate) params.append('startDate', filterParams.startDate);
         if (filterParams.endDate) params.append('endDate', filterParams.endDate);
 
-        console.log("--- 데이터 요청 시점 ---");
         const requestUrl = `/user/api/my/filter?${params.toString()}`;
-        console.log("요청 URL:", requestUrl);
 
         const response = await authFetch(requestUrl);
         if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
 
         const result = await response.json();
-        console.log("서버 응답 데이터 개수:", result.length);
 
         allPosts = Array.isArray(result) ? result : [];
         currentPage = 1; // 검색 시 항상 1페이지부터

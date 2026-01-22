@@ -17,9 +17,6 @@ const regCheckDuplicate = () => {
     console.log('로컬 스토리지에 데이터 존재하지 않음;;;;');
   }
 
-  console.log('유저가 입력한값', checkDName);
-  console.log('로컬 스토리지에 서 빼낸 UserName', userName);
-
   if (userName.trim() === checkDName.trim()) {
     msgUid.textContent =
       '이미 존재하는 아이디입니다. 새로운 아이디를 작성해 주세요.';

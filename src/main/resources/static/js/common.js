@@ -51,7 +51,6 @@ function loadHTML(selector, url) {
                 resolve(); // HTML 삽입 완료
             })
             .catch((err) => {
-                console.error(`Failed to load ${url}:`, err);
                 reject(err);
             });
     });
@@ -93,7 +92,6 @@ async function authFetch(url, options = {}) {
     let response = await fetch(url, {...options, headers});
 
     if (response.status === 401) {
-        console.warn("액세스 토큰 만료됨. 재발급 시도 중...");
         const isRefreshed = await refreshTokens();
 
         if (isRefreshed) {

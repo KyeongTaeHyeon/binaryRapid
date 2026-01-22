@@ -9,5 +9,4 @@ import java.util.List;
 public interface CategoryMapper {
     List<CategoryForm> allCategory();
 
-    List<CategoryForm> findCategory(String groupId);
 }

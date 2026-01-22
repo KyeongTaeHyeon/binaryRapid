@@ -1,5 +1,4 @@
   (function() {
-  console.log("Header Script Loaded");
 
   function initHeader() {
   const accessToken = localStorage.getItem("accessToken");
@@ -24,7 +23,6 @@
   // 2. 세션 스토리지에 캐시된 유저 데이터가 있는지 확인
   const cachedUser = sessionStorage.getItem("cachedUser");
   if (cachedUser) {
-  console.log("캐시된 데이터 사용");
   renderUserMenu(JSON.parse(cachedUser));
   return;
 }
@@ -42,7 +40,6 @@
   renderUserMenu(userData);
 })
   .catch(error => {
-  console.error("인증 실패:", error);
   localStorage.removeItem("accessToken");
   sessionStorage.removeItem("cachedUser");
   guestBox.style.display = "flex";

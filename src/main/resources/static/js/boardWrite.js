@@ -36,10 +36,6 @@ document.addEventListener("DOMContentLoaded", function () {
             if (config && config.maxFileSize) serverMaxFileSize = config.maxFileSize;
             if (config && config.maxRequestSize) serverMaxRequestSize = config.maxRequestSize;
 
-            console.log("서버 파일 용량 설정 로드 완료:", {
-                maxFileSize: serverMaxFileSize + " bytes",
-                maxRequestSize: serverMaxRequestSize + " bytes"
-            });
         })
         .catch(err => console.error("설정 로드 실패(기본값 사용):", err));
 
@@ -190,7 +186,6 @@ document.addEventListener("DOMContentLoaded", function () {
                     }
                 })
                 .catch(error => {
-                    console.error('Error:', error);
                     alert("서버 오류가 발생했습니다.");
                 });
         });

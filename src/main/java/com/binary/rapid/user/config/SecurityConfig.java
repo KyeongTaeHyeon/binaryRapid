@@ -23,12 +23,13 @@ import java.nio.charset.StandardCharsets;
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-    // 암호화 메서드
+    
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final OAuth2UserProviderRouter oAuth2UserProviderRouter;
     private final OAuth2SuccessHandler oAuth2SuccessHandler;
-
+    
+    // 암호화 메서드
     @Bean
     public BCryptPasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();

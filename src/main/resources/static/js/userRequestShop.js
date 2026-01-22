@@ -44,8 +44,6 @@ function renderReqUI() {
     }
 
     pagedData.forEach((post, i) => {
-        // 디버깅용 로그: 실제 reqType 값 확인
-        console.log(`Post ID: ${post.id}, reqType: '${post.reqType}'`);
 
         const tr = document.createElement('tr');
 
@@ -103,7 +101,6 @@ async function deleteReqShop(shopId) {
             alert(msg);
         }
     } catch (e) {
-        console.error("삭제 중 오류 발생", e);
         alert("오류가 발생했습니다.");
     }
 }

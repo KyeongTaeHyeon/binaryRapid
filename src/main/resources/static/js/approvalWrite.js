@@ -97,9 +97,7 @@ async function submitApproval() {
     const fd = new FormData(form);
 
     // [브라우저 Console] 제출 시점 상태 확인
-    console.log("[approvalWrite] submitApproval", {isEdit, editId});
     const fileInput = document.getElementById("images");
-    console.log("[approvalWrite] new upload files length:", fileInput?.files?.length ?? 0);
 
     // categories[] 추가
     for (let i = 1; i <= 8; i++) {
@@ -124,7 +122,6 @@ async function submitApproval() {
             if (v instanceof File) entries.push([k, `File(name=${v.name}, size=${v.size})`]);
             else entries.push([k, v]);
         }
-        console.log("[approvalWrite] FormData entries:", entries);
     } catch (e) {
         console.error("[approvalWrite] FormData dump failed", e);
     }
@@ -173,7 +170,6 @@ document.addEventListener("DOMContentLoaded", async () => {
         });
 
         if (!res.ok) {
-            console.error("detail fetch fail:", res.status);
             alert("수정 데이터를 불러오지 못했습니다.");
             return;
         }

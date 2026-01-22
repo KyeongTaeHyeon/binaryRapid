@@ -16,7 +16,6 @@ document.addEventListener('DOMContentLoaded', () => {
       const data = await response.json();
       renderFn(data, wrapper);
     } catch (err) {
-      console.error(`${jsonPath} 데이터 로드 실패`, err);
       wrapper.innerHTML = '<p>데이터를 불러올 수 없습니다.</p>';
     }
   }

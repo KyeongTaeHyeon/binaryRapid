@@ -11,8 +11,8 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 import java.util.Map;
 
-@RestController // JSON 형태로 데이터를 응답할 때 사용합니다.
-@RequiredArgsConstructor // RamenService를 주입받기 위해 사용합니다.
+@RestController 
+@RequiredArgsConstructor 
 public class RamenController {
 
     private final RamenService ramenService;

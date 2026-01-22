@@ -100,8 +100,7 @@ public class BoardController {
 
     @PostMapping("/update")
     public ResponseEntity<String> updateBoard(@RequestBody BoardDto boardDto) {
-        System.out.println("수정 요청 데이터: " + boardDto.toString());
-        log.info("수정 요청 데이터: " + boardDto.toString());
+        
         boardService.updateBoard(boardDto);
         return ResponseEntity.ok("success");
     }

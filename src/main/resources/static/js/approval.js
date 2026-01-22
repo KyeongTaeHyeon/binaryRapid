@@ -51,7 +51,6 @@ async function loadApprovalList(page = 1) {
         renderPagination(data.page || page, data.totalPages || 1);
 
     } catch (error) {
-        console.error("데이터 로드 실패:", error);
         listContent.innerHTML = '<div style="text-align:center; padding:20px;">데이터를 불러오는 중 오류가 발생했습니다.</div>';
 
         // 오류 시 페이징 숨김

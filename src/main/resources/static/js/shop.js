@@ -276,7 +276,6 @@ async function fetchChunkFromServer(pageToFetch) {
     try {
         const res = await fetch(buildUrl(`/shop/filter?${params.toString()}`));
         if (!res.ok) {
-            console.error('Server responded with status:', res.status);
             return;
         }
 
@@ -381,7 +380,6 @@ async function toggleWishlist(shopId, btn) {
     } catch (e) {
         applyLikeUi(btn, prev);
         updateBufferLiked(shopId, prev);
-        console.error('toggleWishlist error:', e);
     }
 }
 

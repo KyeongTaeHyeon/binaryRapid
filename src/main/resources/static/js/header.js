@@ -62,7 +62,6 @@
                     }
                 })
                 .catch(err => {
-                    console.error("인증 에러:", err);
                     localStorage.removeItem("accessToken");
                     sessionStorage.removeItem("cachedUser");
                     renderGuestUI();

@@ -49,11 +49,8 @@ public class UserMyPageController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("로그인이 필요합니다.");
         }
 
-        // 1. 요청 데이터 로그 확인 (password가 null인지 혹은 "********"인지 확인용)
-        log.info("수정 요청 데이터: {}, 유저 권한/타입: {}", updateRequestDto.toString(), userDetails.getAuthorities());
-
         try {
-            // 2. 중요: JS에서 보낸 데이터의 userId가 현재 로그인한 유저의 PK와 일치하는지 보안 검증
+            // 중요: JS에서 보낸 데이터의 userId가 현재 로그인한 유저의 PK와 일치하는지 보안 검증
             if (updateRequestDto.getUserId() != userDetails.getUserId()) {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).body("본인의 정보만 수정할 수 있습니다.");
             }

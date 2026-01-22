@@ -19,7 +19,6 @@ const fetchDuplicate = async (type, value) => {
         const result = await response.json();
         return result.data; // true: 중복됨
     } catch (e) {
-        console.error("중복 체크 에러:", e);
         return true;
     }
 };
@@ -264,7 +263,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 social: isSocialMode ? (socialParam ? socialParam.toUpperCase() : 'GOOGLE') : 'LOCAL'
             };
 
-            console.log("최종 전송 데이터:", JSON.stringify(formData, null, 2));
             
             if (!confirm("가입하시겠습니까?")) return;
 

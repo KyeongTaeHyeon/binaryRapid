@@ -20,7 +20,6 @@ async function loadWishlistFromServer() {
         allShops = await response.json();
         updateUI();
     } catch (error) {
-        console.error("데이터 로드 오류:", error);
         contentList.innerHTML = '<p style="text-align:center; padding:50px;">데이터를 불러올 수 없습니다.</p>';
     }
 }

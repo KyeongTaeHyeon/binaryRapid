@@ -70,7 +70,7 @@ public class ShopController {
         Map<String, Object> response = new HashMap<>();
         response.put("content", shopPage.getContent());
         response.put("totalPages", shopPage.getTotalPages());
-        response.put("totalElements", shopPage.getTotalElements()); // 🔴 중요
+        response.put("totalElements", shopPage.getTotalElements()); 
         response.put("number", shopPage.getNumber());
         response.put("first", shopPage.isFirst());
         response.put("last", shopPage.isLast());
@@ -88,7 +88,7 @@ public class ShopController {
     public String shopList(@RequestParam(value = "ramenId", required = false) String ramenId,
                            Model model, HttpSession session, @PageableDefault(size = 8) Pageable pageable) {
 
-        // 1. 초기 데이터 조회 (첫 화면도 데이터가 있어야 하니까요)
+        // 1. 초기 데이터 조회 
         Map<String, Object> searchMap = new HashMap<>();
         searchMap.put("conditions", new HashMap<>());
 

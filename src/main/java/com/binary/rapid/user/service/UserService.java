@@ -41,7 +41,6 @@ public class UserService {
         int dupleUser = userMapper.duplicateUserId(form.getId());
         if (dupleUser > 0) throw new DuplicateEmailException();
 
-        // 수정 포인트: Factory 메서드에 form.getSocial()을 추가로 전달해야 합니다.
         UserDto user = UserCreateFactory.createLocalUser(
                 form.getId(),
                 passwordEncoder.encode(form.getPassword()),
@@ -51,7 +50,7 @@ public class UserService {
                 form.getBirth(),
                 form.getEmail(),
                 form.getGender(),
-                form.getSocial() // <--- 이 부분이 추가되어야 합니다!
+                form.getSocial() 
         );
 
         int result = userMapper.insertUser(user);
@@ -75,7 +74,6 @@ public class UserService {
     // 사이트에 필요한 정보를 포함한 소셜을 통한 회원가입 메서드
     public int socialSignup(UserSignUpForm form) {
 
-        // 여기서 form의 id가 social email로 가야함
         int dupleUser = userMapper.duplicateUserId(form.getId());
 
         if (dupleUser > 0) {
@@ -95,11 +93,8 @@ public class UserService {
         );
 
         int userSignUpOk = userMapper.insertUser(user);
-
-        // 1이면 insert 성공
-        log.info("인서트 결과값: " + userSignUpOk);
-
-        // 4. insert 실패 방어
+        
+        // 3. insert 실패 방어
         if (userSignUpOk != 1) {
             throw new RuntimeException("회원가입 실패");
         }
@@ -109,10 +104,8 @@ public class UserService {
 
 
     // 유저 id로 게시글 select
-
     public List<myBoardDto> getMyBoards(int loginUser) {
 
-        // ✅ Service는 세션을 직접 보지 않는다
         if (loginUser == 0) {
             throw new LoginRequiredException();
         }
@@ -193,7 +186,7 @@ public class UserService {
         return user.getEmail();
     }
 
-    // ✅ 통합 로그아웃 서비스
+    // 통합 로그아웃 서비스
     @Transactional
     public void logout(int userId, String accessToken) {
         // 1. 리프레시 토큰 삭제
@@ -225,11 +218,8 @@ public class UserService {
     }
 
     public List<UserMyReqShopDto> getBoardListByUserId(Map<String, Object> params) {
-        // 1. 매퍼 호출 (가방째로 던짐)
+        // 1. 매퍼 호출
         List<UserMyReqShopDto> list = userMapper.selectBoardListByUserId(params);
-
-        // 2. 디버깅 로그 (리스트가 왜 안 나오는지 확인용)
-        System.out.println("조회된 게시글 수: " + (list != null ? list.size() : 0));
 
         return list;
     }
@@ -248,7 +238,7 @@ public class UserService {
             // Map에 담아 보내거나, XML을 수정하여 userId만 조건으로 사용하세요.
             Map<String, Object> params = new HashMap<>();
             params.put("userId", userId);
-            params.put("password", user.getPassword()); // 암호화된 비밀번호 전달
+            params.put("password", user.getPassword());
 
             return userMapper.deleteUserByPk(params) > 0;
         }

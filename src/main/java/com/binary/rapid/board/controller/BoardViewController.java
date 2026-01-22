@@ -38,7 +38,7 @@ public class BoardViewController {
 
     @GetMapping("/restaurantApply")
     public String restaurantApply() {
-        // src/main/resources/templates/board/restaurantApply.html 파일을 찾아갑니다.
+        // src/main/resources/templates/board/restaurantApply.html 
         return "board/restaurantApply";
     }
 }

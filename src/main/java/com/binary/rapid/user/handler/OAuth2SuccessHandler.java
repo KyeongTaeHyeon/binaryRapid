@@ -36,7 +36,6 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
         String email = userDetails.getUser().getEmail();
         String name = userDetails.getUser().getName();
 
-        log.info("OAuth2 로그인 성공: {}", email);
 
         // 2. DB에서 실제 가입 여부 확인
         UserResponseDto existingUser = userMapper.selectUserToUserResponseDto(email);
@@ -44,7 +43,6 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
         // [핵심 로직] 신규 유저 판별
         // DB에 없거나, 닉네임/취향 등 필수 정보가 아직 '기본' 상태라면 가입 페이지로 유도
         if (existingUser == null || existingUser.getUserId() == 0 || "기본".equals(existingUser.getTaste())) {
-            log.info("신규 소셜 유저 - 회원가입 페이지로 리다이렉트");
 
             String targetUrl = UriComponentsBuilder.fromUriString("/login/register")
                     .queryParam("email", email)
@@ -55,11 +53,9 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
                     .toUriString();
 
             response.sendRedirect(targetUrl);
-            return; // 여기서 로직 종료
+            return; 
         }
 
-        // 3. 기존 유저 로그인 처리 (JWT 발급)
-        log.info("기존 소셜 유저 - 토큰 발급 및 로그인 처리");
 
         String accessToken = jwtUtil.createAccessToken(email);
         String refreshToken = jwtUtil.createRefreshToken();
@@ -71,7 +67,7 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
                 TokenExpiration.REFRESH_TOKEN.toLocalDateTime()
         );
 
-        // 4. 메인 페이지로 리다이렉트 (토큰 포함)
+        // 3. 메인 페이지로 리다이렉트 (토큰 포함)
         // common.js에서 이 파라미터들을 읽어서 localStorage에 저장합니다.
         String targetUrl = UriComponentsBuilder.fromUriString("/")
                 .queryParam("accessToken", accessToken)

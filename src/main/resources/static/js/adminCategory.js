@@ -9,19 +9,16 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // 디버깅: 값이 잘 넘어왔는지 확인
     if (!targetInput) {
-        console.error("❌ HTML에 <input type='hidden' id='targetGroupId'> 태그가 없습니다.");
         return;
     }
 
     const targetGroupId = targetInput.value;
-    console.log("🔍 서버에서 받은 그룹 ID:", targetGroupId);
 
     if (targetGroupId) {
         // 해당 groupId를 가진 요소를 찾습니다.
         const targetElement = document.querySelector(`.group-item[data-groupid='${targetGroupId}']`);
 
         if (targetElement) {
-            console.log("✅ 해당 그룹을 찾았습니다. 클릭합니다.", targetElement);
             targetElement.click();
             targetElement.scrollIntoView({behavior: 'smooth', block: 'center'});
         } else {

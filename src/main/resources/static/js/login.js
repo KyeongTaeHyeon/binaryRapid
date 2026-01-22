@@ -11,7 +11,6 @@ function handleCredentialResponse(response) {
     const token = response.credential; // 구글이 준 JWT 토큰
     const payload = JSON.parse(atob(token.split('.')[1])); // 토큰 해석
 
-    console.log("구글 로그인 사용자:", payload);
 
     // (임시) 프론트에서만 로그인 상태 유지
     localStorage.setItem('userName', payload.name);
@@ -73,7 +72,6 @@ document.addEventListener('DOMContentLoaded', function () {
                 return result.data;
             })
             .then((data) => {
-                console.log('로그인 성공 데이터:', data);
 
                 if (data.accessToken) {
                     localStorage.setItem('accessToken', data.accessToken);
