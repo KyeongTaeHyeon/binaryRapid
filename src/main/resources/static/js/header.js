@@ -49,6 +49,7 @@
             })
                 .then(res => {
                     if (res.ok) return res.json();
+                    // 401 등 에러 발생 시 토큰 만료로 간주
                     throw new Error("인증 실패");
                 })
                 .then(res => {
@@ -62,6 +63,7 @@
                     }
                 })
                 .catch(err => {
+                    // 조용히 실패 처리 (로그아웃 상태로 전환)
                     localStorage.removeItem("accessToken");
                     sessionStorage.removeItem("cachedUser");
                     renderGuestUI();
@@ -71,25 +73,33 @@
             return;
         }
 
-        // 4) accessToken이 없는 경우(현재 재현 케이스):
-        //    => HttpOnly 쿠키 기반으로 /user/me를 시도해서 성공하면 로그인 UI로 전환
-        fetch("/user/me", {
-            method: "GET",
-            credentials: "include"
-        })
-            .then(res => {
-                if (res.ok) return res.json();
-                throw new Error("cookie auth failed");
+        // 4) accessToken이 없는 경우:
+        //    => 쿠키에 'accessToken'이 있는지 확인 후 요청 (불필요한 401 방지)
+        if (document.cookie.includes("accessToken=")) {
+            fetch("/user/me", {
+                method: "GET",
+                credentials: "include"
             })
-            .then(res => {
-                const userData = res.data;
-                if (!userData) throw new Error("no user data");
-                sessionStorage.setItem("cachedUser", JSON.stringify(userData));
-                renderUserUI(userData);
-            })
-            .catch(() => {
-                renderGuestUI();
-            });
+                .then(res => {
+                    if (res.ok) return res.json();
+                    return null;
+                })
+                .then(res => {
+                    if (res && res.data) {
+                        const userData = res.data;
+                        sessionStorage.setItem("cachedUser", JSON.stringify(userData));
+                        renderUserUI(userData);
+                    } else {
+                        renderGuestUI();
+                    }
+                })
+                .catch(() => {
+                    renderGuestUI();
+                });
+        } else {
+            // 토큰도 없고 쿠키도 없으면 바로 게스트 UI 렌더링 (API 호출 X)
+            renderGuestUI();
+        }
     }
 
     function renderUserUI(userData) {
@@ -117,7 +127,6 @@
             logoutBtn.onclick = null;
             logoutBtn.onclick = async function (e) {
                 e.preventDefault();
-                // e.stopImmediatePropagation(); // 다른 스크립트의 간섭을 즉시 중단시킴 (제거: 중복 바인딩 대신 dataset로 제어)
 
                 if (confirm("로그아웃 하시겠습니까?")) {
                     try {

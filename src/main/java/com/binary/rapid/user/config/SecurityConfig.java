@@ -23,12 +23,11 @@ import java.nio.charset.StandardCharsets;
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-    
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final OAuth2UserProviderRouter oAuth2UserProviderRouter;
     private final OAuth2SuccessHandler oAuth2SuccessHandler;
-    
+
     // 암호화 메서드
     @Bean
     public BCryptPasswordEncoder passwordEncoder() {
@@ -54,6 +53,7 @@ public class SecurityConfig {
                                 "/login/oauth2/**",
                                 "/api/ramen/**",
                                 "/shop/**",
+                                "/news/**", "/api/news/**",
                                 "/board/**",
                                 "/api/board/**",
                                 "/user/check-duplicate",
@@ -64,7 +64,9 @@ public class SecurityConfig {
                                 "/approval/",
                                 "/approval/detail",
                                 "/css/**", "/js/**", "/images/**", "/fragments/**", "/img/**", "/favicon.ico",
-                                "/error"
+                                "/error",
+                                // ✅ 정적 데이터 파일 허용
+                                "/data/**"
                         ).permitAll()
                         // ✅ approval pages: write/edit requires login
                         .requestMatchers("/approval/write", "/approval/edit").authenticated()
