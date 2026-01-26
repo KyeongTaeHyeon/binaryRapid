@@ -2,20 +2,27 @@
  * header.js - 인증 관리 및 페이지 접근 권한 제어 통합본
  */
 (function () {
-    // 1. 중복 로드 방지(바인딩만 1회)
-    const alreadyBootstrapped = !!window.__headerBootstrapped;
-    window.__headerBootstrapped = true;
+    // 전역 함수로 노출 (common.js 등에서 호출 가능하도록)
+    window.initHeader = initHeader;
 
     function initHeader() {
         const accessToken = localStorage.getItem("accessToken");
         const guestBox = document.getElementById("guestBox");
         const loginBox = document.getElementById("loginBox");
 
-        // DOM 로드 대기 (header fragment가 늦게 붙는 경우)
+        // DOM 요소가 아직 없으면 대기 (최대 10초)
         if (!guestBox || !loginBox) {
-            requestAnimationFrame(initHeader);
+            if (!window._headerRetryCount) window._headerRetryCount = 0;
+            if (window._headerRetryCount++ < 100) {
+                requestAnimationFrame(initHeader);
+            } else {
+                console.error("header.js: guestBox or loginBox not found after retries.");
+            }
             return;
         }
+        
+        // 요소 찾음 - 재시도 카운트 초기화
+        window._headerRetryCount = 0;
 
         const currentPath = window.location.pathname;
 
@@ -34,6 +41,8 @@
         if (cached) {
             try {
                 renderUserUI(JSON.parse(cached));
+                // 캐시가 있어도 토큰 유효성 검증을 위해 백그라운드에서 /user/me 호출 가능
+                // 여기서는 캐시 우선 사용하고 종료
                 return;
             } catch (_) {
                 sessionStorage.removeItem("cachedUser");
@@ -49,7 +58,6 @@
             })
                 .then(res => {
                     if (res.ok) return res.json();
-                    // 401 등 에러 발생 시 토큰 만료로 간주
                     throw new Error("인증 실패");
                 })
                 .then(res => {
@@ -63,7 +71,7 @@
                     }
                 })
                 .catch(err => {
-                    // 조용히 실패 처리 (로그아웃 상태로 전환)
+                    console.warn("토큰 인증 실패, 로그아웃 처리:", err);
                     localStorage.removeItem("accessToken");
                     sessionStorage.removeItem("cachedUser");
                     renderGuestUI();
@@ -97,7 +105,7 @@
                     renderGuestUI();
                 });
         } else {
-            // 토큰도 없고 쿠키도 없으면 바로 게스트 UI 렌더링 (API 호출 X)
+            // 토큰도 없고 쿠키도 없으면 바로 게스트 UI 렌더링
             renderGuestUI();
         }
     }
@@ -109,7 +117,9 @@
         const loginBox = document.getElementById("loginBox");
         const logoutBtn = document.getElementById("logoutBtn");
 
-        if (userNickname) userNickname.innerText = userData.nickName;
+        if (userNickname) {
+            userNickname.innerText = userData.nickName || userData.name || "사용자";
+        }
 
         if (mypageLink) {
             if (userData.role === 'ADMIN') {
@@ -123,14 +133,12 @@
 
         // 🔥 로그아웃 이벤트 중복 방지 로직
         if (logoutBtn) {
-            // 기존에 할당된 모든 이벤트를 무효화 (null 처리 후 할당)
             logoutBtn.onclick = null;
             logoutBtn.onclick = async function (e) {
                 e.preventDefault();
 
                 if (confirm("로그아웃 하시겠습니까?")) {
                     try {
-                        // 서버 로그아웃 호출 (쿠키 기반 인증 사용)
                         await fetch('/user/logout', {
                             method: 'POST',
                             credentials: 'include'
@@ -139,7 +147,6 @@
                         console.warn('서버 로그아웃 호출 실패:', err);
                     }
 
-                    // 로컬 정리
                     try {
                         localStorage.removeItem('accessToken');
                     } catch (_) {
@@ -153,16 +160,14 @@
                     } catch (_) {
                     }
 
-                    // 메인 페이지로 이동하면서 새로고침 효과
                     window.location.href = "/";
                 }
             };
-            // mark as bound so other common binding won't attach
             logoutBtn.dataset.bound = '1';
         }
 
-        guestBox.style.display = "none";
-        loginBox.style.display = "flex";
+        if (guestBox) guestBox.style.display = "none";
+        if (loginBox) loginBox.style.display = "flex";
     }
 
     function renderGuestUI() {
@@ -172,15 +177,19 @@
         if (loginBox) loginBox.style.display = "none";
     }
 
-    // ✅ 외부(common.js 등)에서 토큰 저장 직후 헤더를 다시 그릴 수 있도록 노출
-    window.initHeader = initHeader;
-
-    // 초기화 실행
+    // 자동 실행 (DOM 로드 시)
     if (document.readyState === 'loading') {
-        if (!alreadyBootstrapped) {
-            document.addEventListener('DOMContentLoaded', initHeader);
-        }
+        document.addEventListener('DOMContentLoaded', () => {
+             // common.js 등에서 이미 호출했을 수 있으므로 체크
+             if (!window._headerInitCalled) {
+                 window._headerInitCalled = true;
+                 initHeader();
+             }
+        });
     } else {
-        initHeader();
+         if (!window._headerInitCalled) {
+             window._headerInitCalled = true;
+             initHeader();
+         }
     }
 })();
