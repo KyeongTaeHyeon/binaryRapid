@@ -52,7 +52,7 @@
                                 <td>
                                     <span th:if="${shop.reqType == null or shop.reqType == ''}" class="badge bg-wait">대기중</span>
                                     <span th:if="${shop.reqType == 'Y'}" class="badge bg-green">승인됨</span>
-                                    <span th:if="${shop.reqType == 'N'}" class="badge bg-red">거절됨</span>
+                                    <span th:if="${shop.reqType == 'N'}" class="badge bg-red">반려됨</span>
                                     <span th:if="${shop.reqType == 'P'}" class="badge bg-gray">보류됨</span>
                                 </td>
 
@@ -63,7 +63,7 @@
                                                 th:data-id="${shop.id}">승인
                                         </button>
                                         <button class="btn-mini red" onclick="processShopDirectly(this, 'REJECT')"
-                                                th:data-id="${shop.id}">거절
+                                                th:data-id="${shop.id}">반려
                                         </button>
                                         <button class="btn-mini" style="background-color:#6c757d; color:white;"
                                                 onclick="processShopDirectly(this, 'HOLD')" th:data-id="${shop.id}">보류
@@ -130,7 +130,7 @@
                                     </label>
                                     <label class="radio-item">
                                         <input type="radio" name="statusType" value="REJECT" id="radioReject">
-                                        <span style="color:#dc3545; font-weight:bold;">거절 (N)</span>
+                                        <span style="color:#dc3545; font-weight:bold;">반려 (N)</span>
                                     </label>
                                     <label class="radio-item">
                                         <input type="radio" name="statusType" value="HOLD" id="radioHold">

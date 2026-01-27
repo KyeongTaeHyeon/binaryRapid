@@ -2,13 +2,13 @@
  * 식당 인가 관리 스크립트
  */
 
-// 1. [대기 탭] 즉시 승인/거절 처리
+// 1. [대기 탭] 즉시 승인/반려 처리
 function processShopDirectly(btn, action) {
     const id = btn.dataset.id;
     let msg = "";
 
     if (action === 'APPROVE') msg = '승인하시겠습니까?';
-    else if (action === 'REJECT') msg = '거절하시겠습니까?';
+    else if (action === 'REJECT') msg = '반려하시겠습니까?';
     else if (action === 'HOLD') msg = '보류하시겠습니까?'; // [추가]
 
     if (!confirm(msg)) return;

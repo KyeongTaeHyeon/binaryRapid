@@ -1,6 +1,7 @@
 // src/main/java/com/binary/rapid/board/controller/BoardController.java
 package com.binary.rapid.board.controller;
 
+import com.binary.rapid.admin.dto.NoticeDto;
 import com.binary.rapid.board.dto.BoardCommentDto;
 import com.binary.rapid.board.dto.BoardDto;
 import com.binary.rapid.board.dto.BoardFileDto;
@@ -61,6 +62,12 @@ public class BoardController {
     public ResponseEntity<List<BoardDto>> getBoardList() {
         List<BoardDto> boardList = boardService.getBoardList();
         return ResponseEntity.ok(boardList);
+    }
+
+    // [추가] 공지사항 목록 조회 (사용자용)
+    @GetMapping("/notices")
+    public ResponseEntity<List<NoticeDto>> getNoticeList() {
+        return ResponseEntity.ok(boardService.getNoticeListForUser());
     }
 
     @GetMapping("/detail/{id}")

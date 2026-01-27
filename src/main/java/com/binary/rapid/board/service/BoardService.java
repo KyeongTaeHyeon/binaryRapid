@@ -1,5 +1,7 @@
 package com.binary.rapid.board.service;
 
+import com.binary.rapid.admin.dto.NoticeDto;
+import com.binary.rapid.admin.mapper.AdminMapper;
 import com.binary.rapid.board.dto.BoardCommentDto;
 import com.binary.rapid.board.dto.BoardDto;
 import com.binary.rapid.board.dto.BoardFileDto;
@@ -24,6 +26,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class BoardService {
     private final BoardMapper boardMapper;
+    private final AdminMapper adminMapper; // 공지사항 조회를 위해 추가
 
     @Value("${app.upload.root}")
     private String uploadRoot;
@@ -31,6 +34,13 @@ public class BoardService {
     // 1. 게시글 목록 조회
     public List<BoardDto> getBoardList() {
         return boardMapper.selectBoardList();
+    }
+
+    // [추가] 사용자용 공지사항 목록 조회 (게시판 상단 노출용)
+    public List<NoticeDto> getNoticeListForUser() {
+        // AdminMapper의 selectNoticeList를 활용하되, 사용자 화면이므로 검색어 없이 전체 노출
+        // (필요 시 notice_YN='Y' 조건이 Mapper에 이미 있거나 추가해야 함)
+        return adminMapper.selectNoticeList(null, null);
     }
 
     // 2. 게시글 상세 조회

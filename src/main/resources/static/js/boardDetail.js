@@ -1,16 +1,12 @@
 // ✅ 1. 전역 변수 및 세션 로직
-// 우선순위: 서버 렌더링(Thymeleaf)에서 내려준 값(window.isLogin / window.loginUserId)
-// 이유: localStorage/sessionStorage는 로그아웃/계정 전환 시 stale 값이 남아 다른 사용자로 표시되는 문제가 발생할 수 있음
 let currentUserId = null;
 const isLogin = (typeof window !== "undefined" && typeof window.isLogin === "boolean")
     ? window.isLogin
     : (localStorage.getItem("isLoggedIn") === "true");
 
-// 1) 서버에서 내려준 loginUserId가 있으면 그 값을 최우선으로 사용
 if (typeof window !== "undefined" && window.loginUserId != null && window.loginUserId !== 0) {
     currentUserId = window.loginUserId;
 } else {
-    // 2) fallback: 세션에 cachedUser가 있으면 그 값을 사용(기존 로직 유지)
     try {
         const sessionData = sessionStorage.getItem("cachedUser");
         if (sessionData) {
@@ -25,8 +21,8 @@ if (typeof window !== "undefined" && window.loginUserId != null && window.loginU
 document.addEventListener("DOMContentLoaded", function () {
     const urlParams = new URLSearchParams(window.location.search);
     const postId = urlParams.get("id");
+    const isNotice = urlParams.get("type") === "notice"; // 공지사항 여부 확인
 
-    // UI 제어 (로그인 여부에 따른 댓글창 노출)
     const commentInputSection = document.getElementById("commentInputSection");
     const loginMessage = document.getElementById("loginMessage");
 
@@ -35,9 +31,6 @@ document.addEventListener("DOMContentLoaded", function () {
         if (loginMessage) loginMessage.style.display = "none";
     }
 
-    // --- 페이지 구분 및 초기화 ---
-    const updatePostBtn = document.getElementById('updatePostBtn');
-    // [목록으로 버튼 이동]
     const goListBtn = document.getElementById("goListBtn");
     if (goListBtn) {
         goListBtn.onclick = () => {
@@ -45,24 +38,93 @@ document.addEventListener("DOMContentLoaded", function () {
         };
     }
 
-    if (updatePostBtn) {
-        // [수정 페이지 로직]
-        if (postId) loadPostDataForEdit(postId);
-        updatePostBtn.onclick = (e) => {
-            e.preventDefault();
-            handlePostUpdate(postId);
-        };
-    } else if (postId) {
-        // [상세 페이지 로직]
-        initDetailPage(postId);
+    if (postId) {
+        if (isNotice) {
+            initNoticeDetailPage(postId); // 공지사항 상세 로드
+        } else {
+            initDetailPage(postId); // 일반 게시글 상세 로드
+        }
     }
 
-    // 댓글 등록 버튼 이벤트
     const commentSubmitBtn = document.getElementById("commentSubmit");
     if (commentSubmitBtn) {
         commentSubmitBtn.onclick = saveComment;
     }
 });
+
+/* ================= 공지사항 유형 헬퍼 함수 ================= */
+function getNoticeTypeLabel(type) {
+    switch(parseInt(type)) {
+        case 1: return "일반";
+        case 2: return "이벤트";
+        case 3: return "긴급";
+        case 4: return "기타";
+        default: return "공지";
+    }
+}
+
+function setNoticeTypeStyle(element, type) {
+    if (!element) return;
+    switch(parseInt(type)) {
+        case 1: 
+            element.style.backgroundColor = "#e6f7ff";
+            element.style.color = "#1890ff";
+            break;
+        case 2: 
+            element.style.backgroundColor = "#f6ffed";
+            element.style.color = "#52c41a";
+            break;
+        case 3: 
+            element.style.backgroundColor = "#fff1f0";
+            element.style.color = "#ff4d4f";
+            break;
+        default: 
+            element.style.backgroundColor = "#f5f5f5";
+            element.style.color = "#666";
+            break;
+    }
+}
+
+/* ================= 공지사항 상세보기 로직 ================= */
+async function initNoticeDetailPage(noticeId) {
+    try {
+        const response = await fetch(`/api/board/notices`);
+        if (!response.ok) return;
+        const notices = await response.json();
+        const notice = notices.find(n => String(n.noticeId) === String(noticeId));
+
+        if (!notice) {
+            alert("존재하지 않는 공지사항입니다.");
+            return;
+        }
+
+        // 데이터 바인딩
+        if (document.getElementById("detailCategory")) {
+            const cat = document.getElementById("detailCategory");
+            cat.innerText = getNoticeTypeLabel(notice.noticeType);
+            setNoticeTypeStyle(cat, notice.noticeType);
+        }
+        if (document.getElementById("detailTitle")) document.getElementById("detailTitle").innerText = notice.noticeTitle;
+        if (document.getElementById("detailContent")) document.getElementById("detailContent").innerText = notice.noticeContent;
+        if (document.getElementById("detailWriter")) document.getElementById("detailWriter").innerText = notice.nickName || '관리자';
+        if (document.getElementById("detailDate")) {
+            document.getElementById("detailDate").innerText = notice.noticeCreateAt || '';
+        }
+
+        // 공지사항은 수정/삭제 버튼 숨김
+        if (document.getElementById("editBtn")) document.getElementById("editBtn").style.display = "none";
+        if (document.getElementById("deleteBtn")) document.getElementById("deleteBtn").style.display = "none";
+        
+        // 공지사항은 댓글 섹션 전체 비활성화 (숨김)
+        const commentSection = document.querySelector(".comment-section");
+        if (commentSection) {
+            commentSection.style.setProperty("display", "none", "important");
+        }
+
+    } catch (e) {
+        console.error("공지사항 로드 오류:", e);
+    }
+}
 
 /* ================= 게시글 상세보기 및 삭제 로직 ================= */
 async function initDetailPage(postId) {

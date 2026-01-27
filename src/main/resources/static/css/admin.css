@@ -553,7 +553,7 @@ body {
     border-bottom: 2px solid #007bff;
 }
 
-/* 상태 뱃지 (승인/거절/대기) */
+/* 상태 뱃지 (승인/반려/대기) */
 .badge {
     padding: 4px 8px;
     border-radius: 4px;

@@ -145,7 +145,7 @@ public class AdminService {
         return result;
     }
 
-    // 승인/거절/보류 처리 로직
+    // 승인/반려/보류 처리 로직
     public void processShopApproval(String id, String action) {
         String dbStatus = "";
 
